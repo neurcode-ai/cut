@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "sujit-jaunjal/neurcode",
+  "sourceCommit": "e2977b8489cedb0592a2042c979cb88346bd86cf",
+  "exportMethod": "audited clean-history extraction",
+  "sourceHistoryPublished": false,
+  "authorshipAudit": {
+    "status": "attributable",
+    "distinctAuthorIdentities": 1
+  },
+  "exportedComponents": [
+    "Share format and archive verification",
+    "local capture and disclosure airlock",
+    "loopback Composer and resumable drafts",
+    "canonical renderers",
+    "focused CLI",
+    "public viewer helpers",
+    "public TypeScript SDK"
+  ],
+  "excludedComponents": [
+    "hosted web application",
+    "hosted API and authentication",
+    "database implementation and migrations",
+    "object storage and lifecycle workers",
+    "production deployment and operations",
+    "unrelated Neurcode products"
+  ]
+}

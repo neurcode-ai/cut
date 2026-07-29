@@ -1,0 +1,23 @@
+name: Bug report
+description: Report reproducible open-core behavior
+title: "[bug] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Package and version
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed and expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Use synthetic content. Never attach credentials, access links, personal data, or real Share payloads.
+    validations:
+      required: true

@@ -1,0 +1,27 @@
+{
+  "example": "source-free Share handoff",
+  "format": "cut/1",
+  "title": "Investigate the queue shutdown race",
+  "intent": "Explain whether an in-flight task can be lost after shutdown begins.",
+  "provenance": {
+    "repository": "example.invalid/acme/queue",
+    "revision": "0000000000000000000000000000000000000000",
+    "dirty": true
+  },
+  "inventory": [
+    {
+      "kind": "excerpt",
+      "path": "src/queue.ts",
+      "range": "40-88",
+      "bytes": 1200,
+      "content": "withheld from this source-free example"
+    },
+    {
+      "kind": "evidence",
+      "command": "pnpm test queue",
+      "exit": 1,
+      "content": "withheld from this source-free example"
+    }
+  ],
+  "privacy": "This fixture contains no real repository content, user data, capability, or hosted Share identifier."
+}

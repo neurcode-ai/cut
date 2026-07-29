@@ -1,0 +1,16 @@
+name: Feature proposal
+description: Propose an open-core capability or compatibility change
+title: "[proposal] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Format, privacy, and compatibility impact
+    validations:
+      required: true

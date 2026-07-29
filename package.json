@@ -1,0 +1,31 @@
+{
+  "name": "@neurcode-ai/share-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-core workspace for the Neurcode Share format, CLI, viewer, and SDK",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.16.1",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "test:packages": "pnpm build && pnpm -r --if-present test",
+    "test:boundary": "node scripts/boundary-check.mjs",
+    "test:privacy": "node scripts/privacy-scan.mjs",
+    "test:licenses": "node scripts/license-audit.mjs",
+    "test:compatibility": "node scripts/compatibility-test.mjs",
+    "test:pack": "node scripts/package-parity.mjs",
+    "test:anonymous": "node scripts/anonymous-install.mjs",
+    "test": "pnpm test:packages && pnpm test:boundary && pnpm test:privacy",
+    "pack:all": "node scripts/package-parity.mjs",
+    "sbom": "node scripts/generate-sbom.mjs",
+    "release:local": "pnpm build && pnpm test && pnpm test:compatibility && pnpm test:licenses && pnpm test:pack && pnpm test:anonymous && pnpm sbom && git diff --check && git diff --cached --check"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.25",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
