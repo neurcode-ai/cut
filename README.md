@@ -61,6 +61,18 @@ npx @neurcode-ai/share --run "pnpm test queue" --yes --out evidence.tar.gz
 Commands are bounded by time and output limits. Sensitive paths are denied by
 default. The disclosure airlock runs before any file is written or uploaded.
 
+Verify exact cited bytes against a selected local repository state, or prepare
+a reviewed immutable successor without publishing:
+
+```sh
+npx @neurcode-ai/share verify review.tar.gz --repo ../project
+npx @neurcode-ai/share refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+```
+
+See the [CLI guide](packages/cli/README.md) for deterministic JSON, named
+revisions, staged comparisons, explicit refresh decisions, hosted receipts,
+and authorized comments.
+
 ## Hosted publishing
 
 Add `--publish` after reviewing the local cut. Publishing uses the existing

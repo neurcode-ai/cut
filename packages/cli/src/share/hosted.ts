@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
+  SHARE_LIMITS,
   readShareArchive,
   writeShareArchive,
   type ShareBundle,
@@ -32,7 +33,79 @@ export function expiryHours(value: string | undefined): number {
   return hours;
 }
 
-async function browserPublishToken(apiUrl: string, shareOrigin: string): Promise<string> {
+export interface HostedShareLink {
+  shareId: string;
+  revisionNumber?: number;
+  agentLinkId?: string;
+  capability?: string;
+  agentSecret?: string;
+}
+
+export function parseHostedShareLink(value: string): HostedShareLink {
+  if (typeof value !== 'string' || value.length < 1 || value.length > 16_384) {
+    throw new Error('Hosted Share URL is not a bounded string.');
+  }
+  const link = new URL(value);
+  const localHttp = link.protocol === 'http:'
+    && (link.hostname === '127.0.0.1' || link.hostname === 'localhost');
+  if ((link.protocol !== 'https:' && !localHttp) || link.username || link.password) {
+    throw new Error('Hosted Share URLs must use HTTPS.');
+  }
+  const fragment = new URLSearchParams(link.hash.replace(/^#/, ''));
+  const agent = link.pathname.match(/^\/agent\/(shr_[A-Za-z0-9_-]{20,26})\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+  const normal = link.pathname.match(/^\/s\/(shr_[A-Za-z0-9_-]{20,26})$/i);
+  const shareId = agent?.[1] || normal?.[1];
+  if (!shareId) throw new Error('Hosted Share URL is not recognized.');
+  const revisionRaw = link.searchParams.get('revision');
+  const revisionNumber = revisionRaw === null ? undefined : Number(revisionRaw);
+  if (
+    revisionRaw !== null
+    && (!/^[1-9]\d*$/.test(revisionRaw) || !Number.isSafeInteger(revisionNumber) || revisionNumber! > 100_000)
+  ) {
+    throw new Error('Hosted Share revision must be a positive bounded integer.');
+  }
+  const capability = fragment.get('cap') ?? undefined;
+  const agentSecret = fragment.get('token') ?? undefined;
+  if (agent && !agentSecret) throw new Error('Scoped agent link is missing its fragment token.');
+  return {
+    shareId,
+    revisionNumber,
+    agentLinkId: agent?.[2],
+    capability,
+    agentSecret,
+  };
+}
+
+export function hostedAccessHeaders(link: HostedShareLink): Record<string, string> {
+  const headers: Record<string, string> = { 'x-neurcode-share-consumer': 'agent' };
+  if (link.capability) headers['x-share-capability'] = link.capability;
+  if (link.agentLinkId) headers['x-share-agent-link'] = link.agentLinkId;
+  if (link.agentSecret) headers['x-share-agent-secret'] = link.agentSecret;
+  return headers;
+}
+
+async function boundedResponseBytes(response: Response, limit: number): Promise<Buffer> {
+  const declared = Number(response.headers.get('content-length'));
+  if (Number.isFinite(declared) && declared > limit) {
+    throw new Error('Hosted Share response exceeds the bounded size limit.');
+  }
+  if (!response.body) return Buffer.alloc(0);
+  const chunks: Buffer[] = [];
+  let total = 0;
+  for await (const chunk of response.body as any) {
+    const bytes = Buffer.from(chunk);
+    total += bytes.length;
+    if (total > limit) throw new Error('Hosted Share response exceeds the bounded size limit.');
+    chunks.push(bytes);
+  }
+  return Buffer.concat(chunks);
+}
+
+export async function browserCliToken(
+  apiUrl: string,
+  shareOrigin: string,
+  purpose: 'publish' | 'verify' | 'comments' | 'receipt' = 'publish',
+): Promise<string> {
   const state = randomBytes(32).toString('base64url');
   const verifier = randomBytes(48).toString('base64url');
   let expectedHost = '';
@@ -60,12 +133,12 @@ async function browserPublishToken(apiUrl: string, shareOrigin: string): Promise
         'content-security-policy': "default-src 'none'; frame-ancestors 'none'",
         'cache-control': 'no-store',
       });
-      response.end('Publishing authorized. Return to the Neurcode terminal.');
+      response.end('Neurcode Share CLI authorized. Return to the terminal.');
       complete(exchanged.publishToken);
     } catch (error) {
       response.writeHead(400, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
-      response.end('Publishing authorization failed.');
-      fail(error instanceof Error ? error : new Error('Publishing authorization failed.'));
+      response.end('Neurcode Share CLI authorization failed.');
+      fail(error instanceof Error ? error : new Error('Neurcode Share CLI authorization failed.'));
     } finally {
       setImmediate(() => server.close());
     }
@@ -85,6 +158,7 @@ async function browserPublishToken(apiUrl: string, shareOrigin: string): Promise
       stateHash: createHash('sha256').update(state).digest('hex'),
       pkceChallenge: createHash('sha256').update(verifier).digest('base64url'),
       callbackUrl,
+      purpose,
     }),
   });
   const authorization = new URL(
@@ -92,7 +166,7 @@ async function browserPublishToken(apiUrl: string, shareOrigin: string): Promise
       || `${shareOrigin}/authorize-publish?session=${encodeURIComponent(initialized.sessionId)}`,
   );
   authorization.searchParams.set('state', state);
-  process.stdout.write(`Sign in to publish:\n${authorization.toString()}\n`);
+  process.stdout.write(`Sign in to authorize Share ${purpose}:\n${authorization.toString()}\n`);
   try {
     const open = (await import('open')).default;
     await open(authorization.toString());
@@ -101,7 +175,7 @@ async function browserPublishToken(apiUrl: string, shareOrigin: string): Promise
   }
   const timeout = setTimeout(() => {
     server.close();
-    fail(new Error('Publishing authorization expired. The local Share was preserved.'));
+    fail(new Error('Share CLI authorization expired. Local files were preserved.'));
   }, 10 * 60 * 1000);
   timeout.unref();
   try {
@@ -110,6 +184,83 @@ async function browserPublishToken(apiUrl: string, shareOrigin: string): Promise
     clearTimeout(timeout);
     if (server.listening) server.close();
   }
+}
+
+export async function fetchHostedArchive(input: {
+  url: string;
+  apiUrl?: string;
+  bearerToken?: string;
+}): Promise<{ bundle: ShareBundle; archive: Buffer; link: HostedShareLink }> {
+  const link = parseHostedShareLink(input.url);
+  const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
+  const headers = hostedAccessHeaders(link);
+  if (input.bearerToken) headers.authorization = `Bearer ${input.bearerToken}`;
+  const endpoint = input.bearerToken
+    ? `${apiUrl}/api/v1/share/cli/shares/${encodeURIComponent(link.shareId)}/archive`
+    : `${apiUrl}/api/v1/shares/${encodeURIComponent(link.shareId)}/archive`;
+  const revision = link.revisionNumber ? `?revision=${link.revisionNumber}` : '';
+  const response = await fetch(`${endpoint}${revision}`, { headers, cache: 'no-store' });
+  if (!response.ok) {
+    let payload: any = null;
+    try { payload = await response.json(); } catch {}
+    throw apiError(response.status, payload);
+  }
+  const archive = await boundedResponseBytes(response, SHARE_LIMITS.compressedPackBytes);
+  const bundle = readShareArchive(archive);
+  return { archive, bundle, link };
+}
+
+export async function fetchHostedComments(input: {
+  url: string;
+  bearerToken: string;
+  apiUrl?: string;
+}): Promise<{ shareId: string; comments: Array<Record<string, unknown>> }> {
+  const link = parseHostedShareLink(input.url);
+  if (link.revisionNumber) {
+    throw new Error('Comments are currently available only for the current Share revision.');
+  }
+  const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
+  const response = await fetch(
+    `${apiUrl}/api/v1/share/cli/shares/${encodeURIComponent(link.shareId)}/comments`,
+    {
+      headers: {
+        ...hostedAccessHeaders(link),
+        authorization: `Bearer ${input.bearerToken}`,
+      },
+      cache: 'no-store',
+    },
+  );
+  let payload: any = null;
+  try { payload = await response.json(); } catch {}
+  if (!response.ok) throw apiError(response.status, payload);
+  return {
+    shareId: link.shareId,
+    comments: Array.isArray(payload?.items) ? payload.items : [],
+  };
+}
+
+export async function submitHostedVerificationReceipt(input: {
+  url: string;
+  bearerToken: string;
+  receipt: Record<string, unknown>;
+  apiUrl?: string;
+}): Promise<Record<string, unknown>> {
+  const link = parseHostedShareLink(input.url);
+  if (link.revisionNumber) {
+    throw new Error('Verification receipts may be submitted only for the current Share revision.');
+  }
+  const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
+  return jsonFetch(
+    `${apiUrl}/api/v1/share/cli/shares/${encodeURIComponent(link.shareId)}/verification-receipts`,
+    {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${input.bearerToken}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(input.receipt),
+    },
+  );
 }
 
 export async function publishHostedShare(input: {
@@ -122,7 +273,7 @@ export async function publishHostedShare(input: {
 }): Promise<{ url: string; share: Record<string, unknown> }> {
   const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
   const shareOrigin = (input.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://share.neurcode.com').replace(/\/+$/, '');
-  const publishToken = await browserPublishToken(apiUrl, shareOrigin);
+  const publishToken = await browserCliToken(apiUrl, shareOrigin, 'publish');
   const archive = writeShareArchive(input.bundle);
   const digest = input.bundle.cut.manifest.digest;
   const upload = await jsonFetch(`${apiUrl}/api/v1/share/uploads`, {
@@ -156,26 +307,21 @@ export async function fetchHostedShare(input: {
   out?: string;
   stdout?: string;
 }): Promise<void> {
-  const link = new URL(input.url);
+  const linkUrl = new URL(input.url);
   const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
-  const fragment = new URLSearchParams(link.hash.replace(/^#/, ''));
-  const agent = link.pathname.match(/^\/agent\/(shr_[A-Za-z0-9_-]+)\/([0-9a-f-]{36})$/i);
-  const normal = link.pathname.match(/^\/s\/(shr_[A-Za-z0-9_-]+)$/i);
-  const shareId = agent?.[1] || normal?.[1];
-  if (!shareId) throw new Error('Share fetch URL is not recognized.');
+  const parsedLink = parseHostedShareLink(input.url);
+  const fragment = new URLSearchParams(linkUrl.hash.replace(/^#/, ''));
+  const agent = parsedLink.agentLinkId;
+  const shareId = parsedLink.shareId;
   const requested = (fragment.get('format') || input.stdout || (input.out?.endsWith('.tar.gz') ? 'archive' : 'json')).toLowerCase();
   const format = requested === 'md' ? 'markdown' : requested;
   if (!['markdown', 'json', 'archive'].includes(format)) throw new Error('Fetch format must be markdown, json, or archive.');
-  const headers: Record<string, string> = { 'x-neurcode-share-consumer': 'agent' };
-  const capability = fragment.get('cap');
-  if (capability) headers['x-share-capability'] = capability;
+  const headers = hostedAccessHeaders(parsedLink);
   if (agent) {
-    const secret = fragment.get('token');
-    if (!secret) throw new Error('Scoped agent link is missing its fragment token.');
-    headers['x-share-agent-link'] = agent[2];
-    headers['x-share-agent-secret'] = secret;
+    headers['x-share-agent-link'] = agent;
   }
-  const response = await fetch(`${apiUrl}/api/v1/shares/${encodeURIComponent(shareId)}/${format}`, {
+  const revision = parsedLink.revisionNumber ? `?revision=${parsedLink.revisionNumber}` : '';
+  const response = await fetch(`${apiUrl}/api/v1/shares/${encodeURIComponent(shareId)}/${format}${revision}`, {
     headers,
   });
   if (!response.ok) {

@@ -10,7 +10,7 @@ import {
 } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Writable } from 'node:stream';
-import { test } from 'node:test';
+import { after, test } from 'node:test';
 import {
   SHARE_LIMITS,
   readShareArchive,
@@ -22,12 +22,20 @@ import { captureEvidence } from './evidence';
 import { readShareSelections } from './git-reader';
 import { createLocalShare } from './create';
 
+const fixtureRoots: string[] = [];
+
 function testRoot(): string {
   const configured = process.env.NEURCODE_SHARE_TEST_TMP;
   const parent = resolve(configured || join(process.cwd(), 'tmp/share-v0-tests'));
   mkdirSync(parent, { recursive: true });
-  return mkdtempSync(join(parent, 'repo-'));
+  const root = mkdtempSync(join(parent, 'repo-'));
+  fixtureRoots.push(root);
+  return root;
 }
+
+after(() => {
+  for (const root of fixtureRoots) rmSync(root, { force: true, recursive: true });
+});
 
 function git(root: string, args: string[]): string {
   return execFileSync('git', ['-C', root, ...args], {

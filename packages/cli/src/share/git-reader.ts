@@ -54,12 +54,23 @@ interface ParsedSelection {
   range?: { start: number; end: number };
 }
 
-function git(root: string, args: string[], encoding: BufferEncoding = 'utf8'): string {
+export interface RepositoryDiscoveryOptions {
+  timeoutMs?: number;
+  maxBuffer?: number;
+  requireBoundedStatus?: boolean;
+}
+
+function git(
+  root: string,
+  args: string[],
+  encoding: BufferEncoding = 'utf8',
+  bounds: RepositoryDiscoveryOptions = {},
+): string {
   return execFileSync('git', ['-C', root, ...args], {
     encoding,
     stdio: ['ignore', 'pipe', 'ignore'],
-    timeout: 10_000,
-    maxBuffer: 32 * 1024 * 1024,
+    timeout: bounds.timeoutMs ?? 10_000,
+    maxBuffer: bounds.maxBuffer ?? 32 * 1024 * 1024,
   }).trim();
 }
 
@@ -72,24 +83,36 @@ function gitBuffer(root: string, args: string[]): Buffer {
   });
 }
 
-function tryGit(root: string, args: string[]): string | null {
+function tryGit(root: string, args: string[], bounds: RepositoryDiscoveryOptions = {}): string | null {
   try {
-    return git(root, args);
+    return git(root, args, 'utf8', bounds);
   } catch {
     return null;
   }
 }
 
-export function discoverShareRepository(cwd = process.cwd()): RepositorySnapshot {
-  const root = tryGit(cwd, ['rev-parse', '--show-toplevel']);
+export function discoverShareRepository(
+  cwd = process.cwd(),
+  bounds: RepositoryDiscoveryOptions = {},
+): RepositorySnapshot {
+  const root = tryGit(cwd, ['rev-parse', '--show-toplevel'], bounds);
   if (!root) throw new Error('Neurcode Share must run inside a Git repository.');
-  const head = tryGit(root, ['rev-parse', '--verify', 'HEAD']);
+  const head = tryGit(root, ['rev-parse', '--verify', 'HEAD'], bounds);
   if (!head || !/^[a-f0-9]{40,64}$/i.test(head)) {
     throw new Error('Neurcode Share requires a repository with at least one commit.');
   }
-  const remote = tryGit(root, ['remote', 'get-url', 'origin']);
-  const branch = tryGit(root, ['branch', '--show-current']) ?? '';
-  const dirty = Boolean(tryGit(root, ['status', '--porcelain=v1', '--untracked-files=normal']));
+  const remote = tryGit(root, ['remote', 'get-url', 'origin'], bounds);
+  const branch = tryGit(root, ['branch', '--show-current'], bounds) ?? '';
+  let status: string | null;
+  try {
+    status = git(root, ['status', '--porcelain=v1', '--untracked-files=normal'], 'utf8', bounds);
+  } catch {
+    if (bounds.requireBoundedStatus) {
+      throw new Error('Bounded Git status inspection could not complete reliably.');
+    }
+    status = null;
+  }
+  const dirty = Boolean(status);
   const normalizedRoot = realpathSync(root);
   return {
     root: normalizedRoot,

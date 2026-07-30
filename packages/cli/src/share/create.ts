@@ -104,7 +104,7 @@ function buildFrames(items: ShareItem[], noteValues: string[]): StoryFrame[] {
   return frames;
 }
 
-function fieldsForScan(state: Pick<AirlockState, 'draft' | 'blobs'>): ScanField[] {
+export function fieldsForScan(state: Pick<AirlockState, 'draft' | 'blobs'>): ScanField[] {
   const fields: ScanField[] = [
     { scope: 'title', text: state.draft.manifest.title },
     { scope: 'intent', text: state.draft.manifest.intent },
@@ -141,11 +141,11 @@ function fieldsForScan(state: Pick<AirlockState, 'draft' | 'blobs'>): ScanField[
   return fields;
 }
 
-function rescan(state: AirlockState): SecretFinding[] {
+export function rescan(state: AirlockState): SecretFinding[] {
   return scanFields(fieldsForScan(state));
 }
 
-function rebuildBlobIndex(draft: ShareDocumentDraft, blobs: Map<string, Buffer>): void {
+export function rebuildBlobIndex(draft: ShareDocumentDraft, blobs: Map<string, Buffer>): void {
   pruneUnreferencedBlobs(draft.pack.items, blobs);
   const aggregateBytes = [...blobs.values()].reduce((sum, content) => sum + content.length, 0);
   if (aggregateBytes > SHARE_LIMITS.maxAggregateBlobBytes) {

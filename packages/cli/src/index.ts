@@ -2,6 +2,7 @@
 
 import { Command } from 'commander';
 import { shareCommand } from './command';
+import { livingShareCommands } from './living-commands';
 
 const version = '0.1.0';
 const program = new Command()
@@ -10,9 +11,19 @@ const program = new Command()
   .version(version);
 
 shareCommand(program, version);
+livingShareCommands(program, version);
 
 const first = process.argv[2];
-if (first !== 'share' && first !== '--help' && first !== '-h' && first !== '--version' && first !== '-V') {
+if (
+  first !== 'share'
+  && first !== 'verify'
+  && first !== 'refresh'
+  && first !== 'comments'
+  && first !== '--help'
+  && first !== '-h'
+  && first !== '--version'
+  && first !== '-V'
+) {
   process.argv.splice(2, 0, 'share');
 }
 
