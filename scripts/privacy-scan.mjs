@@ -1,9 +1,16 @@
 #!/usr/bin/env node
 
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { filesUnder, repositoryPath } from './lib.mjs';
 
 const findings = [];
+const publicShareDocs = new Set(['README.md', 'docs/EXAMPLES.md']);
+const documentedPublicShareHashes = new Set([
+  '520ed9dc841b8ab6faba5f918eb833f428ed73663784134b3e50b792be71ff17',
+  '9ac567ac4e6bbf57435bcb22f8d7afb5701e66abcc76fd82ae888f087ec04c14',
+  'aaf449eba05183dc2c16cd39fe2829064ef76f6bae7c03753409aa02470fcc08',
+]);
 const patterns = [
   [/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g, 'private key'],
   [/\bAKIA[0-9A-Z]{16}\b/g, 'AWS access-key identifier'],
@@ -23,7 +30,17 @@ for (const absolute of filesUnder()) {
   const text = readFileSync(absolute, 'utf8');
   for (const [pattern, label] of patterns) {
     pattern.lastIndex = 0;
-    if (pattern.test(text)) findings.push(`${path}: ${label}`);
+    for (const match of text.matchAll(pattern)) {
+      const isDocumentedPublicShare = label === 'hosted Share identifier'
+        && publicShareDocs.has(path)
+        && documentedPublicShareHashes.has(
+          createHash('sha256').update(match[0]).digest('hex'),
+        );
+      if (!isDocumentedPublicShare) {
+        findings.push(`${path}: ${label}`);
+        break;
+      }
+    }
   }
 }
 

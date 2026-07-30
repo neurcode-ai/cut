@@ -1,14 +1,19 @@
 # Neurcode Share
 
-Neurcode Share turns exact code, diffs, questions, and bounded command evidence
-into a deterministic, reviewable package for people and AI agents.
+Stop pasting code. Share the exact code, complete diff, notes, and observed test
+evidence in one clear link for a teammate or an AI agent.
+
+Neurcode Share is the open format, CLI, SDK, and viewer for creating a bounded,
+reviewable code handoff. The hosted service at
+[share.neurcode.com](https://share.neurcode.com) publishes that handoff as a
+link when you choose to.
 
 ## 15-second quick start
 
 From any Git repository:
 
 ```sh
-npx @neurcode-ai/share
+npx @neurcode-ai/share@0.1.0
 ```
 
 The Composer binds only to loopback, inventories the exact disclosure, scans
@@ -18,8 +23,28 @@ choose Publish.
 For a non-interactive local archive:
 
 ```sh
-npx @neurcode-ai/share src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/share@0.1.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
 ```
+
+## From terminal to one clear Share
+
+![Neurcode Share terminal-to-recipient workflow](docs/assets/terminal-to-share.gif)
+
+Select the exact material, review the disclosure cut locally, then publish one
+immutable revision for a person or an AI agent. The example above uses the
+released `0.1.0` CLI and the same delivery states as this
+[public focused-review Share](https://share.neurcode.com/s/shr_11_hrFS0KNX36a5aWpdCXyxs).
+
+## Three public workflows
+
+| Workflow | What the recipient gets | Open |
+| --- | --- | --- |
+| Focused code review | Implementation, complete diff, relevant test, passing evidence, and one review question | [View Share](https://share.neurcode.com/s/shr_11_hrFS0KNX36a5aWpdCXyxs) |
+| Debugging handoff | Failing path, bounded reproducer, observed failure, controls, and an asserted hypothesis | [View Share](https://share.neurcode.com/s/shr_hGkRYw0cXil-MRgFqz3KjZ7n) |
+| AI-agent handoff | Cited task scope, current work, contract context, evidence, remaining work, and trust guidance | [View Share](https://share.neurcode.com/s/shr_5H2gTVyOAlPu_z6Su-le06ix) |
+
+See [public Share examples](docs/EXAMPLES.md) for the included and excluded
+scope plus direct Markdown and JSON delivery.
 
 ## Local-only usage
 
