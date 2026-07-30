@@ -74,7 +74,7 @@ const terminalBody = (frame) => {
   if (frame >= 2) {
     base.push(
       text(94, 466, '✓ Revision 1 published', { fill: '#8bc8ba', size: 16, weight: 750 }),
-      text(94, 500, 'share.neurcode.com/s/shr_11_hrF…', { fill: '#f5f7f5', size: 14 }),
+      text(94, 500, 'share.neurcode.com/examples/code-review', { fill: '#f5f7f5', size: 14 }),
       text(94, 542, 'Public • immutable revision • 4 items', { fill: '#93a099', size: 13 }),
     );
   }

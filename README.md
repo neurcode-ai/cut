@@ -33,15 +33,15 @@ npx @neurcode-ai/share@0.1.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
 Select the exact material, review the disclosure cut locally, then publish one
 immutable revision for a person or an AI agent. The example above uses the
 released `0.1.0` CLI and the same delivery states as this
-[public focused-review Share](https://share.neurcode.com/s/shr_11_hrFS0KNX36a5aWpdCXyxs).
+[public focused-review Share](https://share.neurcode.com/examples/code-review).
 
 ## Three public workflows
 
 | Workflow | What the recipient gets | Open |
 | --- | --- | --- |
-| Focused code review | Implementation, complete diff, relevant test, passing evidence, and one review question | [View Share](https://share.neurcode.com/s/shr_11_hrFS0KNX36a5aWpdCXyxs) |
-| Debugging handoff | Failing path, bounded reproducer, observed failure, controls, and an asserted hypothesis | [View Share](https://share.neurcode.com/s/shr_hGkRYw0cXil-MRgFqz3KjZ7n) |
-| AI-agent handoff | Cited task scope, current work, contract context, evidence, remaining work, and trust guidance | [View Share](https://share.neurcode.com/s/shr_5H2gTVyOAlPu_z6Su-le06ix) |
+| Focused code review | Implementation, complete diff, relevant test, passing evidence, and one review question | [View Share](https://share.neurcode.com/examples/code-review) |
+| Debugging handoff | Failing path, bounded reproducer, observed failure, controls, and an asserted hypothesis | [View Share](https://share.neurcode.com/examples/debugging-handoff) |
+| AI-agent handoff | Cited task scope, current work, contract context, evidence, remaining work, and trust guidance | [View Share](https://share.neurcode.com/examples/ai-agent-handoff) |
 
 See [public Share examples](docs/EXAMPLES.md) for the included and excluded
 scope plus direct Markdown and JSON delivery.
