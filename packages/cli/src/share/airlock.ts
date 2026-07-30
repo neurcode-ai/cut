@@ -5,6 +5,7 @@ import type {
   ShareItem,
 } from '@neurcode-ai/share-format';
 import { canonicalize, finalizeShare } from '@neurcode-ai/share-format';
+import { canonicalCompilePlan, type CompilePlan } from '@neurcode-ai/share-compiler';
 import { pruneUnreferencedBlobs } from './git-reader';
 
 export interface AirlockState {
@@ -13,6 +14,7 @@ export interface AirlockState {
   findings: SecretFinding[];
   exclusions?: string[];
   destinations?: string[];
+  compilerPlan?: CompilePlan;
 }
 
 export interface AirlockResult extends AirlockState {
@@ -88,7 +90,7 @@ function writeInventory(
     }
   }
   if (hasBlockingFindings) {
-    output.write('\n  Complete cut.json metadata boundary withheld while secret findings are blocking.\n');
+    output.write('\n  Complete compiler plan and cut.json metadata boundary withheld while secret findings are blocking.\n');
     output.write('  Resolve, exclude, or explicitly acknowledge every displayed finding before metadata is shown.\n');
   } else {
     const absolutePaths = absolutePathWarnings(state);
@@ -97,6 +99,10 @@ function writeInventory(
     } else {
       output.write(`  Absolute paths: ${absolutePaths.length} warning(s). They are not secret findings, but they disclose local identity or machine layout. Review each:\n`);
       for (const warning of absolutePaths) output.write(`    - ${warning}\n`);
+    }
+    if (state.compilerPlan) {
+      output.write('\n  Selected by compiler — review every proposed item and unresolved obligation:\n');
+      output.write(`    ${canonicalCompilePlan(state.compilerPlan)}\n`);
     }
     output.write('\n  Complete cut.json metadata boundary (content bytes are inventoried above):\n');
     output.write(`    ${canonicalize(finalizeShare(state.draft))}\n`);

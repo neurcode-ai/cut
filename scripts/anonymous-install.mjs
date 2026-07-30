@@ -33,6 +33,7 @@ try {
     "require('@neurcode-ai/share-sdk')",
     "require('@neurcode-ai/share-viewer')",
     "require('@neurcode-ai/share-format')",
+    "require('@neurcode-ai/share-compiler')",
   ].join(';')], { cwd: consumer });
   const cli = join(consumer, 'node_modules', '@neurcode-ai', 'share', 'dist', 'index.js');
   execFileSync('node', [cli, '--help'], { cwd: consumer, stdio: 'pipe' });

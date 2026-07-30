@@ -1,0 +1,1716 @@
+{
+  "aggregate": {
+    "archiveVerificationPasses": 10,
+    "candidateCounts": {
+      "consumer": 8,
+      "definition": 52,
+      "dependency": 30,
+      "instruction": 2,
+      "test": 70,
+      "total": 162
+    },
+    "changedHunkSymbolCoverage": 1,
+    "compilationLatencyMs": {
+      "maximumIndividualPhase": {
+        "milliseconds": 853.08,
+        "phase": "indexMs",
+        "task": "prettier-19516"
+      },
+      "p50": 273.539,
+      "p95": 930.373
+    },
+    "medianTokenReductionVersusB": 0.628,
+    "provisionalRequiredContextRecall": 0.892,
+    "replayPasses": 13,
+    "selectedItems": 99,
+    "sensitiveFindings": {
+      "armA": 4,
+      "armB": 2101,
+      "armC": 0
+    },
+    "validatorPasses": 10
+  },
+  "architecture": {
+    "forbiddenRuntimeMechanisms": 0,
+    "formatFilesChanged": [],
+    "graphDepth": 1,
+    "newCapturePath": false,
+    "productModelCalls": 0,
+    "productNetworkCalls": 0,
+    "runtimePackageDependencies": 0
+  },
+  "arms": {
+    "A": "complete accepted unified diff",
+    "B": "arm A plus complete non-deleted changed post-images, unique blobs counted once",
+    "C": "arm A plus compiler selections and context halos through existing Share capture",
+    "D": {
+      "reason": "No reproducible full-repository agent exploration was run within the fixed observational budget.",
+      "status": "not-evaluated"
+    }
+  },
+  "dominantFailures": {
+    "ambiguityCategories": {
+      "dynamic-import": 2,
+      "optional-parse": 4,
+      "unresolved-relative-import": 1
+    },
+    "missingOracleObligationsByKind": {
+      "operational-evidence": 13,
+      "review-reference": 4
+    },
+    "overSelectionByChannel": {
+      "consumer": 8,
+      "dependency": 27,
+      "test": 9
+    },
+    "uncertaintyByKind": {
+      "review-symbol-boundary-unresolved": 21,
+      "review-symbol-no-post-image": 1
+    }
+  },
+  "experiment": "context-compiler-v0",
+  "gates": [
+    {
+      "actual": 1,
+      "name": "changed-hunk enclosing-symbol coverage",
+      "pass": true,
+      "target": "100%"
+    },
+    {
+      "actual": 0.892,
+      "name": "provisional required-context recall",
+      "pass": false,
+      "target": ">= 90%"
+    },
+    {
+      "actual": 0.628,
+      "name": "median token reduction versus arm B",
+      "pass": false,
+      "target": ">= 3.0x"
+    },
+    {
+      "actual": 273.539,
+      "name": "compilation p50",
+      "pass": true,
+      "target": "< 2000 ms"
+    },
+    {
+      "actual": 930.373,
+      "name": "compilation p95",
+      "pass": true,
+      "target": "< 5000 ms"
+    },
+    {
+      "actual": 853.08,
+      "name": "maximum individual phase",
+      "pass": true,
+      "target": "<= 1000 ms"
+    },
+    {
+      "actual": 0,
+      "name": "unreviewed sensitive upload",
+      "pass": false,
+      "target": "0"
+    },
+    {
+      "actual": {
+        "allCut1": false,
+        "changedFiles": 0
+      },
+      "name": "Share Format changes",
+      "pass": false,
+      "target": "0 files and cut 1"
+    },
+    {
+      "actual": 13,
+      "name": "CLI selection expressibility",
+      "pass": false,
+      "target": "100%"
+    },
+    {
+      "actual": 10,
+      "name": "existing validator success",
+      "pass": false,
+      "target": "15/15"
+    },
+    {
+      "actual": 13,
+      "name": "exact normalized replay",
+      "pass": false,
+      "target": "15/15"
+    },
+    {
+      "actual": {
+        "forbiddenMechanisms": 0,
+        "packageDependencies": 0
+      },
+      "name": "forbidden runtime dependency",
+      "pass": true,
+      "target": "0"
+    }
+  ],
+  "humanGate": {
+    "requestedChanges": 10,
+    "requestedDevelopers": 5,
+    "simulated": false,
+    "status": "pending"
+  },
+  "limitations": [
+    "The provisional oracle is regex- and public-review-reference-based, not a human gold label.",
+    "Arm D and task-completion outcomes were not evaluated.",
+    "Token counts are deterministic estimates, not model-tokenizer counts.",
+    "Filesystem cache state was not forcibly reset between tasks.",
+    "Human retention, addback, time-saved, comprehension, and full-change recheck observations remain pending."
+  ],
+  "releaseDecisionOccurred": false,
+  "robustness": {
+    "byRepository": {
+      "eslint": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": 0.628,
+        "replayPasses": 3,
+        "requiredContextRecall": 0.852,
+        "tasks": 3,
+        "validatorPasses": 3
+      },
+      "hono": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": 0.573,
+        "replayPasses": 5,
+        "requiredContextRecall": 0.92,
+        "tasks": 6,
+        "validatorPasses": 4
+      },
+      "prettier": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": 1.69,
+        "replayPasses": 4,
+        "requiredContextRecall": 0.848,
+        "tasks": 4,
+        "validatorPasses": 3
+      },
+      "vitest": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": null,
+        "replayPasses": 1,
+        "requiredContextRecall": 0.913,
+        "tasks": 2,
+        "validatorPasses": 0
+      }
+    },
+    "byTaskFamily": {
+      "configuration-or-persistence": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": 2.499,
+        "replayPasses": 2,
+        "requiredContextRecall": 0.852,
+        "tasks": 3,
+        "validatorPasses": 1
+      },
+      "multi-file-feature-or-fix": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": 0.628,
+        "replayPasses": 6,
+        "requiredContextRecall": 0.875,
+        "tasks": 6,
+        "validatorPasses": 5
+      },
+      "public-interface": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": 1.179,
+        "replayPasses": 3,
+        "requiredContextRecall": 0.942,
+        "tasks": 3,
+        "validatorPasses": 3
+      },
+      "rename-or-deletion": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": null,
+        "replayPasses": 0,
+        "requiredContextRecall": 1,
+        "tasks": 1,
+        "validatorPasses": 0
+      },
+      "security-adjacent": {
+        "changedHunkSymbolCoverage": 1,
+        "medianReduction": 0.573,
+        "replayPasses": 2,
+        "requiredContextRecall": 0.87,
+        "tasks": 2,
+        "validatorPasses": 1
+      }
+    }
+  },
+  "run": {
+    "baseRepositoryCommit": "e140fd00cbcf59b6cace5632ecb29d46d0151a42",
+    "corpusSealedBeforeCompiler": true,
+    "corpusSha256": "75c616c6e12c98c818bb9824ee95562ef17da78993c0b1efbd6f00697e32045d",
+    "normalizedReplayRunsPerTask": 2,
+    "sequence": 1,
+    "targetedCorrectionsUsed": 0,
+    "tasksAttempted": 15,
+    "tasksMeasured": 13
+  },
+  "schemaVersion": 1,
+  "sourceFreeArtifactScan": {
+    "absolutePaths": 0,
+    "pass": true,
+    "sensitiveFindings": 0,
+    "sourcePayloadMarkers": 0
+  },
+  "storage": {
+    "cleanup": {
+      "bytesRemoved": 0,
+      "retainedThirdPartySourceBytes": 181485568,
+      "temporaryClonesRemoved": false
+    },
+    "limitBytes": 5368709120,
+    "temporaryCorpusBytesAfterMaterialization": 181485568,
+    "temporaryCorpusBytesBeforeMaterialization": 2035712
+  },
+  "tasks": [
+    {
+      "armA": null,
+      "armB": null,
+      "armC": {
+        "archiveVerificationSuccess": false,
+        "validatorSuccess": false
+      },
+      "candidateCounts": null,
+      "compile": {
+        "errorCategory": "budget-failure",
+        "success": false
+      },
+      "failureDigest": "ea486c06c5ff56bf",
+      "family": "rename-or-deletion",
+      "id": "hono-4599",
+      "missingContext": null,
+      "oracle": {
+        "covered": 0,
+        "implementation": {
+          "coverage": 0,
+          "covered": 0,
+          "total": 0
+        },
+        "missingKinds": {},
+        "recall": 0,
+        "total": 0,
+        "uncertain": 0,
+        "uncertaintyKinds": {}
+      },
+      "reduction": null,
+      "replay": {
+        "exact": false,
+        "normalizedPlanSha256": null
+      },
+      "repository": "hono",
+      "selected": null,
+      "timingsMs": null
+    },
+    {
+      "armA": {
+        "bytes": 9550,
+        "diffFiles": 4,
+        "estimatedTokens": 2388,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 85008,
+        "diffFiles": 4,
+        "estimatedTokens": 21254,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 4,
+        "uniqueBlobs": 5
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 72045,
+        "category": null,
+        "compilerEstimatedTokens": 17481,
+        "cut": 1,
+        "diffFiles": 4,
+        "estimatedTokens": 18024,
+        "excerpts": 18,
+        "fileItems": 0,
+        "itemCount": 19,
+        "machineReasonFrames": 18,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 9,
+        "storyFrames": 18,
+        "success": true,
+        "uniqueBlobs": 36,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 1,
+        "definition": 10,
+        "dependency": 6,
+        "instruction": 0,
+        "test": 9,
+        "total": 26
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "public-interface",
+      "id": "hono-4636",
+      "missingContext": {
+        "ambiguityCategories": {},
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 26,
+        "implementation": {
+          "coverage": 1,
+          "covered": 20,
+          "total": 20
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.963,
+        "total": 27,
+        "uncertain": 4,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 4
+        }
+      },
+      "reduction": 1.179,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "96bb1cf87518bcd179776e8f60a6c141400d378b6f439de991ccc93e1d0b223b"
+      },
+      "repository": "hono",
+      "selected": {
+        "estimatedTokens": 17481,
+        "excerpts": 18,
+        "expressible": true,
+        "files": 9,
+        "items": 18,
+        "overSelectionByChannel": {
+          "consumer": 1,
+          "dependency": 4,
+          "test": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 23.73,
+        "gitMs": 35.434,
+        "indexMs": 45.162,
+        "obligationsMs": 0.005,
+        "planMs": 0.681,
+        "selectionMs": 0.332,
+        "totalMs": 105.353
+      }
+    },
+    {
+      "armA": {
+        "bytes": 6372,
+        "diffFiles": 2,
+        "estimatedTokens": 1593,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 24275,
+        "diffFiles": 2,
+        "estimatedTokens": 6069,
+        "excerpts": 0,
+        "sensitiveFindings": 1,
+        "sourceFiles": 2,
+        "uniqueBlobs": 3
+      },
+      "armC": {
+        "airlockPlanShown": false,
+        "category": "secret-scan-blocked",
+        "compilerEstimatedTokens": 18678,
+        "planMatchesArchiveSourceItemCount": false,
+        "selectionExpressible": true,
+        "success": false
+      },
+      "candidateCounts": {
+        "consumer": 0,
+        "definition": 4,
+        "dependency": 3,
+        "instruction": 0,
+        "test": 6,
+        "total": 13
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "security-adjacent",
+      "id": "hono-4645",
+      "missingContext": {
+        "ambiguityCategories": {},
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 13,
+        "implementation": {
+          "coverage": 1,
+          "covered": 8,
+          "total": 8
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.929,
+        "total": 14,
+        "uncertain": 2,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 2
+        }
+      },
+      "reduction": null,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "228ddd325feff69b3ddc0ab52f6a5f34f39ca699bb7127d809204f4fb2c5efa9"
+      },
+      "repository": "hono",
+      "selected": {
+        "estimatedTokens": 18678,
+        "excerpts": 8,
+        "expressible": true,
+        "files": 6,
+        "items": 8,
+        "overSelectionByChannel": {
+          "dependency": 3,
+          "test": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 7.574,
+        "gitMs": 35.562,
+        "indexMs": 42.049,
+        "obligationsMs": 0.002,
+        "planMs": 0.26,
+        "selectionMs": 0.069,
+        "totalMs": 85.527
+      }
+    },
+    {
+      "armA": {
+        "bytes": 9438,
+        "diffFiles": 2,
+        "estimatedTokens": 2360,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 24551,
+        "diffFiles": 2,
+        "estimatedTokens": 6139,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 2,
+        "uniqueBlobs": 3
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 45927,
+        "category": null,
+        "compilerEstimatedTokens": 11287,
+        "cut": 1,
+        "diffFiles": 2,
+        "estimatedTokens": 11488,
+        "excerpts": 7,
+        "fileItems": 0,
+        "itemCount": 8,
+        "machineReasonFrames": 7,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 4,
+        "storyFrames": 7,
+        "success": true,
+        "uniqueBlobs": 15,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 0,
+        "definition": 5,
+        "dependency": 2,
+        "instruction": 0,
+        "test": 0,
+        "total": 7
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "public-interface",
+      "id": "hono-4658",
+      "missingContext": {
+        "ambiguityCategories": {},
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 19,
+        "implementation": {
+          "coverage": 1,
+          "covered": 14,
+          "total": 14
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.95,
+        "total": 20,
+        "uncertain": 1,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 1
+        }
+      },
+      "reduction": 0.534,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "f7121dde9ed2edd23abfae130ac7fac5bc8f12f975b26436110172a61a68688c"
+      },
+      "repository": "hono",
+      "selected": {
+        "estimatedTokens": 11287,
+        "excerpts": 7,
+        "expressible": true,
+        "files": 4,
+        "items": 7,
+        "overSelectionByChannel": {
+          "dependency": 2
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 6.53,
+        "gitMs": 42.246,
+        "indexMs": 53.347,
+        "obligationsMs": 0.003,
+        "planMs": 0.263,
+        "selectionMs": 0.045,
+        "totalMs": 102.438
+      }
+    },
+    {
+      "armA": {
+        "bytes": 2427,
+        "diffFiles": 2,
+        "estimatedTokens": 607,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 43312,
+        "diffFiles": 2,
+        "estimatedTokens": 10829,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 2,
+        "uniqueBlobs": 3
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 75607,
+        "category": null,
+        "compilerEstimatedTokens": 18725,
+        "cut": 1,
+        "diffFiles": 2,
+        "estimatedTokens": 18903,
+        "excerpts": 2,
+        "fileItems": 0,
+        "itemCount": 3,
+        "machineReasonFrames": 2,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 2,
+        "storyFrames": 2,
+        "success": true,
+        "uniqueBlobs": 5,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 0,
+        "definition": 2,
+        "dependency": 0,
+        "instruction": 0,
+        "test": 0,
+        "total": 2
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "security-adjacent",
+      "id": "hono-4659",
+      "missingContext": {
+        "ambiguityCategories": {},
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 7,
+        "implementation": {
+          "coverage": 1,
+          "covered": 3,
+          "total": 3
+        },
+        "missingKinds": {
+          "operational-evidence": 1,
+          "review-reference": 1
+        },
+        "recall": 0.778,
+        "total": 9,
+        "uncertain": 2,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 2
+        }
+      },
+      "reduction": 0.573,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "eb73aebf8457f4e11bf78b862d9ec237055acc4e4220e9d7201f589315ce48ba"
+      },
+      "repository": "hono",
+      "selected": {
+        "estimatedTokens": 18725,
+        "excerpts": 2,
+        "expressible": true,
+        "files": 2,
+        "items": 2,
+        "overSelectionByChannel": {}
+      },
+      "timingsMs": {
+        "candidatesMs": 10.954,
+        "gitMs": 43.531,
+        "indexMs": 50.933,
+        "obligationsMs": 0.001,
+        "planMs": 0.209,
+        "selectionMs": 0.027,
+        "totalMs": 105.667
+      }
+    },
+    {
+      "armA": {
+        "bytes": 475,
+        "diffFiles": 1,
+        "estimatedTokens": 119,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 22601,
+        "diffFiles": 1,
+        "estimatedTokens": 5651,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 1,
+        "uniqueBlobs": 2
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 3679,
+        "category": null,
+        "compilerEstimatedTokens": 896,
+        "cut": 1,
+        "diffFiles": 1,
+        "estimatedTokens": 921,
+        "excerpts": 1,
+        "fileItems": 1,
+        "itemCount": 3,
+        "machineReasonFrames": 2,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 2,
+        "storyFrames": 2,
+        "success": true,
+        "uniqueBlobs": 4,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 0,
+        "definition": 1,
+        "dependency": 0,
+        "instruction": 0,
+        "test": 10,
+        "total": 11
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "public-interface",
+      "id": "hono-4719",
+      "missingContext": {
+        "ambiguityCategories": {},
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": [
+          "test"
+        ]
+      },
+      "oracle": {
+        "covered": 4,
+        "implementation": {
+          "coverage": 1,
+          "covered": 1,
+          "total": 1
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.8,
+        "total": 5,
+        "uncertain": 1,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 1
+        }
+      },
+      "reduction": 6.136,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "7170a4970bbf6fa79a5289dc5332475603bc1a8ac3d10cf1dadfb33f60dd77f4"
+      },
+      "repository": "hono",
+      "selected": {
+        "estimatedTokens": 896,
+        "excerpts": 1,
+        "expressible": true,
+        "files": 2,
+        "items": 2,
+        "overSelectionByChannel": {
+          "test": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 12.749,
+        "gitMs": 45.29,
+        "indexMs": 44.023,
+        "obligationsMs": 0.002,
+        "planMs": 0.109,
+        "selectionMs": 0.028,
+        "totalMs": 102.206
+      }
+    },
+    {
+      "armA": {
+        "bytes": 4494,
+        "diffFiles": 5,
+        "estimatedTokens": 1124,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 23281,
+        "diffFiles": 5,
+        "estimatedTokens": 5823,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 5,
+        "uniqueBlobs": 6
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 69167,
+        "category": null,
+        "compilerEstimatedTokens": 17219,
+        "cut": 1,
+        "diffFiles": 5,
+        "estimatedTokens": 17296,
+        "excerpts": 3,
+        "fileItems": 1,
+        "itemCount": 5,
+        "machineReasonFrames": 4,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 4,
+        "storyFrames": 4,
+        "success": true,
+        "uniqueBlobs": 8,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 1,
+        "definition": 2,
+        "dependency": 1,
+        "instruction": 0,
+        "test": 0,
+        "total": 4
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "multi-file-feature-or-fix",
+      "id": "prettier-19516",
+      "missingContext": {
+        "ambiguityCategories": {
+          "optional-parse": 1
+        },
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 5,
+        "implementation": {
+          "coverage": 1,
+          "covered": 2,
+          "total": 2
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.833,
+        "total": 6,
+        "uncertain": 0,
+        "uncertaintyKinds": {}
+      },
+      "reduction": 0.337,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "4e5348731d1fb2c10e01d270849c85f9733c5cccced51c6e59117faa9069c98f"
+      },
+      "repository": "prettier",
+      "selected": {
+        "estimatedTokens": 17219,
+        "excerpts": 3,
+        "expressible": true,
+        "files": 4,
+        "items": 4,
+        "overSelectionByChannel": {
+          "consumer": 1,
+          "dependency": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 18.919,
+        "gitMs": 57.501,
+        "indexMs": 853.08,
+        "obligationsMs": 0.001,
+        "planMs": 0.819,
+        "selectionMs": 0.038,
+        "totalMs": 930.373
+      }
+    },
+    {
+      "armA": {
+        "bytes": 11886,
+        "diffFiles": 8,
+        "estimatedTokens": 2972,
+        "excerpts": 0,
+        "sensitiveFindings": 3,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 400745,
+        "diffFiles": 8,
+        "estimatedTokens": 100189,
+        "excerpts": 0,
+        "sensitiveFindings": 24,
+        "sourceFiles": 8,
+        "uniqueBlobs": 9
+      },
+      "armC": {
+        "airlockPlanShown": false,
+        "category": "secret-scan-blocked",
+        "compilerEstimatedTokens": 4247,
+        "planMatchesArchiveSourceItemCount": false,
+        "selectionExpressible": true,
+        "success": false
+      },
+      "candidateCounts": {
+        "consumer": 1,
+        "definition": 3,
+        "dependency": 2,
+        "instruction": 0,
+        "test": 0,
+        "total": 6
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "multi-file-feature-or-fix",
+      "id": "prettier-19527",
+      "missingContext": {
+        "ambiguityCategories": {
+          "optional-parse": 1
+        },
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 8,
+        "implementation": {
+          "coverage": 1,
+          "covered": 5,
+          "total": 5
+        },
+        "missingKinds": {
+          "operational-evidence": 1,
+          "review-reference": 1
+        },
+        "recall": 0.8,
+        "total": 10,
+        "uncertain": 1,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 1
+        }
+      },
+      "reduction": null,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "e37f5d2e6343fffbd683ec9c1440552a63dd8ebfbc4de41961bab5ff9b56604b"
+      },
+      "repository": "prettier",
+      "selected": {
+        "estimatedTokens": 4247,
+        "excerpts": 3,
+        "expressible": true,
+        "files": 5,
+        "items": 6,
+        "overSelectionByChannel": {
+          "consumer": 1,
+          "dependency": 2
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 12.42,
+        "gitMs": 67.722,
+        "indexMs": 417.115,
+        "obligationsMs": 0.002,
+        "planMs": 1.678,
+        "selectionMs": 0.034,
+        "totalMs": 498.975
+      }
+    },
+    {
+      "armA": {
+        "bytes": 8968,
+        "diffFiles": 6,
+        "estimatedTokens": 2242,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 411042,
+        "diffFiles": 6,
+        "estimatedTokens": 102775,
+        "excerpts": 0,
+        "sensitiveFindings": 14,
+        "sourceFiles": 6,
+        "uniqueBlobs": 7
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 19093,
+        "category": null,
+        "compilerEstimatedTokens": 4551,
+        "cut": 1,
+        "diffFiles": 6,
+        "estimatedTokens": 4775,
+        "excerpts": 4,
+        "fileItems": 0,
+        "itemCount": 5,
+        "machineReasonFrames": 4,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 4,
+        "storyFrames": 4,
+        "success": true,
+        "uniqueBlobs": 9,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 1,
+        "definition": 2,
+        "dependency": 0,
+        "instruction": 0,
+        "test": 5,
+        "total": 8
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "multi-file-feature-or-fix",
+      "id": "prettier-19573",
+      "missingContext": {
+        "ambiguityCategories": {
+          "optional-parse": 1
+        },
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 7,
+        "implementation": {
+          "coverage": 1,
+          "covered": 3,
+          "total": 3
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.875,
+        "total": 8,
+        "uncertain": 2,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 2
+        }
+      },
+      "reduction": 21.524,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "aa19802d2f92d87386afe09c22e1f0e2a1cbfc4958b5867de39007500b8ea8a6"
+      },
+      "repository": "prettier",
+      "selected": {
+        "estimatedTokens": 4551,
+        "excerpts": 4,
+        "expressible": true,
+        "files": 4,
+        "items": 4,
+        "overSelectionByChannel": {
+          "consumer": 1,
+          "test": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 15.063,
+        "gitMs": 49.152,
+        "indexMs": 383.08,
+        "obligationsMs": 0.002,
+        "planMs": 0.766,
+        "selectionMs": 0.023,
+        "totalMs": 448.09
+      }
+    },
+    {
+      "armA": {
+        "bytes": 4044,
+        "diffFiles": 3,
+        "estimatedTokens": 1011,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 39782,
+        "diffFiles": 3,
+        "estimatedTokens": 9949,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 3,
+        "uniqueBlobs": 4
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 23457,
+        "category": null,
+        "compilerEstimatedTokens": 5714,
+        "cut": 1,
+        "diffFiles": 3,
+        "estimatedTokens": 5887,
+        "excerpts": 20,
+        "fileItems": 1,
+        "itemCount": 22,
+        "machineReasonFrames": 21,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 15,
+        "storyFrames": 21,
+        "success": true,
+        "uniqueBlobs": 39,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 1,
+        "definition": 8,
+        "dependency": 11,
+        "instruction": 0,
+        "test": 10,
+        "total": 30
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "multi-file-feature-or-fix",
+      "id": "prettier-19630",
+      "missingContext": {
+        "ambiguityCategories": {
+          "optional-parse": 1
+        },
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": [
+          "test"
+        ]
+      },
+      "oracle": {
+        "covered": 8,
+        "implementation": {
+          "coverage": 1,
+          "covered": 6,
+          "total": 6
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.889,
+        "total": 9,
+        "uncertain": 3,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 3
+        }
+      },
+      "reduction": 1.69,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "5a9d0ffa25c6b3e2f30983235a8fe9a5f7b25e13fec35337b1c31d2a467b61e2"
+      },
+      "repository": "prettier",
+      "selected": {
+        "estimatedTokens": 5714,
+        "excerpts": 20,
+        "expressible": true,
+        "files": 15,
+        "items": 21,
+        "overSelectionByChannel": {
+          "consumer": 1,
+          "dependency": 11,
+          "test": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 26.23,
+        "gitMs": 74.246,
+        "indexMs": 416.782,
+        "obligationsMs": 0.006,
+        "planMs": 0.35,
+        "selectionMs": 0.166,
+        "totalMs": 517.787
+      }
+    },
+    {
+      "armA": {
+        "bytes": 1864,
+        "diffFiles": 1,
+        "estimatedTokens": 465,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 4656,
+        "diffFiles": 1,
+        "estimatedTokens": 1162,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 1,
+        "uniqueBlobs": 2
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 1864,
+        "category": null,
+        "compilerEstimatedTokens": 341,
+        "cut": 1,
+        "diffFiles": 1,
+        "estimatedTokens": 465,
+        "excerpts": 0,
+        "fileItems": 0,
+        "itemCount": 1,
+        "machineReasonFrames": 0,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "storyFrames": 0,
+        "success": true,
+        "uniqueBlobs": 1,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 0,
+        "definition": 0,
+        "dependency": 0,
+        "instruction": 0,
+        "test": 0,
+        "total": 0
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "configuration-or-persistence",
+      "id": "eslint-21027",
+      "missingContext": {
+        "ambiguityCategories": {},
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": []
+      },
+      "oracle": {
+        "covered": 2,
+        "implementation": {
+          "coverage": 1,
+          "covered": 0,
+          "total": 0
+        },
+        "missingKinds": {
+          "operational-evidence": 1,
+          "review-reference": 1
+        },
+        "recall": 0.5,
+        "total": 4,
+        "uncertain": 1,
+        "uncertaintyKinds": {
+          "review-symbol-no-post-image": 1
+        }
+      },
+      "reduction": 2.499,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "0880476ef83852b03a472c7e06a20db813d2388593b751ce2f4dfb9c51a70f38"
+      },
+      "repository": "eslint",
+      "selected": {
+        "estimatedTokens": 341,
+        "excerpts": 0,
+        "expressible": true,
+        "files": 0,
+        "items": 0,
+        "overSelectionByChannel": {}
+      },
+      "timingsMs": {
+        "candidatesMs": 3.932,
+        "gitMs": 44.165,
+        "indexMs": 173.682,
+        "obligationsMs": 0,
+        "planMs": 0.055,
+        "selectionMs": 0.009,
+        "totalMs": 221.852
+      }
+    },
+    {
+      "armA": {
+        "bytes": 2572,
+        "diffFiles": 2,
+        "estimatedTokens": 643,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 16269,
+        "diffFiles": 2,
+        "estimatedTokens": 4068,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 2,
+        "uniqueBlobs": 3
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 28452,
+        "category": null,
+        "compilerEstimatedTokens": 6966,
+        "cut": 1,
+        "diffFiles": 2,
+        "estimatedTokens": 7118,
+        "excerpts": 4,
+        "fileItems": 0,
+        "itemCount": 5,
+        "machineReasonFrames": 4,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 3,
+        "storyFrames": 4,
+        "success": true,
+        "uniqueBlobs": 9,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 0,
+        "definition": 2,
+        "dependency": 1,
+        "instruction": 0,
+        "test": 10,
+        "total": 13
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "multi-file-feature-or-fix",
+      "id": "eslint-21030",
+      "missingContext": {
+        "ambiguityCategories": {
+          "dynamic-import": 1
+        },
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": [
+          "test"
+        ]
+      },
+      "oracle": {
+        "covered": 8,
+        "implementation": {
+          "coverage": 1,
+          "covered": 5,
+          "total": 5
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.889,
+        "total": 9,
+        "uncertain": 2,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 2
+        }
+      },
+      "reduction": 0.572,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "637a0a15cbc3baa9a1fe1ce3abe632c4ade30473d90fe3d0c3554550bde39dce"
+      },
+      "repository": "eslint",
+      "selected": {
+        "estimatedTokens": 6966,
+        "excerpts": 4,
+        "expressible": true,
+        "files": 3,
+        "items": 4,
+        "overSelectionByChannel": {
+          "test": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 81.145,
+        "gitMs": 38.728,
+        "indexMs": 156.882,
+        "obligationsMs": 0.003,
+        "planMs": 0.231,
+        "selectionMs": 0.037,
+        "totalMs": 277.03
+      }
+    },
+    {
+      "armA": {
+        "bytes": 6289,
+        "diffFiles": 2,
+        "estimatedTokens": 1573,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 40274,
+        "diffFiles": 2,
+        "estimatedTokens": 10070,
+        "excerpts": 0,
+        "sensitiveFindings": 0,
+        "sourceFiles": 2,
+        "uniqueBlobs": 3
+      },
+      "armC": {
+        "airlockPlanShown": true,
+        "archiveMode": "600",
+        "archiveVerificationSuccess": true,
+        "bytes": 64134,
+        "category": null,
+        "compilerEstimatedTokens": 15730,
+        "cut": 1,
+        "diffFiles": 2,
+        "estimatedTokens": 16037,
+        "excerpts": 4,
+        "fileItems": 0,
+        "itemCount": 5,
+        "machineReasonFrames": 4,
+        "planMatchesArchiveSourceItemCount": true,
+        "selectionExpressible": true,
+        "sensitiveFindings": 0,
+        "sourceFiles": 4,
+        "storyFrames": 4,
+        "success": true,
+        "uniqueBlobs": 8,
+        "validatorSuccess": true
+      },
+      "candidateCounts": {
+        "consumer": 0,
+        "definition": 2,
+        "dependency": 0,
+        "instruction": 0,
+        "test": 10,
+        "total": 12
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "multi-file-feature-or-fix",
+      "id": "eslint-21045",
+      "missingContext": {
+        "ambiguityCategories": {
+          "dynamic-import": 1
+        },
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1
+        },
+        "truncatedChannels": [
+          "test"
+        ]
+      },
+      "oracle": {
+        "covered": 13,
+        "implementation": {
+          "coverage": 1,
+          "covered": 9,
+          "total": 9
+        },
+        "missingKinds": {
+          "operational-evidence": 1
+        },
+        "recall": 0.929,
+        "total": 14,
+        "uncertain": 2,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 2
+        }
+      },
+      "reduction": 0.628,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "922d4c59b7342eecd809354eb58b7278b28bdb2826f9b5561b7f3c2c6c899c65"
+      },
+      "repository": "eslint",
+      "selected": {
+        "estimatedTokens": 15730,
+        "excerpts": 4,
+        "expressible": true,
+        "files": 4,
+        "items": 4,
+        "overSelectionByChannel": {
+          "test": 2
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 108.469,
+        "gitMs": 37.181,
+        "indexMs": 153.83,
+        "obligationsMs": 0.003,
+        "planMs": 0.282,
+        "selectionMs": 0.038,
+        "totalMs": 299.829
+      }
+    },
+    {
+      "armA": null,
+      "armB": null,
+      "armC": {
+        "archiveVerificationSuccess": false,
+        "validatorSuccess": false
+      },
+      "candidateCounts": null,
+      "compile": {
+        "errorCategory": "budget-failure",
+        "success": false
+      },
+      "failureDigest": "f1cb7bb3223040c0",
+      "family": "configuration-or-persistence",
+      "id": "vitest-10506",
+      "missingContext": null,
+      "oracle": {
+        "covered": 0,
+        "implementation": {
+          "coverage": 0,
+          "covered": 0,
+          "total": 0
+        },
+        "missingKinds": {},
+        "recall": 0,
+        "total": 0,
+        "uncertain": 0,
+        "uncertaintyKinds": {}
+      },
+      "reduction": null,
+      "replay": {
+        "exact": false,
+        "normalizedPlanSha256": null
+      },
+      "repository": "vitest",
+      "selected": null,
+      "timingsMs": null
+    },
+    {
+      "armA": {
+        "bytes": 10604,
+        "diffFiles": 8,
+        "estimatedTokens": 2649,
+        "excerpts": 0,
+        "sensitiveFindings": 1,
+        "sourceFiles": 0,
+        "uniqueBlobs": 1
+      },
+      "armB": {
+        "bytes": 742404,
+        "diffFiles": 8,
+        "estimatedTokens": 185600,
+        "excerpts": 0,
+        "sensitiveFindings": 2062,
+        "sourceFiles": 8,
+        "uniqueBlobs": 9
+      },
+      "armC": {
+        "airlockPlanShown": false,
+        "category": "secret-scan-blocked",
+        "compilerEstimatedTokens": 14082,
+        "planMatchesArchiveSourceItemCount": false,
+        "selectionExpressible": true,
+        "success": false
+      },
+      "candidateCounts": {
+        "consumer": 3,
+        "definition": 11,
+        "dependency": 4,
+        "instruction": 2,
+        "test": 10,
+        "total": 30
+      },
+      "compile": {
+        "errorCategory": null,
+        "success": true
+      },
+      "family": "configuration-or-persistence",
+      "id": "vitest-10742",
+      "missingContext": {
+        "ambiguityCategories": {
+          "unresolved-relative-import": 1
+        },
+        "planUnsatisfiedByKind": {
+          "operational-evidence": 1,
+          "test": 1
+        },
+        "truncatedChannels": [
+          "test"
+        ]
+      },
+      "oracle": {
+        "covered": 21,
+        "implementation": {
+          "coverage": 1,
+          "covered": 13,
+          "total": 13
+        },
+        "missingKinds": {
+          "operational-evidence": 1,
+          "review-reference": 1
+        },
+        "recall": 0.913,
+        "total": 23,
+        "uncertain": 1,
+        "uncertaintyKinds": {
+          "review-symbol-boundary-unresolved": 1
+        }
+      },
+      "reduction": null,
+      "replay": {
+        "exact": true,
+        "normalizedPlanSha256": "fd522488b7eeb348b044020dfee1f1ac71a218142f8673127ff05f616efd332a"
+      },
+      "repository": "vitest",
+      "selected": {
+        "estimatedTokens": 14082,
+        "excerpts": 17,
+        "expressible": true,
+        "files": 13,
+        "items": 19,
+        "overSelectionByChannel": {
+          "consumer": 3,
+          "dependency": 4,
+          "test": 1
+        }
+      },
+      "timingsMs": {
+        "candidatesMs": 33.995,
+        "gitMs": 41.081,
+        "indexMs": 197.604,
+        "obligationsMs": 0.006,
+        "planMs": 0.664,
+        "selectionMs": 0.182,
+        "totalMs": 273.539
+      }
+    }
+  ],
+  "verdict": "KILL"
+}

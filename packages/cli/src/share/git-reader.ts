@@ -116,13 +116,18 @@ function walkFiles(
   add: (path: string, bytes: number) => void,
 ): void {
   const visit = (absolute: string): void => {
-    for (const entry of readdirSync(absolute, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const entries = readdirSync(absolute, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
+    const directoryPaths = entries
+      .filter((entry) => entry.isDirectory() && entry.name !== '.git')
+      .map((entry) => sanitizeRepoRelativePath(root, join(absolute, entry.name)));
+    const ignoredDirectories = ignoredPaths(root, directoryPaths);
+    for (const entry of entries) {
       const child = join(absolute, entry.name);
       if (entry.isSymbolicLink()) throw new Error(`Symbolic links cannot be shared in V0: ${sanitizeRepoRelativePath(root, child)}`);
       if (entry.isDirectory()) {
         if (entry.name === '.git') continue;
         const relative = sanitizeRepoRelativePath(root, child);
-        if (exclusionReason(relative) || isIgnored(root, relative)) continue;
+        if (exclusionReason(relative) || ignoredDirectories.has(relative)) continue;
         visit(child);
       } else if (entry.isFile()) {
         const relative = sanitizeRepoRelativePath(root, child);
@@ -133,12 +138,25 @@ function walkFiles(
   visit(directory);
 }
 
-function isIgnored(root: string, path: string): boolean {
-  const result = spawnSync('git', ['-C', root, 'check-ignore', '--quiet', '--no-index', '--', path], {
-    stdio: 'ignore',
+function ignoredPaths(root: string, paths: string[]): Set<string> {
+  if (paths.length === 0) return new Set();
+  const result = spawnSync('git', ['-C', root, 'check-ignore', '--no-index', '-z', '--stdin'], {
+    input: Buffer.from(`${paths.join('\0')}\0`, 'utf8'),
+    encoding: 'buffer',
+    stdio: ['pipe', 'pipe', 'pipe'],
     timeout: 5_000,
+    maxBuffer: 32 * 1024 * 1024,
   });
-  return result.status === 0;
+  if (result.error || (result.status !== 0 && result.status !== 1)) {
+    throw new Error(`Git ignore check failed: ${result.error?.message ?? result.stderr?.toString('utf8') ?? `status ${result.status}`}`);
+  }
+  return new Set(
+    (result.stdout as Buffer)
+      .toString('utf8')
+      .split('\0')
+      .filter(Boolean)
+      .map((path) => sanitizeRepoRelativePath(root, path)),
+  );
 }
 
 function exclusionReason(path: string): string | null {
@@ -252,12 +270,19 @@ function expandSelections(
     selectionKeys.add(key);
     parsed.push(selection);
   };
-  for (const value of values) {
+  const prepared = values.map((value) => {
     const selection = parseSelection(value);
     const candidateAbsolute = resolve(repository.root, selection.path);
     const relative = candidateAbsolute === resolve(repository.root)
       ? '.'
       : sanitizeRepoRelativePath(repository.root, selection.path);
+    return { selection, relative };
+  });
+  const ignoredNamedPaths = ignoredPaths(
+    repository.root,
+    prepared.map(({ relative }) => relative).filter((path) => path !== '.'),
+  );
+  for (const { selection, relative } of prepared) {
     const absolute = resolve(repository.root, relative);
     let info;
     try {
@@ -268,7 +293,7 @@ function expandSelections(
     if (info.isSymbolicLink()) throw new Error(`Symbolic links cannot be shared in V0: ${relative}`);
     if (info.isDirectory()) {
       if (selection.range) throw new Error(`A line range cannot target a directory: ${selection.original}`);
-      if (relative !== '.' && (exclusionReason(relative) || isIgnored(repository.root, relative))) {
+      if (relative !== '.' && (exclusionReason(relative) || ignoredNamedPaths.has(relative))) {
         throw new Error(`${relative}: excluded directory. Name each intended file directly and use per-file --force-include where required.`);
       }
       walkFiles(repository.root, absolute, (child, bytes) =>
@@ -293,9 +318,10 @@ function validateSelectableFile(
   directlyNamed: boolean,
   forceSet: Set<string>,
   warnings: string[],
+  ignored: Set<string>,
 ): Buffer | null {
   const forced = forceSet.has(path);
-  const reason = exclusionReason(path) ?? (isIgnored(repository.root, path) ? 'Git-ignored paths are excluded' : null);
+  const reason = exclusionReason(path) ?? (ignored.has(path) ? 'Git-ignored paths are excluded' : null);
   if (reason && !directlyNamed) {
     warnings.push(`${path}: ${reason} (directory selection did not explicitly name this file)`);
     return null;
@@ -336,10 +362,11 @@ function buildFileItems(
   const stripSet = new Set(options.stripContext);
   const items: ShareItem[] = [];
   const warnings: string[] = [];
+  const ignored = ignoredPaths(repository.root, parsed.map((selection) => selection.path));
 
   for (const selection of parsed) {
     const directlyNamed = selection.direct && explicitlyNamedFiles.has(selection.path);
-    const content = validateSelectableFile(repository, selection.path, directlyNamed, forceSet, warnings);
+    const content = validateSelectableFile(repository, selection.path, directlyNamed, forceSet, warnings, ignored);
     if (!content) continue;
     const committed = committedBytes(repository.root, selection.path);
     const provenance: ProvenanceGrade = committed?.equals(content)

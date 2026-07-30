@@ -1,0 +1,45 @@
+{
+  "name": "@neurcode-ai/share-compiler",
+  "version": "0.1.0",
+  "description": "Experimental deterministic local context compiler for Neurcode Share",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "tsx --test src/compiler.test.ts",
+    "prepack": "pnpm build"
+  },
+  "keywords": [
+    "neurcode",
+    "code-context",
+    "deterministic"
+  ],
+  "license": "Apache-2.0",
+  "author": "Neurcode AI",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neurcode-ai/share.git",
+    "directory": "packages/compiler"
+  },
+  "bugs": {
+    "url": "https://github.com/neurcode-ai/share/issues"
+  },
+  "homepage": "https://github.com/neurcode-ai/share#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.25",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

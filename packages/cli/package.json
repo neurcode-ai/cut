@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc && chmod +x dist/index.js",
-    "test": "tsx --test src/share/share-local.test.ts src/share/composer.test.ts",
+    "test": "tsx --test src/share/share-local.test.ts src/share/composer.test.ts src/share/auto.test.ts",
     "prepack": "pnpm build"
   },
   "keywords": [
@@ -40,6 +40,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@neurcode-ai/share-compiler": "workspace:*",
     "@neurcode-ai/share-format": "workspace:*",
     "commander": "^11.1.0",
     "open": "^10.1.0"

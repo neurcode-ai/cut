@@ -1,5 +1,6 @@
-import type { Command } from 'commander';
+import { Option, type Command } from 'commander';
 import { createInterface } from 'node:readline/promises';
+import { compile, type CompilePlan } from '@neurcode-ai/share-compiler';
 import { createLocalShare } from './share/create';
 import { startShareComposer } from './share/composer';
 import { discoverShareRepository } from './share/git-reader';
@@ -40,6 +41,8 @@ export function shareCommand(program: Command, toolVersion: string): void {
     .option('--stdout <format>', 'Write only md or json payload to stdout; disclosure review stays on stderr')
     .option('--dry-run', 'Print “Review what will be shared” and write nothing')
     .option('--yes', 'Confirm non-interactively after printing the full disclosure review')
+    .addOption(new Option('--auto', 'Experimentally propose context from the concrete change').hideHelp())
+    .addOption(new Option('--task <text>', 'Task text for experimental automatic context selection').hideHelp())
     .addHelpText(
       'after',
       '\nExamples:\n'
@@ -70,6 +73,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
       }
       // Explicit headless or export flags mean the caller wants no browser.
       const headlessRequested = options.browser === false
+        || options.auto === true
         || Boolean(options.out)
         || Boolean(options.preview)
         || Boolean(options.copy)
@@ -84,7 +88,8 @@ export function shareCommand(program: Command, toolVersion: string): void {
         && !options.preview
         && !options.copy
         && !options.stdout
-        && !options.dryRun;
+        && !options.dryRun
+        && options.auto !== true;
       // --handoff is a Share-format preset, not a second UI. It opens the visual
       // Composer only when nothing forces headless mode; with --no-browser or any
       // export flag it falls through to the terminal/headless path below and the
@@ -109,6 +114,33 @@ export function shareCommand(program: Command, toolVersion: string): void {
       let terminalMessage = options.message as string | undefined;
       let terminalOut = options.out as string | undefined;
       let terminalPreview = options.preview as boolean | string | undefined;
+      let compilerPlan: CompilePlan | undefined;
+
+      if (options.task !== undefined && options.auto !== true) {
+        throw new Error('--task is available only with the experimental --auto option.');
+      }
+      if (options.auto === true) {
+        if (options.handoff === true || options.draft) {
+          throw new Error('--auto cannot be combined with --handoff or --draft.');
+        }
+        if (terminalSelections.length > 0) {
+          throw new Error('--auto proposes the complete source selection; do not combine it with manual selections.');
+        }
+        const compileDiff = terminalStaged
+          ? { kind: 'staged' as const }
+          : typeof terminalDiff === 'string'
+            ? { kind: 'range' as const, range: terminalDiff }
+            : { kind: 'worktree' as const };
+        compilerPlan = compile({
+          repositoryRoot: process.cwd(),
+          diff: compileDiff,
+          task: options.task as string | undefined,
+          operationalEvidenceSupplied: Boolean(terminalRun),
+        });
+        terminalSelections = compilerPlan.selections;
+        if (!terminalStaged && typeof terminalDiff !== 'string') terminalDiff = true;
+        if (!terminalMessage && typeof options.task === 'string') terminalMessage = options.task;
+      }
 
       // Headless --handoff preset: capture the current working-tree diff when the
       // caller did not name their own selections, so agents can produce a handoff
@@ -126,6 +158,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
 
       if (
         options.browser === false
+        && options.auto !== true
         && terminalSelections.length === 0
         && !terminalStaged
         && terminalDiff === false
@@ -200,6 +233,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
               recipientCount: publishRecipients.length,
             }
           : undefined,
+        compilerPlan,
       });
       if (options.publish === true) {
         if (!result.bundle) throw new Error('Publishing requires a completed local disclosure review.');

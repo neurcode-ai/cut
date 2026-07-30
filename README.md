@@ -131,6 +131,7 @@ cross-file, or intended for an external person or agent.
 ## Packages
 
 - `@neurcode-ai/share-format`: schema, archive, verifier, renderers, scanner
+- `@neurcode-ai/share-compiler`: experimental deterministic local context proposal
 - `@neurcode-ai/share`: focused CLI and local Composer
 - `@neurcode-ai/share-viewer`: verified local/static rendering helpers
 - `@neurcode-ai/share-sdk`: public hosted client contracts

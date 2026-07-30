@@ -19,6 +19,7 @@ execFileSync('pnpm', ['build'], { cwd: root, stdio: 'inherit' });
 
 const packages = [
   ['@neurcode-ai/share-format', 'packages/format'],
+  ['@neurcode-ai/share-compiler', 'packages/compiler'],
   ['@neurcode-ai/share', 'packages/cli'],
   ['@neurcode-ai/share-viewer', 'packages/viewer'],
   ['@neurcode-ai/share-sdk', 'packages/sdk'],

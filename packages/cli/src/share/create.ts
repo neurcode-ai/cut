@@ -20,6 +20,7 @@ import {
   type ShareItem,
   type StoryFrame,
 } from '@neurcode-ai/share-format';
+import type { CompilePlan } from '@neurcode-ai/share-compiler';
 import { runAirlock, type AirlockState } from './airlock';
 import { captureEvidence, type EvidenceCapture } from './evidence';
 import { pruneUnreferencedBlobs, readShareSelections } from './git-reader';
@@ -59,6 +60,7 @@ export interface CreateShareOptions {
     expiryHours: number;
     recipientCount: number;
   };
+  compilerPlan?: CompilePlan;
 }
 
 function addBlob(blobs: Map<string, Buffer>, content: Buffer): string {
@@ -87,12 +89,32 @@ function noteTarget(item: ShareItem): string[] {
   return ['run', item.id];
 }
 
-function buildFrames(items: ShareItem[], noteValues: string[]): StoryFrame[] {
+function selectionForItem(item: ShareItem): string | null {
+  if (item.kind === 'file') return item.path;
+  if (item.kind === 'excerpt') return `${item.path}:${item.range.start}-${item.range.end}`;
+  return null;
+}
+
+function buildFrames(items: ShareItem[], noteValues: string[], compilerPlan?: CompilePlan): StoryFrame[] {
   const notes = parseNotes(noteValues);
-  const frames: StoryFrame[] = [];
+  const notesByItem = new Map<string, string>();
+  for (const inclusion of compilerPlan?.inclusions ?? []) {
+    const item = items.find((candidate) => selectionForItem(candidate) === inclusion.selection);
+    if (!item) throw new Error(`Compiler selection was not captured through the existing path: ${inclusion.selection}`);
+    notesByItem.set(item.id, inclusion.reason);
+  }
   for (const [target, note] of notes) {
     const item = items.find((candidate) => noteTarget(candidate).includes(target));
     if (!item) throw new Error(`--note target is not in this Share: ${target}`);
+    const existing = notesByItem.get(item.id);
+    const combined = existing ? `${existing}\n\nUser note: ${note}` : note;
+    if (combined.length > 4_000) throw new Error(`Combined note for ${target} exceeds 4,000 characters.`);
+    notesByItem.set(item.id, combined);
+  }
+  const frames: StoryFrame[] = [];
+  for (const item of items) {
+    const note = notesByItem.get(item.id);
+    if (!note) continue;
     frames.push({
       id: `f${frames.length + 1}`,
       cite: { item: item.id },
@@ -104,13 +126,19 @@ function buildFrames(items: ShareItem[], noteValues: string[]): StoryFrame[] {
   return frames;
 }
 
-function fieldsForScan(state: Pick<AirlockState, 'draft' | 'blobs'>): ScanField[] {
+function fieldsForScan(state: Pick<AirlockState, 'draft' | 'blobs' | 'compilerPlan'>): ScanField[] {
   const fields: ScanField[] = [
     { scope: 'title', text: state.draft.manifest.title },
     { scope: 'intent', text: state.draft.manifest.intent },
   ];
   for (const frame of state.draft.story.frames) {
     fields.push({ scope: `note:${frame.cite.item}`, text: frame.note });
+  }
+  if (state.compilerPlan) {
+    fields.push({ scope: 'compiler-plan', text: JSON.stringify(state.compilerPlan) });
+    for (const exclusion of state.compilerPlan.exclusionSummary) {
+      fields.push({ scope: 'compiler-exclusion', text: exclusion });
+    }
   }
   for (const item of state.draft.pack.items) {
     if (item.kind === 'file') {
@@ -375,7 +403,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
   if (items.length > SHARE_LIMITS.maxItems) throw new Error(`Share exceeds the ${SHARE_LIMITS.maxItems}-item limit.`);
   applyItemOrder(items, options.itemOrder);
 
-  const frames = buildFrames(items, options.notes);
+  const frames = buildFrames(items, options.notes, options.compilerPlan);
   const draft: ShareDocumentDraft = {
     manifest: {
       cut: 1,
@@ -400,8 +428,9 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
     draft,
     blobs,
     findings: scanFields(fieldsForScan({ draft, blobs })),
-    exclusions: selection.warnings,
+    exclusions: [...selection.warnings, ...(options.compilerPlan?.exclusionSummary ?? [])],
     destinations,
+    compilerPlan: options.compilerPlan,
   };
   if (capturedEvidence && initialState.findings.length === 0 && !options.stdout) {
     if (capturedEvidence.stdout.length) process.stdout.write(capturedEvidence.stdout);
