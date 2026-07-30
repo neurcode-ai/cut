@@ -1,0 +1,468 @@
+{
+  "schemaVersion": 1,
+  "selectionTimestamp": "2026-07-30T03:03:25Z",
+  "descriptionPolicy": "Verbatim substantive task text from the public PR body; repository checklist boilerplate omitted.",
+  "acceptedPatchPolicy": "Landed merge-or-squash commit versus its first parent.",
+  "repositories": [
+    {
+      "id": "hono",
+      "url": "https://github.com/honojs/hono.git",
+      "license": "MIT",
+      "observedTargetCodeFiles": 386,
+      "selectionRationale": "Near the approximate lower size edge; retained for reviewed TypeScript middleware, public-interface, and authentication changes."
+    },
+    {
+      "id": "prettier",
+      "url": "https://github.com/prettier/prettier.git",
+      "license": "MIT",
+      "observedTargetCodeFiles": 5796,
+      "selectionRationale": "Near the approximate upper size edge; retained for mature reviewed JavaScript parser/printer fixes with fixtures."
+    },
+    {
+      "id": "eslint",
+      "url": "https://github.com/eslint/eslint.git",
+      "license": "MIT",
+      "observedTargetCodeFiles": 1540,
+      "selectionRationale": "Mature JavaScript project with disciplined rule tests and substantive human review."
+    },
+    {
+      "id": "vitest",
+      "url": "https://github.com/vitest-dev/vitest.git",
+      "license": "MIT",
+      "observedTargetCodeFiles": 2316,
+      "selectionRationale": "Mid-size TypeScript monorepo with reviewed cache, configuration, and persistence behavior."
+    }
+  ],
+  "composition": {
+    "multi-file-feature-or-fix": 6,
+    "public-interface": 3,
+    "configuration-or-persistence": 3,
+    "security-adjacent": 2,
+    "rename-or-deletion": 1
+  },
+  "tasks": [
+    {
+      "id": "hono-4599",
+      "repository": "hono",
+      "pr": 4599,
+      "prUrl": "https://github.com/honojs/hono/pull/4599",
+      "title": "feat(ssg): add redirect plugin",
+      "description": "close #4389",
+      "mergedAt": "2026-02-19T10:16:26Z",
+      "base": "69f303e0c3a45c09e7ec56611973751208737857",
+      "head": "00b405a8f840f0f2ce4145e0fe5558cf2beeee78",
+      "family": "rename-or-deletion",
+      "changedPaths": [
+        {"status": "M", "path": "src/helper/ssg/index.ts"},
+        {"status": "A", "path": "src/helper/ssg/plugins.test.tsx"},
+        {"status": "A", "path": "src/helper/ssg/plugins.ts"},
+        {"status": "M", "path": "src/helper/ssg/ssg.test.tsx"},
+        {"status": "M", "path": "src/helper/ssg/ssg.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/honojs/hono/pull/4599#discussion_r2786717398",
+          "path": "src/helper/ssg/index.ts",
+          "symbols": ["defaultPlugin", "redirectPlugin"],
+          "additionalPaths": ["src/helper/ssg/plugins.ts"]
+        },
+        {
+          "url": "https://github.com/honojs/hono/pull/4599#discussion_r2752285357",
+          "path": "src/helper/ssg/ssg.test.tsx",
+          "symbols": [],
+          "additionalPaths": ["src/helper/ssg/plugins.test.tsx"]
+        }
+      ],
+      "selectionRationale": "Moves the default plugin out of ssg.ts, adds a redirect plugin, updates exports, and separates plugin tests."
+    },
+    {
+      "id": "hono-4636",
+      "repository": "hono",
+      "pr": 4636,
+      "prUrl": "https://github.com/honojs/hono/pull/4636",
+      "title": "feat(client): $path",
+      "description": "closes #4186",
+      "mergedAt": "2026-02-19T10:18:26Z",
+      "base": "00b405a8f840f0f2ce4145e0fe5558cf2beeee78",
+      "head": "9524923b485145148d6395b7531f3f504dc85933",
+      "family": "public-interface",
+      "changedPaths": [
+        {"status": "M", "path": "src/client/client.test.ts"},
+        {"status": "M", "path": "src/client/client.ts"},
+        {"status": "M", "path": "src/client/types.test.ts"},
+        {"status": "M", "path": "src/client/types.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/honojs/hono/pull/4636#discussion_r2752365009",
+          "path": "src/client/types.test.ts",
+          "symbols": ["ClientRequest", "BuildPath", "BuildPathname", "BuildSearch"],
+          "additionalPaths": ["src/client/types.ts"]
+        }
+      ],
+      "selectionRationale": "Adds a typed public client path API with runtime and type-level tests."
+    },
+    {
+      "id": "hono-4645",
+      "repository": "hono",
+      "pr": 4645,
+      "prUrl": "https://github.com/honojs/hono/pull/4645",
+      "title": "feat(basic-auth): add context key and callback options",
+      "description": "Add usernameContextKey and onAuthSuccess options so route handlers can access the authenticated username without reparsing the Authorization header.",
+      "mergedAt": "2026-02-19T10:20:20Z",
+      "base": "9524923b485145148d6395b7531f3f504dc85933",
+      "head": "bf37828d6df56618bb90649c65c1c4deb2f9bcd6",
+      "family": "security-adjacent",
+      "changedPaths": [
+        {"status": "M", "path": "src/middleware/basic-auth/index.test.ts"},
+        {"status": "M", "path": "src/middleware/basic-auth/index.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/honojs/hono/pull/4645#discussion_r2752268566",
+          "path": "src/middleware/basic-auth/index.ts",
+          "symbols": ["basicAuth", "usernameContextKey", "onAuthSuccess"],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Authentication middleware API change with direct credential-path tests and review."
+    },
+    {
+      "id": "hono-4658",
+      "repository": "hono",
+      "pr": 4658,
+      "prUrl": "https://github.com/honojs/hono/pull/4658",
+      "title": "feat(trailing-slash): add `alwaysRedirect` option to support wildcard routes",
+      "description": "Add alwaysRedirect to trimTrailingSlash and appendTrailingSlash. When true, middleware redirects before handlers so trailing-slash handling works with wildcard routes.",
+      "mergedAt": "2026-02-19T10:25:21Z",
+      "base": "16321afd47e1bf8f48d06d9d8a2eae6b607c73ef",
+      "head": "034223f1bf8db3c98e4bf2d11d597c94362729d7",
+      "family": "public-interface",
+      "changedPaths": [
+        {"status": "M", "path": "src/middleware/trailing-slash/index.test.ts"},
+        {"status": "M", "path": "src/middleware/trailing-slash/index.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/honojs/hono/pull/4658#discussion_r2821924886",
+          "path": "src/middleware/trailing-slash/index.ts",
+          "symbols": ["alwaysRedirect", "trimTrailingSlash"],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Reviewed public middleware option with paired implementation and tests."
+    },
+    {
+      "id": "hono-4659",
+      "repository": "hono",
+      "pr": 4659,
+      "prUrl": "https://github.com/honojs/hono/pull/4659",
+      "title": "fix(bearer-auth): make auth-scheme case-insensitive",
+      "description": "Handle the bearer authentication scheme case-insensitively as specified by RFC 7235 section 2.1.",
+      "mergedAt": "2026-02-06T06:50:31Z",
+      "base": "cea7b7b993af682fbf10bb29937d028a55b8ab7e",
+      "head": "3aa2f9ae0957b4466a6d84978aba36f1e5677f25",
+      "family": "security-adjacent",
+      "changedPaths": [
+        {"status": "M", "path": "src/middleware/bearer-auth/index.test.ts"},
+        {"status": "M", "path": "src/middleware/bearer-auth/index.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/honojs/hono/pull/4659#discussion_r2756896304",
+          "path": "src/middleware/bearer-auth/index.ts",
+          "symbols": ["prefixRegexStr", "TOKEN_STRINGS", "verifyToken"],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Security-adjacent parser behavior with explicit review of scheme versus token case sensitivity."
+    },
+    {
+      "id": "hono-4719",
+      "repository": "hono",
+      "pr": 4719,
+      "prUrl": "https://github.com/honojs/hono/pull/4719",
+      "title": "feat(types): Add exports field to ExecutionContext",
+      "description": "Add the Cloudflare Workers exports property to ExecutionContext while allowing module augmentation with Wrangler-generated types.",
+      "mergedAt": "2026-02-19T10:38:49Z",
+      "base": "02346c6d945a10c98f54ae51622e8c7afbe3bad4",
+      "head": "b85c1e032864322c581f4d04652d37ef59130eee",
+      "family": "public-interface",
+      "changedPaths": [
+        {"status": "M", "path": "src/context.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/honojs/hono/pull/4719#discussion_r2811742497",
+          "path": "src/context.ts",
+          "symbols": ["ExecutionContext", "exports"],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Single-file declared exception: a focused public type contract reviewed for runtime-specific coupling."
+    },
+    {
+      "id": "prettier-19516",
+      "repository": "prettier",
+      "pr": 19516,
+      "prUrl": "https://github.com/prettier/prettier/pull/19516",
+      "title": "Prevent the addition of space in `type()` with `+`",
+      "description": "Fix the addition of a space before + in a CSS type() declaration, which produced invalid CSS.",
+      "mergedAt": "2026-07-09T04:56:57Z",
+      "base": "3d063b57b1a2fdc660341b6e1c719e09997cc72c",
+      "head": "a4e6f7a0264bad45f3c153773111f60a5d406d55",
+      "family": "multi-file-feature-or-fix",
+      "changedPaths": [
+        {"status": "A", "path": "changelog_unreleased/css/19516.md"},
+        {"status": "M", "path": "src/language-css/print/comma-separated-value-group.js"},
+        {"status": "A", "path": "tests/format/css/type-function/__snapshots__/format.test.js.snap"},
+        {"status": "A", "path": "tests/format/css/type-function/format.test.js"},
+        {"status": "A", "path": "tests/format/css/type-function/type.css"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/prettier/prettier/pull/19516#discussion_r3544663417",
+          "path": "tests/format/css/type-function/format.test.js",
+          "symbols": [],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Parser/printer fix with a new convention-based test, fixture, snapshot, and changelog."
+    },
+    {
+      "id": "prettier-19527",
+      "repository": "prettier",
+      "pr": 19527,
+      "prUrl": "https://github.com/prettier/prettier/pull/19527",
+      "title": "Preserve wiki links with aliases in markdown",
+      "description": "Fix #19525 and #19551 by preserving wiki links with aliases in Markdown.",
+      "mergedAt": "2026-07-08T08:26:15Z",
+      "base": "a7ce99aa577011fa4aa3debdf6cb6830e1b7af46",
+      "head": "e4dd78409f8eb39791e4a85d085cb1c6aef818bd",
+      "family": "multi-file-feature-or-fix",
+      "changedPaths": [
+        {"status": "A", "path": "changelog_unreleased/markdown/19527.md"},
+        {"status": "M", "path": "cspell.json"},
+        {"status": "M", "path": "package.json"},
+        {"status": "M", "path": "src/language-markdown/parse/parse-markdown.js"},
+        {"status": "A", "path": "tests/format/markdown/wiki-link/alias/__snapshots__/format.test.js.snap"},
+        {"status": "A", "path": "tests/format/markdown/wiki-link/alias/format.test.js"},
+        {"status": "A", "path": "tests/format/markdown/wiki-link/alias/issue-19525.md"},
+        {"status": "M", "path": "yarn.lock"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/prettier/prettier/pull/19527#discussion_r3513519009",
+          "path": "src/language-markdown/print/mdast.js",
+          "symbols": ["wiki link alias"],
+          "additionalPaths": ["src/language-markdown/print/mdast.js"]
+        }
+      ],
+      "selectionRationale": "Eight-file declared exception: parser behavior, package/config changes, fixture, generated snapshot, and a human review reference to an unchanged printer consumer."
+    },
+    {
+      "id": "prettier-19573",
+      "repository": "prettier",
+      "pr": 19573,
+      "prUrl": "https://github.com/prettier/prettier/pull/19573",
+      "title": "Fix adjacent block comments corrupted in less",
+      "description": "Fix adjacent Less block comments being corrupted; part of #19495.",
+      "mergedAt": "2026-07-08T17:34:59Z",
+      "base": "e4dd78409f8eb39791e4a85d085cb1c6aef818bd",
+      "head": "b3973c02dd0eb4e55651b27710cfc3aab3d05023",
+      "family": "multi-file-feature-or-fix",
+      "changedPaths": [
+        {"status": "A", "path": "changelog_unreleased/less/19574.md"},
+        {"status": "M", "path": "src/language-css/loc.js"},
+        {"status": "M", "path": "tests/format/less/comments/__snapshots__/format.test.js.snap"},
+        {"status": "A", "path": "tests/format/less/comments/adjacent.less"},
+        {"status": "M", "path": "tests/format/less/less-test-suite/__snapshots__/format.test.js.snap"},
+        {"status": "M", "path": "tests/format/less/less-test-suite/format.test.js"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/prettier/prettier/pull/19573#discussion_r3545994407",
+          "path": "src/language-css/loc.js",
+          "symbols": ["state", "inlineCommentStartIndex"],
+          "additionalPaths": []
+        },
+        {
+          "url": "https://github.com/prettier/prettier/pull/19573#discussion_r3546007265",
+          "path": "tests/format/less/comments/adjacent.less",
+          "symbols": [],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Six-file lexical-state fix with dedicated and broader regression fixtures."
+    },
+    {
+      "id": "prettier-19630",
+      "repository": "prettier",
+      "pr": 19630,
+      "prUrl": "https://github.com/prettier/prettier/pull/19630",
+      "title": "Fix comment moved before `:` in property signature",
+      "description": "Fix #19443 by preserving block-comment placement around TypeScript and Flow property signatures.",
+      "mergedAt": "2026-07-22T01:37:03Z",
+      "base": "57f6882d2b00e8e277d0e819fb8dc81948f738c4",
+      "head": "53334538ac577ddf65f1c3eacb3e80ae37e2e31f",
+      "family": "multi-file-feature-or-fix",
+      "changedPaths": [
+        {"status": "M", "path": "src/language-js/comments/handle-comments.js"},
+        {"status": "M", "path": "tests/format/typescript/property-signature/consistent-with-flow/__snapshots__/format.test.js.snap"},
+        {"status": "M", "path": "tests/format/typescript/property-signature/consistent-with-flow/comments.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/prettier/prettier/pull/19630#discussion_r3600716014",
+          "path": "src/language-js/comments/handle-comments.js",
+          "symbols": ["TSPropertySignature.typeAnnotation", "ObjectTypeProperty.value", "isBlockComment"],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Cross-language comment attachment fix with source fixture and generated snapshot."
+    },
+    {
+      "id": "eslint-21027",
+      "repository": "eslint",
+      "pr": 21027,
+      "prUrl": "https://github.com/eslint/eslint/pull/21027",
+      "title": "ci: run ecosystem tests on pull requests",
+      "description": "Implement step 3 of the ecosystem-tests rollout by triggering ecosystem-tests.yml for pull requests targeting main.",
+      "mergedAt": "2026-07-03T07:37:35Z",
+      "base": "8859bafb018e2b23b5110d52e491b69b94ad890a",
+      "head": "4d4155df4a21d711e8dd21a467de085e770bad35",
+      "family": "configuration-or-persistence",
+      "changedPaths": [
+        {"status": "M", "path": ".github/workflows/ecosystem-tests.yml"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/eslint/eslint/pull/21027#discussion_r3513296758",
+          "path": ".github/workflows/ecosystem-tests.yml",
+          "symbols": ["prevRun"],
+          "additionalPaths": []
+        },
+        {
+          "url": "https://github.com/eslint/eslint/pull/21027#discussion_r3485718775",
+          "path": ".github/workflows/ecosystem-tests.yml",
+          "symbols": [],
+          "additionalPaths": [".github/workflows/types-integration.yml"],
+          "oracleDisposition": "excluded because the reviewer explicitly retracted the comparison in discussion_r3486632516"
+        }
+      ],
+      "selectionRationale": "Single-file declared exception: operational workflow configuration with substantive failure-mode review."
+    },
+    {
+      "id": "eslint-21030",
+      "repository": "eslint",
+      "pr": 21030,
+      "prUrl": "https://github.com/eslint/eslint/pull/21030",
+      "title": "feat: report invalid signed numeric radix values in `radix` rule",
+      "description": "Update the radix rule to validate signed numeric literal radix arguments such as -1 and +37.",
+      "mergedAt": "2026-07-01T07:32:27Z",
+      "base": "0129972ba122e95bece6040fda44d20f6799246a",
+      "head": "96cdd427db5f26c6403fba92b0f7ae4556c595ec",
+      "family": "multi-file-feature-or-fix",
+      "changedPaths": [
+        {"status": "M", "path": "lib/rules/radix.js"},
+        {"status": "M", "path": "tests/lib/rules/radix.js"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/eslint/eslint/pull/21030#discussion_r3490584323",
+          "path": "lib/rules/radix.js",
+          "symbols": ["radix rule", "UnaryExpression"],
+          "additionalPaths": ["tests/lib/rules/radix.js"]
+        }
+      ],
+      "selectionRationale": "Two-file rule behavior change with direct human-requested edge-case tests."
+    },
+    {
+      "id": "eslint-21045",
+      "repository": "eslint",
+      "pr": 21045,
+      "prUrl": "https://github.com/eslint/eslint/pull/21045",
+      "title": "fix: parenthesize sequence expression operands in no-implicit-coercion",
+      "description": "Preserve semantics by parenthesizing SequenceExpression operands used in Boolean, Number, and String recommendations.",
+      "mergedAt": "2026-07-03T13:47:56Z",
+      "base": "026e1304080512bcddfd2af3557fff86474ff949",
+      "head": "d1f637eca27e523d613991c6bea5b8726b810e4c",
+      "family": "multi-file-feature-or-fix",
+      "changedPaths": [
+        {"status": "M", "path": "lib/rules/no-implicit-coercion.js"},
+        {"status": "M", "path": "tests/lib/rules/no-implicit-coercion.js"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/eslint/eslint/pull/21045#discussion_r3513840269",
+          "path": "lib/rules/no-implicit-coercion.js",
+          "symbols": ["getOperandText", "SequenceExpression"],
+          "additionalPaths": ["tests/lib/rules/no-implicit-coercion.js"]
+        }
+      ],
+      "selectionRationale": "Semantic autofix correction with paired rule tests requested in review."
+    },
+    {
+      "id": "vitest-10506",
+      "repository": "vitest",
+      "pr": 10506,
+      "prUrl": "https://github.com/vitest-dev/vitest/pull/10506",
+      "title": "perf(coverage): speed up v8 report generation (bounded-memory merge + precompiled globs)",
+      "description": "Bound raw V8 coverage merge memory and precompile coverage globs without changing coverage behavior.",
+      "mergedAt": "2026-07-14T07:39:49Z",
+      "base": "ad065a7d62af6ff5818197f3424f17c54d238ba3",
+      "head": "b05e5d6343c83c55e512774eaecfebcd52434a99",
+      "family": "configuration-or-persistence",
+      "changedPaths": [
+        {"status": "M", "path": "packages/coverage-v8/src/provider.ts"},
+        {"status": "M", "path": "packages/vitest/src/node/coverage.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/vitest-dev/vitest/pull/10506#discussion_r3576687963",
+          "path": "packages/vitest/src/node/coverage.ts",
+          "symbols": ["_globMatchers", "_initialize", "options"],
+          "additionalPaths": []
+        },
+        {
+          "url": "https://github.com/vitest-dev/vitest/pull/10506#discussion_r3576651343",
+          "path": "packages/coverage-v8/src/provider.ts",
+          "symbols": ["scriptId"],
+          "additionalPaths": []
+        }
+      ],
+      "selectionRationale": "Two-file configuration-cache and bounded persistence change with lifecycle review."
+    },
+    {
+      "id": "vitest-10742",
+      "repository": "vitest",
+      "pr": 10742,
+      "prUrl": "https://github.com/vitest-dev/vitest/pull/10742",
+      "title": "perf: make the Node compile cache opt-in, persist worker caches on teardown",
+      "description": "Make NODE_COMPILE_CACHE opt-in, flush worker compile caches during graceful teardown, preserve coverage behavior, and document the persistence tradeoff.",
+      "mergedAt": "2026-07-09T06:21:03Z",
+      "base": "96fa6d73d8db734fd647edb1d7a896e573ef81eb",
+      "head": "941bc836167d6c41ded609ed4819084d52dbb226",
+      "family": "configuration-or-persistence",
+      "changedPaths": [
+        {"status": "M", "path": "docs/guide/improving-performance.md"},
+        {"status": "M", "path": "packages/vitest/src/runtime/workers/init.ts"},
+        {"status": "M", "path": "packages/vitest/vitest.mjs"},
+        {"status": "M", "path": "pnpm-lock.yaml"},
+        {"status": "A", "path": "test/e2e/fixtures/compile-cache/basic.test.ts"},
+        {"status": "A", "path": "test/e2e/fixtures/compile-cache/vitest.config.ts"},
+        {"status": "M", "path": "test/e2e/package.json"},
+        {"status": "A", "path": "test/e2e/test/compile-cache.test.ts"}
+      ],
+      "reviewReferences": [
+        {
+          "url": "https://github.com/vitest-dev/vitest/pull/10742#discussion_r3565969616",
+          "path": "packages/vitest/src/runtime/workers/init.ts",
+          "symbols": ["flushCompileCache"],
+          "additionalPaths": ["packages/vitest/src/node/pools/workers/forksWorker.ts"]
+        }
+      ],
+      "selectionRationale": "Eight-file declared exception: configuration, persisted worker-cache lifecycle, docs, fixtures, and an unchanged worker consumer explicitly cited in review."
+    }
+  ]
+}
