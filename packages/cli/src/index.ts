@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { shareCommand } from './command';
 import { livingShareCommands } from './living-commands';
 
-const version = '0.1.0';
+const version = '0.2.0';
 const program = new Command()
   .name('neurcode-share')
   .description('Create deterministic, reviewable code-context Shares locally or publish them securely')

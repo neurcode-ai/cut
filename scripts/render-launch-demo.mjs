@@ -41,7 +41,7 @@ const stepPills = (active) => {
 
 const terminalBody = (frame) => {
   const base = [
-    text(94, 174, '$ npx @neurcode-ai/share@0.1.0', { fill: '#f5f7f5', size: 18, weight: 650 }),
+    text(94, 174, '$ npx @neurcode-ai/share@0.2.0', { fill: '#f5f7f5', size: 18, weight: 650 }),
   ];
   if (frame === 0) {
     base.push(

@@ -1,6 +1,6 @@
 {
   "name": "@neurcode-ai/share",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local-first deterministic code-context capture, review, export, and secure Neurcode Share publishing",
   "bin": {
     "neurcode-share": "dist/index.js"

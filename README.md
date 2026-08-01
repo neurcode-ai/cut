@@ -13,7 +13,7 @@ link when you choose to.
 From any Git repository:
 
 ```sh
-npx @neurcode-ai/share@0.1.0
+npx @neurcode-ai/share@0.2.0
 ```
 
 The Composer binds only to loopback, inventories the exact disclosure, scans
@@ -23,7 +23,7 @@ choose Publish.
 For a non-interactive local archive:
 
 ```sh
-npx @neurcode-ai/share@0.1.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/share@0.2.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
 ```
 
 ## From terminal to one clear Share
@@ -32,7 +32,7 @@ npx @neurcode-ai/share@0.1.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
 
 Select the exact material, review the disclosure cut locally, then publish one
 immutable revision for a person or an AI agent. The example above uses the
-released `0.1.0` CLI and the same delivery states as this
+released `0.2.0` CLI and the same delivery states as this
 [public focused-review Share](https://share.neurcode.com/examples/code-review).
 
 ## Three public workflows
@@ -52,10 +52,10 @@ Local creation needs no account. Export a deterministic archive, inert HTML,
 Markdown, or agent JSON:
 
 ```sh
-npx @neurcode-ai/share src/queue.ts --yes --out queue-review.html
-npx @neurcode-ai/share --staged --yes --out staged-review.md
-npx @neurcode-ai/share --diff=main..HEAD --yes --out change.json
-npx @neurcode-ai/share --run "pnpm test queue" --yes --out evidence.tar.gz
+npx @neurcode-ai/share@0.2.0 src/queue.ts --yes --out queue-review.html
+npx @neurcode-ai/share@0.2.0 --staged --yes --out staged-review.md
+npx @neurcode-ai/share@0.2.0 --diff=main..HEAD --yes --out change.json
+npx @neurcode-ai/share@0.2.0 --run "pnpm test queue" --yes --out evidence.tar.gz
 ```
 
 Commands are bounded by time and output limits. Sensitive paths are denied by
@@ -65,8 +65,8 @@ Verify exact cited bytes against a selected local repository state, or prepare
 a reviewed immutable successor without publishing:
 
 ```sh
-npx @neurcode-ai/share verify review.tar.gz --repo ../project
-npx @neurcode-ai/share refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+npx @neurcode-ai/share@0.2.0 verify review.tar.gz --repo ../project
+npx @neurcode-ai/share@0.2.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
 ```
 
 See the [CLI guide](packages/cli/README.md) for deterministic JSON, named
@@ -80,7 +80,7 @@ Neurcode identity and a loopback PKCE flow, so no hosted token is copied into
 the terminal:
 
 ```sh
-npx @neurcode-ai/share src/session.ts --publish --visibility unlisted
+npx @neurcode-ai/share@0.2.0 src/session.ts --publish --visibility unlisted
 ```
 
 The hosted service at [share.neurcode.com](https://share.neurcode.com) is
@@ -96,7 +96,7 @@ For an AI agent, create a short-lived, revision-pinned agent link in the hosted
 library and fetch its scoped format:
 
 ```sh
-npx @neurcode-ai/share fetch 'AGENT_LINK' --stdout md
+npx @neurcode-ai/share@0.2.0 fetch 'AGENT_LINK' --stdout md
 ```
 
 Capability and agent secrets remain in URL fragments at rest and are sent in
