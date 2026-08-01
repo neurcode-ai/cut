@@ -1,6 +1,6 @@
 {
   "name": "@neurcode-ai/share-format",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Pure local format, safety, archive, and rendering primitives for Neurcode Share",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

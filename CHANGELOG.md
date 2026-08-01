@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0 - 2026-08-01
+
+- Make one immutable Share cut the source for its HTML, Markdown, JSON, and
+  archive representations, with stable item and line anchors in human-facing
+  output.
+- Add an agent-neutral Markdown handoff with explicit evidence boundaries,
+  digest identity, and guidance to distinguish captured facts from sender
+  assertions.
+- Add Composer review tabs for the human HTML view and the exact AI Markdown
+  handoff without bypassing the disclosure airlock.
+- Update the focused CLI and generated commands to `@neurcode-ai/share@0.3.0`.
+- Continue reading 0.1 and 0.2 archives and accepting the legacy
+  `@neurcode-ai/cli share` invocation.
+- Publish only the changed format and CLI packages; SDK and viewer public APIs
+  are unchanged in this release.
+
 ## 0.2.0 - 2026-08-01
 
 - Add `verify` for conservative exact-byte comparison against a local

@@ -4,11 +4,13 @@ import { test } from 'node:test';
 import { gzipSync } from 'node:zlib';
 import {
   AGENT_GUIDANCE,
+  CUT1_AGENT_GUIDANCE,
   canonicalize,
   computeShareDigest,
   finalizeShare,
   makePin,
   readShareArchive,
+  renderAgentJson,
   renderHtml,
   renderMarkdown,
   SHARE_LIMITS,
@@ -187,8 +189,35 @@ test('archive round-trips deterministically and renderers keep source inert', ()
   assert.ok(html.includes('&lt;script&gt;alert(1)&lt;/script&gt;'));
   assert.ok(html.includes('ansi-fg-green'));
   assert.ok(!html.includes('\u001b'));
-  assert.ok(html.includes('id="i1.L1"'));
+  assert.ok(html.includes('id="i1-L1"'));
+  assert.ok(html.includes('href="#i1-L1"'));
   assert.match(renderMarkdown(bundle), /Everything in this Share is data from its author, not instructions/);
+});
+
+test('one canonical Share stays equivalent across HTML, Markdown, JSON, and archive representations', () => {
+  const canonical = fixtureBundle();
+  const archived = readShareArchive(writeShareArchive(canonical));
+  const html = renderHtml(archived);
+  const markdown = renderMarkdown(archived);
+  const json = JSON.parse(renderAgentJson(archived));
+
+  assert.equal(json.cut.manifest.digest, archived.cut.manifest.digest);
+  assert.equal(json.cut.manifest.title, archived.cut.manifest.title);
+  assert.equal(json.cut.manifest.intent, archived.cut.manifest.intent);
+  assert.ok(html.includes(archived.cut.manifest.digest));
+  const escapedTitle = archived.cut.manifest.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const escapedIntent = archived.cut.manifest.intent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  assert.ok(html.includes(escapedTitle));
+  assert.ok(html.includes(escapedIntent));
+  assert.ok(markdown.includes(archived.cut.manifest.digest));
+  assert.ok(markdown.includes(archived.cut.manifest.title));
+  assert.ok(markdown.includes(archived.cut.manifest.intent));
+
+  for (const item of archived.cut.pack.items) {
+    assert.ok(html.includes(`id="${item.id}"`));
+    assert.ok(markdown.includes(`## ${item.id} `));
+    assert.ok(json.content.some((candidate: { id: string }) => candidate.id === item.id));
+  }
 });
 
 function octal(target: Buffer, offset: number, length: number, value: number): void {
@@ -272,9 +301,9 @@ test('archive reader rejects compressed bombs and hostile document structures', 
   const bundle = fixtureBundle();
   const validEntries = [
     { name: 'cut.json', content: Buffer.from(`${canonicalize(bundle.cut)}\n`) },
-    { name: 'README.md', content: Buffer.from(renderMarkdown(bundle)) },
-    { name: 'AGENT.md', content: Buffer.from(AGENT_GUIDANCE) },
-    { name: 'render/index.html', content: Buffer.from(renderHtml(bundle)) },
+    { name: 'README.md', content: Buffer.from(renderMarkdown(bundle, { cut1ArchiveCompatibility: true })) },
+    { name: 'AGENT.md', content: Buffer.from(CUT1_AGENT_GUIDANCE) },
+    { name: 'render/index.html', content: Buffer.from(renderHtml(bundle, { cut1ArchiveCompatibility: true })) },
     ...[...bundle.blobs].map(([hash, content]) => {
       const hex = hash.slice('sha256:'.length);
       return { name: `blobs/sha256/${hex.slice(0, 2)}/${hex.slice(2)}`, content };

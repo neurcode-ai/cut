@@ -111,6 +111,7 @@ test('loopback Composer is local-only, resumable, provenance-honest, and blocks 
     assert.equal(review.digest, null);
     assert.ok(review.findings.length >= 1);
     assert.equal(review.previewHtml, null);
+    assert.equal(review.previewMarkdown, null);
     assert.equal(review.items[0].provenance, 'pasted');
 
     const traversal = await fetch(`${origin}${config.basePath}/api/file?path=../outside`);

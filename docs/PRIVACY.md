@@ -13,3 +13,8 @@ inventory.
 Hosted publishing is a separate, explicit action. The hosted service has its
 own privacy and retention policy. This repository contains no production user
 data, Share payload, recipient address, access link, or telemetry.
+
+The local AI Markdown preview is another representation of the same reviewed
+Share cut. It is not sent to an AI service by the Composer. Copying it or using
+an external agent is an explicit user action governed by that destination's
+privacy terms.

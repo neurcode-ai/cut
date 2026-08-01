@@ -41,7 +41,7 @@ try {
     cwd: consumer,
     encoding: 'utf8',
   }).trim();
-  if (cliVersion !== '0.2.0') throw new Error(`Anonymous CLI version was ${cliVersion}, not 0.2.0.`);
+  if (cliVersion !== '0.3.0') throw new Error(`Anonymous CLI version was ${cliVersion}, not 0.3.0.`);
   const consumerRequire = createRequire(join(consumer, 'smoke.cjs'));
   const format = consumerRequire('@neurcode-ai/share-format');
 

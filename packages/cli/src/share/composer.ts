@@ -466,6 +466,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
           expiryHours: draft.expiryHours,
           recipients: draft.recipients,
           previewHtml: reviewCache.findings.length ? null : renderHtml(bundle),
+          previewMarkdown: reviewCache.findings.length ? null : renderMarkdown(bundle),
         });
         return;
       }

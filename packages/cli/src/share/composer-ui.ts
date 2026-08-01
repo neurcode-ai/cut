@@ -30,7 +30,7 @@ export function composerHtml(input: {
     .note{width:100%;min-height:54px;margin-top:9px;border:1px solid var(--line);border-radius:7px;padding:7px;resize:vertical;outline:none}.evidence{margin:8px 10px 12px;border-top:1px solid var(--line);padding-top:12px}.evidence h3,.access h3{font-size:12px;margin:0 0 7px}.command{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px;outline:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.evidence-row{display:flex;gap:7px;margin-top:7px}.evidence-result{font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);color:var(--codeText);border-radius:7px;padding:8px;margin-top:8px;max-height:140px;overflow:auto;white-space:pre-wrap}
     .local-form{padding:10px}.local-form label,.access label{display:block;color:var(--muted);font-size:11px;font-weight:700;margin-top:9px}.field{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px;outline:none;background:#fff}.paste{min-height:180px;resize:vertical;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}.drop{border:1px dashed #a9b2c0;border-radius:9px;padding:14px;margin-top:10px;text-align:center;color:var(--muted);background:var(--soft)}.drop.drag{border-color:var(--violet);background:#eeeafe}.local-list{margin-top:10px}.access{margin:0 10px 12px;border-top:1px solid var(--line);padding-top:10px}.access-grid{display:grid;grid-template-columns:1fr 90px;gap:7px}.recipient-help{font-size:11px;color:var(--muted);margin:5px 0 0}.warning-list{margin:10px 0 0;padding-left:20px;color:#7a271a}.publish-result{word-break:break-all;color:#166347}
     .review-bar{margin-top:auto;border-top:1px solid var(--line);padding:12px;background:#fff}.review-bar .primary{width:100%;padding:10px}
-    .overlay{position:fixed;inset:0;background:#f7f8fa;z-index:20;display:none;overflow:auto}.overlay.open{display:block}.review-top{position:sticky;top:0;z-index:2;height:62px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:12px}.review-top h1{font-size:18px;margin:0}.review-grid{max-width:1320px;margin:0 auto;padding:22px;display:grid;grid-template-columns:minmax(360px,.85fr) minmax(460px,1.15fr);gap:18px}.card{background:#fff;border:1px solid var(--line);border-radius:11px;padding:17px}.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 13px}.inventory{list-style:none;padding:0;margin:0}.inventory li{display:grid;grid-template-columns:36px 1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid #edf0f3}.inventory code{font-size:11px;color:var(--violet)}.inventory small{color:var(--muted)}.finding{border:1px solid #efb4af;background:#fff2f0;color:#7a271a;padding:10px;border-radius:8px;margin:8px 0}.ok{border:1px solid #a6dfc6;background:#ecfdf4;color:#166347;padding:10px;border-radius:8px}.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.fact{background:var(--soft);border-radius:8px;padding:9px}.fact span{display:block;color:var(--muted);font-size:11px}.preview{width:100%;height:620px;border:1px solid var(--line);border-radius:9px;background:#fff}.confirm{margin-top:14px;display:flex;gap:9px;align-items:flex-start}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.blocking{color:var(--rose);font-weight:700}
+    .overlay{position:fixed;inset:0;background:#f7f8fa;z-index:20;display:none;overflow:auto}.overlay.open{display:block}.review-top{position:sticky;top:0;z-index:2;height:62px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:12px}.review-top h1{font-size:18px;margin:0}.review-grid{max-width:1320px;margin:0 auto;padding:22px;display:grid;grid-template-columns:minmax(360px,.85fr) minmax(460px,1.15fr);gap:18px}.card{background:#fff;border:1px solid var(--line);border-radius:11px;padding:17px}.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 13px}.inventory{list-style:none;padding:0;margin:0}.inventory li{display:grid;grid-template-columns:36px 1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid #edf0f3}.inventory code{font-size:11px;color:var(--violet)}.inventory small{color:var(--muted)}.finding{border:1px solid #efb4af;background:#fff2f0;color:#7a271a;padding:10px;border-radius:8px;margin:8px 0}.ok{border:1px solid #a6dfc6;background:#ecfdf4;color:#166347;padding:10px;border-radius:8px}.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.fact{background:var(--soft);border-radius:8px;padding:9px}.fact span{display:block;color:var(--muted);font-size:11px}.preview-tabs{display:flex;gap:8px;margin:-3px 0 10px}.preview-tabs .active{border-color:var(--violet);color:var(--violet)}.preview{width:100%;height:620px;border:1px solid var(--line);border-radius:9px;background:#fff}.ai-preview{margin:0;padding:16px;overflow:auto;white-space:pre-wrap;background:var(--code);color:var(--codeText);font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.confirm{margin-top:14px;display:flex;gap:9px;align-items:flex-start}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.blocking{color:var(--rose);font-weight:700}
     .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;border-radius:8px;padding:10px 14px;z-index:40;opacity:0;pointer-events:none;transition:.18s}.toast.show{opacity:1}
     @media(max-width:1050px){.shell{grid-template-columns:230px minmax(360px,1fr) 285px}.review-grid{grid-template-columns:1fr}.preview{height:520px}}
     @media(max-width:760px){body{overflow:auto}.topbar{position:sticky;top:0;z-index:5}.shell{height:auto;display:block}.panel,.panel:last-child{border:0;border-bottom:1px solid var(--line);min-height:260px}.browser{max-height:300px}.editor{min-height:620px}.outline{max-height:420px}.empty .steps{grid-template-columns:1fr}.review-grid{padding:12px}.preview{height:520px}.facts{grid-template-columns:1fr}}
@@ -143,7 +143,12 @@ export function composerHtml(input: {
       </div>
       <div class="card">
         <h2>Exact recipient preview</h2>
-        <iframe class="preview" id="preview" title="Exact local recipient preview" sandbox=""></iframe>
+        <div class="preview-tabs" role="tablist" aria-label="Recipient representation">
+          <button class="ghost active" id="previewHumanButton" type="button" role="tab" aria-selected="true">Human view</button>
+          <button class="ghost" id="previewAiButton" type="button" role="tab" aria-selected="false">AI Markdown</button>
+        </div>
+        <iframe class="preview" id="preview" title="Exact local human recipient preview" sandbox=""></iframe>
+        <pre class="preview ai-preview" id="aiPreview" aria-label="Exact local AI Markdown preview" hidden></pre>
       </div>
     </div>
   </section>
@@ -460,6 +465,13 @@ export function composerHtml(input: {
           review.absolutePathWarnings.forEach((warning)=>{const li=document.createElement('li');li.textContent=warning;list.append(li)});heading.append(list);status.append(heading);
         }
         $('preview').srcdoc = review.previewHtml || '<p style="font-family:system-ui;padding:2rem">Preview is blocked until findings are removed.</p>';
+        $('aiPreview').textContent = review.previewMarkdown || 'Preview is blocked until findings are removed.';
+        $('preview').hidden = false;
+        $('aiPreview').hidden = true;
+        $('previewHumanButton').classList.add('active');
+        $('previewHumanButton').setAttribute('aria-selected', 'true');
+        $('previewAiButton').classList.remove('active');
+        $('previewAiButton').setAttribute('aria-selected', 'false');
         $('confirmReview').checked = false;
         $('actionMessage').textContent = review.findings.length ? 'Remove or replace every finding before export or upload.' : '';
         document.querySelectorAll('[data-export]').forEach((button) => button.disabled = review.findings.length > 0);
@@ -513,6 +525,16 @@ export function composerHtml(input: {
     });
     $('reviewButton').addEventListener('click', openReview);
     $('backButton').addEventListener('click', () => $('reviewOverlay').classList.remove('open'));
+    $('previewHumanButton').addEventListener('click', () => {
+      $('preview').hidden = false; $('aiPreview').hidden = true;
+      $('previewHumanButton').classList.add('active'); $('previewAiButton').classList.remove('active');
+      $('previewHumanButton').setAttribute('aria-selected', 'true'); $('previewAiButton').setAttribute('aria-selected', 'false');
+    });
+    $('previewAiButton').addEventListener('click', () => {
+      $('preview').hidden = true; $('aiPreview').hidden = false;
+      $('previewAiButton').classList.add('active'); $('previewHumanButton').classList.remove('active');
+      $('previewAiButton').setAttribute('aria-selected', 'true'); $('previewHumanButton').setAttribute('aria-selected', 'false');
+    });
     document.querySelectorAll('[data-export]').forEach((button) => button.addEventListener('click', () => exportFormat(button.dataset.export,false)));
     $('copyAi').addEventListener('click', copyGuidance);
     $('copyJson').addEventListener('click', () => exportFormat('json',true));

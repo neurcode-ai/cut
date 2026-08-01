@@ -1,7 +1,7 @@
 # Neurcode Share
 
-Stop pasting code. Share the exact code, complete diff, notes, and observed test
-evidence in one clear link for a teammate or an AI agent.
+Select the exact code once. One canonical Share becomes a readable review for
+a teammate or bounded Markdown, JSON, or archive context for an AI agent.
 
 Neurcode Share is the open format, CLI, SDK, and viewer for creating a bounded,
 reviewable code handoff. The hosted service at
@@ -13,7 +13,7 @@ link when you choose to.
 From any Git repository:
 
 ```sh
-npx @neurcode-ai/share@0.2.0
+npx @neurcode-ai/share@0.3.0
 ```
 
 The Composer binds only to loopback, inventories the exact disclosure, scans
@@ -23,16 +23,18 @@ choose Publish.
 For a non-interactive local archive:
 
 ```sh
-npx @neurcode-ai/share@0.2.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/share@0.3.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
 ```
 
-## From terminal to one clear Share
+## One canonical Share, native representations
 
 ![Neurcode Share terminal-to-recipient workflow](docs/assets/terminal-to-share.gif)
 
 Select the exact material, review the disclosure cut locally, then publish one
-immutable revision for a person or an AI agent. The example above uses the
-released `0.2.0` CLI and the same delivery states as this
+immutable revision and one URL. A person gets inert readable HTML; an AI agent
+gets the equivalent bounded Markdown, JSON, or verified archive without the
+creator manually repackaging anything. The example uses the released `0.3.0`
+CLI and the same canonical Share as this
 [public focused-review Share](https://share.neurcode.com/examples/code-review).
 
 ## Three public workflows
@@ -52,10 +54,10 @@ Local creation needs no account. Export a deterministic archive, inert HTML,
 Markdown, or agent JSON:
 
 ```sh
-npx @neurcode-ai/share@0.2.0 src/queue.ts --yes --out queue-review.html
-npx @neurcode-ai/share@0.2.0 --staged --yes --out staged-review.md
-npx @neurcode-ai/share@0.2.0 --diff=main..HEAD --yes --out change.json
-npx @neurcode-ai/share@0.2.0 --run "pnpm test queue" --yes --out evidence.tar.gz
+npx @neurcode-ai/share@0.3.0 src/queue.ts --yes --out queue-review.html
+npx @neurcode-ai/share@0.3.0 --staged --yes --out staged-review.md
+npx @neurcode-ai/share@0.3.0 --diff=main..HEAD --yes --out change.json
+npx @neurcode-ai/share@0.3.0 --run "pnpm test queue" --yes --out evidence.tar.gz
 ```
 
 Commands are bounded by time and output limits. Sensitive paths are denied by
@@ -65,12 +67,12 @@ Verify exact cited bytes against a selected local repository state, or prepare
 a reviewed immutable successor without publishing:
 
 ```sh
-npx @neurcode-ai/share@0.2.0 verify review.tar.gz --repo ../project
-npx @neurcode-ai/share@0.2.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+npx @neurcode-ai/share@0.3.0 verify review.tar.gz --repo ../project
+npx @neurcode-ai/share@0.3.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
 ```
 
 See the [CLI guide](packages/cli/README.md) for deterministic JSON, named
-revisions, staged comparisons, explicit refresh decisions, hosted receipts,
+revisions, staged comparisons, explicit refresh decisions, hosted checks,
 and authorized comments.
 
 ## Hosted publishing
@@ -80,7 +82,7 @@ Neurcode identity and a loopback PKCE flow, so no hosted token is copied into
 the terminal:
 
 ```sh
-npx @neurcode-ai/share@0.2.0 src/session.ts --publish --visibility unlisted
+npx @neurcode-ai/share@0.3.0 src/session.ts --publish --visibility unlisted
 ```
 
 The hosted service at [share.neurcode.com](https://share.neurcode.com) is
@@ -92,11 +94,12 @@ contract is available through `@neurcode-ai/share-sdk`.
 For a person, send the viewer link. They see the question, selected context,
 provenance, and comments subject to the Share's access policy.
 
-For an AI agent, create a short-lived, revision-pinned agent link in the hosted
-library and fetch its scoped format:
+For an AI agent, use the same accessible URL with content negotiation, an
+adjacent canonical representation, or create a short-lived, revision-pinned
+agent link in the hosted library and fetch its scoped format:
 
 ```sh
-npx @neurcode-ai/share@0.2.0 fetch 'AGENT_LINK' --stdout md
+npx @neurcode-ai/share@0.3.0 fetch 'AGENT_LINK' --stdout md
 ```
 
 Capability and agent secrets remain in URL fragments at rest and are sent in

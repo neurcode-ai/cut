@@ -64,6 +64,7 @@ function codeLines(
   ansi = false,
   startLine = 1,
   idPrefix?: string,
+  cut1ArchiveCompatibility = false,
 ): string {
   const lines = text.replace(/\n$/, '').split('\n');
   return lines.map((line, index) => {
@@ -78,8 +79,12 @@ function codeLines(
       : '';
     const rendered = ansi ? ansiLine(line || ' ') : escapeHtml(line || ' ');
     const lineNumber = startLine + index;
-    const id = idPrefix ? ` id="${escapeAttribute(`${idPrefix}.L${lineNumber}`)}"` : '';
-    return `<span class="line${diffClass}"${id}><span class="ln">${lineNumber}</span><span class="src">${rendered}</span></span>`;
+    const lineId = idPrefix ? `${idPrefix}${cut1ArchiveCompatibility ? '.' : '-'}L${lineNumber}` : '';
+    const id = lineId ? ` id="${escapeAttribute(lineId)}"` : '';
+    const lineAnchor = lineId && !cut1ArchiveCompatibility
+      ? `<a class="ln" href="#${escapeAttribute(lineId)}" aria-label="Line ${lineNumber}">${lineNumber}</a>`
+      : `<span class="ln">${lineNumber}</span>`;
+    return `<span class="line${diffClass}"${id}>${lineAnchor}<span class="src">${rendered}</span></span>`;
   }).join('');
 }
 
@@ -89,7 +94,7 @@ function itemLabel(item: ShareItem): string {
   return (item as EvidenceItem).argv.join(' ');
 }
 
-function renderItem(bundle: ShareBundle, item: ShareItem, note?: string): string {
+function renderItem(bundle: ShareBundle, item: ShareItem, note: string | undefined, cut1ArchiveCompatibility: boolean): string {
   const badge = `<span class="badge">${escapeHtml(item.provenance)}</span><span class="badge observed">observed</span>`;
   const noteHtml = note
     ? `<aside><strong>Author note · asserted</strong><p>${escapeHtml(note).replace(/\n/g, '<br>')}</p></aside>`
@@ -97,20 +102,20 @@ function renderItem(bundle: ShareBundle, item: ShareItem, note?: string): string
   let body = '';
 
   if (item.kind === 'file') {
-    body = `<pre>${codeLines(blobText(bundle, item.blob), undefined, false, 1, item.id)}</pre>`;
+    body = `<pre>${codeLines(blobText(bundle, item.blob), undefined, false, 1, item.id, cut1ArchiveCompatibility)}</pre>`;
   } else if (item.kind === 'excerpt') {
-    body = `<p class="boundary">Selected lines ${item.range.start}–${item.range.end}</p><pre>${codeLines(blobText(bundle, item.blob), undefined, false, item.range.start, item.id)}</pre>`;
+    body = `<p class="boundary">Selected lines ${item.range.start}–${item.range.end}</p><pre>${codeLines(blobText(bundle, item.blob), undefined, false, item.range.start, item.id, cut1ArchiveCompatibility)}</pre>`;
     body += item.context
-      ? `<details><summary>Expand author-approved context · lines ${item.context.start}–${item.context.end}</summary><pre>${codeLines(blobText(bundle, item.context.blob), undefined, false, item.context.start, `${item.id}.context`)}</pre></details>`
+      ? `<details><summary>Expand author-approved context · lines ${item.context.start}–${item.context.end}</summary><pre>${codeLines(blobText(bundle, item.context.blob), undefined, false, item.context.start, `${item.id}.context`, cut1ArchiveCompatibility)}</pre></details>`
       : '<p class="boundary">Context ends here — the author included nothing beyond this range.</p>';
   } else if (item.kind === 'diff') {
-    body = `<p class="boundary">${item.files.length} file(s) · +${item.addedLines} −${item.removedLines} · ${escapeHtml(item.base)} → ${escapeHtml(item.head)}</p><pre>${codeLines(blobText(bundle, item.blob), 'diff')}</pre>`;
+    body = `<p class="boundary">${item.files.length} file(s) · +${item.addedLines} −${item.removedLines} · ${escapeHtml(item.base)} → ${escapeHtml(item.head)}</p><pre>${codeLines(blobText(bundle, item.blob), 'diff', false, 1, cut1ArchiveCompatibility ? undefined : item.id)}</pre>`;
   } else {
     const stdout = item.stdout
-      ? `<h3>Observed stdout${item.stdoutTruncated ? ' · bounded' : ''}</h3><pre>${codeLines(blobText(bundle, item.stdout), undefined, true)}</pre>`
+      ? `<h3>Observed stdout${item.stdoutTruncated ? ' · bounded' : ''}</h3><pre>${codeLines(blobText(bundle, item.stdout), undefined, true, 1, cut1ArchiveCompatibility ? undefined : `${item.id}-stdout`)}</pre>`
       : '';
     const stderr = item.stderr
-      ? `<h3>Observed stderr${item.stderrTruncated ? ' · bounded' : ''}</h3><pre>${codeLines(blobText(bundle, item.stderr), undefined, true)}</pre>`
+      ? `<h3>Observed stderr${item.stderrTruncated ? ' · bounded' : ''}</h3><pre>${codeLines(blobText(bundle, item.stderr), undefined, true, 1, cut1ArchiveCompatibility ? undefined : `${item.id}-stderr`)}</pre>`
       : '';
     body = `<p class="boundary">exit ${item.exit} · ${item.durationMs} ms · ${escapeHtml(item.startedAt)} · cwd ${escapeHtml(item.cwd)}${item.timedOut ? ' · timed out' : ''}</p>${stdout}${stderr}`;
   }
@@ -118,13 +123,14 @@ function renderItem(bundle: ShareBundle, item: ShareItem, note?: string): string
   return `<section id="${escapeAttribute(item.id)}"><header><div><span class="eyebrow">${escapeHtml(item.kind)}</span><h2>${escapeHtml(itemLabel(item))}</h2></div><div>${badge}</div></header>${noteHtml}${body}</section>`;
 }
 
-export function renderHtml(bundle: ShareBundle): string {
+export function renderHtml(bundle: ShareBundle, options: { cut1ArchiveCompatibility?: boolean } = {}): string {
+  const cut1ArchiveCompatibility = options.cut1ArchiveCompatibility === true;
   const { manifest } = bundle.cut;
   const notes = new Map(bundle.cut.story.frames.map((frame) => [frame.cite.item, frame.note]));
   const inventory = bundle.cut.pack.items.map((item) =>
     `<li><a href="${escapeAttribute(`#${item.id}`)}"><span>${escapeHtml(itemLabel(item))}</span><small>${escapeHtml(item.kind)} · ${item.bytes} B · ${escapeHtml(item.provenance)}</small></a></li>`
   ).join('');
-  const items = bundle.cut.pack.items.map((item) => renderItem(bundle, item, notes.get(item.id))).join('');
+  const items = bundle.cut.pack.items.map((item) => renderItem(bundle, item, notes.get(item.id), cut1ArchiveCompatibility)).join('');
 
   return `<!doctype html>
 <html lang="en">
@@ -144,7 +150,7 @@ export function renderHtml(bundle: ShareBundle): string {
     section{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:0 0 22px;padding:20px;overflow:hidden}section header{display:flex;justify-content:space-between;gap:18px;align-items:start}section h2{margin:2px 0 14px;font:650 23px/1.2 ui-serif,Georgia,serif;overflow-wrap:anywhere}
     .badge{display:inline-block;border:1px solid #9ab8b0;background:#eaf4f1;color:#155e55;border-radius:999px;padding:3px 8px;margin:0 0 4px 5px;font-size:11px;white-space:nowrap}.badge.observed{background:#eef0eb;border-color:#c7ccc4;color:#4b554f}
     aside{border-left:4px solid var(--accent);background:#edf5f1;padding:12px 15px;margin:4px 0 16px}aside p{margin:4px 0 0}.boundary{color:var(--muted);font-size:13px}
-    pre{margin:12px -20px -20px;background:var(--code);color:var(--codeInk);overflow:auto;padding:14px 0;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2}.line{display:grid;grid-template-columns:56px minmax(max-content,1fr);min-height:21px}.ln{color:#708078;text-align:right;padding-right:15px;user-select:none}.src{white-space:pre;padding-right:18px}.line.add{background:#173c2e}.line.del{background:#452626}.line.hunk{background:#22334a;color:#b8d2f2}
+    pre{margin:12px -20px -20px;background:var(--code);color:var(--codeInk);overflow:auto;padding:14px 0;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2}.line{display:grid;grid-template-columns:56px minmax(max-content,1fr);min-height:21px}.ln{color:#708078;text-align:right;padding-right:15px;user-select:none${cut1ArchiveCompatibility ? '' : ';text-decoration:none'}}${cut1ArchiveCompatibility ? '' : '.line:target{outline:2px solid #65b8a9;outline-offset:-2px}'}.src{white-space:pre;padding-right:18px}.line.add{background:#173c2e}.line.del{background:#452626}.line.hunk{background:#22334a;color:#b8d2f2}
     .ansi-bold{font-weight:800}.ansi-dim{opacity:.7}.ansi-fg-black{color:#7d877f}.ansi-fg-red,.ansi-fg-bright-red{color:#ff8b8b}.ansi-fg-green,.ansi-fg-bright-green{color:#80dca4}.ansi-fg-yellow,.ansi-fg-bright-yellow{color:#f4d37b}.ansi-fg-blue,.ansi-fg-bright-blue{color:#8bb9ff}.ansi-fg-magenta,.ansi-fg-bright-magenta{color:#e2a2ff}.ansi-fg-cyan,.ansi-fg-bright-cyan{color:#78d9dc}.ansi-fg-white,.ansi-fg-bright-white{color:#fff}.ansi-fg-bright-black{color:#a7afa9}
     details{border:1px solid var(--line);border-radius:10px;margin-top:18px;overflow:hidden}summary{cursor:pointer;padding:12px 14px;font-weight:650}details pre{margin:0}
     footer{color:var(--muted);max-width:850px;margin:32px auto;font-size:13px}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
@@ -157,7 +163,7 @@ export function renderHtml(bundle: ShareBundle): string {
     <span class="eyebrow">Neurcode Share · local preview</span>
     <h1>${escapeHtml(manifest.title)}</h1>
     <p class="intent"><strong>Author intent · asserted:</strong> ${escapeHtml(manifest.intent || 'No intent supplied.')}</p>
-    <p class="origin">${escapeHtml(manifest.origin.remote)} @ ${escapeHtml(manifest.origin.head)} · ${escapeHtml(manifest.origin.branch || '(detached)')} · ${manifest.origin.dirty ? 'uncommitted worktree' : 'clean checkout'} · captured ${escapeHtml(manifest.createdAt)}</p>
+    <p class="origin">${escapeHtml(manifest.origin.remote)} @ ${escapeHtml(manifest.origin.head)} · ${escapeHtml(manifest.origin.branch || '(detached)')} · ${manifest.origin.dirty ? 'uncommitted worktree' : 'clean checkout'} · captured ${escapeHtml(manifest.createdAt)}${cut1ArchiveCompatibility ? '' : ` · digest ${escapeHtml(manifest.digest)}`}</p>
   </article>
   <div class="layout">
     <nav aria-label="Share inventory"><h2>Inventory · ${bundle.cut.pack.items.length} item(s)</h2><ul>${inventory}</ul></nav>
@@ -166,7 +172,7 @@ export function renderHtml(bundle: ShareBundle): string {
   <footer>
     <p><strong>Snapshot honesty:</strong> this is captured source and observed output from one point in time. Provenance labels describe how bytes entered; they are not endorsements.</p>
     <p>Revocation can stop future access through Neurcode, but cannot recall copies already downloaded, cached, screenshotted, or consumed by agents.</p>
-    <p>Made with <code>npx @neurcode-ai/cli share</code>.</p>
+    <p>Made with <code>${cut1ArchiveCompatibility ? 'npx @neurcode-ai/cli share' : 'npx @neurcode-ai/share'}</code>.</p>
   </footer>
 </main>
 </body>

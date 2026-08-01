@@ -3,7 +3,7 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import { canonicalize, computeShareDigest } from './canonical';
 import { SHARE_LIMITS, type ShareBundle, type ShareDocument } from './model';
 import { renderHtml } from './render/html';
-import { AGENT_GUIDANCE, renderMarkdown } from './render/markdown';
+import { CUT1_AGENT_GUIDANCE, renderMarkdown } from './render/markdown';
 import { validateShareBundle, validateShareDocument } from './validation';
 
 const BLOCK = 512;
@@ -16,9 +16,9 @@ interface ArchiveEntry {
 function derivedEntries(bundle: ShareBundle): ArchiveEntry[] {
   return [
     { name: 'cut.json', content: Buffer.from(`${canonicalize(bundle.cut)}\n`) },
-    { name: 'README.md', content: Buffer.from(renderMarkdown(bundle)) },
-    { name: 'AGENT.md', content: Buffer.from(AGENT_GUIDANCE) },
-    { name: 'render/index.html', content: Buffer.from(renderHtml(bundle)) },
+    { name: 'README.md', content: Buffer.from(renderMarkdown(bundle, { cut1ArchiveCompatibility: true })) },
+    { name: 'AGENT.md', content: Buffer.from(CUT1_AGENT_GUIDANCE) },
+    { name: 'render/index.html', content: Buffer.from(renderHtml(bundle, { cut1ArchiveCompatibility: true })) },
   ];
 }
 
