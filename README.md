@@ -1,7 +1,16 @@
 # Neurcode Share
 
-Select the exact code once. One canonical Share becomes a readable review for
-a teammate or bounded Markdown, JSON, or archive context for an AI agent.
+[![npm](https://img.shields.io/npm/v/%40neurcode-ai%2Fshare?label=npm&color=0d7667)](https://www.npmjs.com/package/@neurcode-ai/share)
+[![license](https://img.shields.io/badge/license-Apache--2.0-171b1a)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-171b1a)](package.json)
+
+**The universal link for code.** Select the exact code once. One canonical
+Share becomes a readable review for a teammate or bounded Markdown, JSON, or
+archive context for an AI agent.
+
+[Create in the browser](https://share.neurcode.com/new) ·
+[Open a real example](https://share.neurcode.com/examples/code-review) ·
+[Read the privacy boundary](docs/PRIVACY.md)
 
 Neurcode Share is the open format, CLI, SDK, and viewer for creating a bounded,
 reviewable code handoff. The hosted service at
