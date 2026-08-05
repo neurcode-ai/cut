@@ -1,6 +1,6 @@
 # Changelog
 
-## Cut 0.1.0 / compatible engine 0.4.0 - 2026-08-03
+## Cut 0.1.0 / compatible engine 0.4.0 - 2026-08-06
 
 - Introduce **Cut by Neurcode** as the product identity and “The universal link
   for code” as its single positioning line.

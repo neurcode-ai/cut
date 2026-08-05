@@ -4,7 +4,10 @@ import { Command } from 'commander';
 import { shareCommand } from './command';
 import { livingShareCommands } from './living-commands';
 
-const version = '0.4.0';
+const engineVersion = '0.4.0';
+const version = process.env.NEURCODE_CUT_ENTRY_VERSION === '0.1.0'
+  ? '0.1.0'
+  : engineVersion;
 const program = new Command()
   .name('neurcode-cut')
   .description('Turn the exact code that matters into one Cut for people and AI agents')
