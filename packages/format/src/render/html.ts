@@ -125,6 +125,11 @@ function renderItem(bundle: ShareBundle, item: ShareItem, note: string | undefin
 
 export function renderHtml(bundle: ShareBundle, options: { cut1ArchiveCompatibility?: boolean } = {}): string {
   const cut1ArchiveCompatibility = options.cut1ArchiveCompatibility === true;
+  // `cut/1` archives embed this HTML and are required to remain byte-identical
+  // to the first public writer. The live/non-archive renderer uses Cut branding.
+  const productTitle = cut1ArchiveCompatibility ? 'Neurcode Share' : 'Cut by Neurcode';
+  const previewLabel = cut1ArchiveCompatibility ? 'Neurcode Share · local preview' : 'Cut by Neurcode · local preview';
+  const inventoryLabel = cut1ArchiveCompatibility ? 'Share inventory' : 'Cut inventory';
   const { manifest } = bundle.cut;
   const notes = new Map(bundle.cut.story.frames.map((frame) => [frame.cite.item, frame.note]));
   const inventory = bundle.cut.pack.items.map((item) =>
@@ -139,7 +144,7 @@ export function renderHtml(bundle: ShareBundle, options: { cut1ArchiveCompatibil
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
-  <title>${escapeHtml(manifest.title)} · Cut by Neurcode</title>
+  <title>${escapeHtml(manifest.title)} · ${productTitle}</title>
   <style>
     :root{color-scheme:light;--ink:#17201d;--muted:#61706a;--paper:#f5f3ec;--card:#fffefa;--line:#d8d9d1;--accent:#136f63;--code:#131816;--codeInk:#e9f0eb}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -160,13 +165,13 @@ export function renderHtml(bundle: ShareBundle, options: { cut1ArchiveCompatibil
 <body>
 <main>
   <article class="brief">
-    <span class="eyebrow">Cut by Neurcode · local preview</span>
+    <span class="eyebrow">${previewLabel}</span>
     <h1>${escapeHtml(manifest.title)}</h1>
     <p class="intent"><strong>Author intent · asserted:</strong> ${escapeHtml(manifest.intent || 'No intent supplied.')}</p>
     <p class="origin">${escapeHtml(manifest.origin.remote)} @ ${escapeHtml(manifest.origin.head)} · ${escapeHtml(manifest.origin.branch || '(detached)')} · ${manifest.origin.dirty ? 'uncommitted worktree' : 'clean checkout'} · captured ${escapeHtml(manifest.createdAt)}${cut1ArchiveCompatibility ? '' : ` · digest ${escapeHtml(manifest.digest)}`}</p>
   </article>
   <div class="layout">
-    <nav aria-label="Cut inventory"><h2>Inventory · ${bundle.cut.pack.items.length} item(s)</h2><ul>${inventory}</ul></nav>
+    <nav aria-label="${inventoryLabel}"><h2>Inventory · ${bundle.cut.pack.items.length} item(s)</h2><ul>${inventory}</ul></nav>
     <article>${items}</article>
   </div>
   <footer>
