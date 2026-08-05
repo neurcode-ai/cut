@@ -333,6 +333,10 @@ test('bounds hosted URL parsing and preserves an explicit immutable revision', (
     parseHostedShareLink(`https://share.neurcode.com/s/${shareId}?revision=7#cap=bounded`),
     { shareId, revisionNumber: 7, capability: 'bounded', agentLinkId: undefined, agentSecret: undefined },
   );
+  assert.deepEqual(
+    parseHostedShareLink(`https://cut.neurcode.com/c/${shareId}?revision=7#cap=bounded`),
+    { shareId, revisionNumber: 7, capability: 'bounded', agentLinkId: undefined, agentSecret: undefined },
+  );
   assert.throws(() => parseHostedShareLink(`ftp://localhost/s/${shareId}`));
   assert.throws(() => parseHostedShareLink(`https://user:password@share.neurcode.com/s/${shareId}`));
   assert.throws(() => parseHostedShareLink(`https://share.neurcode.com/s/${shareId}?revision=0`));

@@ -1,7 +1,7 @@
 {
   "name": "@neurcode-ai/share-format",
-  "version": "0.3.0",
-  "description": "Pure local format, safety, archive, and rendering primitives for Neurcode Share",
+  "version": "0.4.0",
+  "description": "Pure local format, safety, archive, and rendering primitives for Cut by Neurcode",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -13,7 +13,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "tsx --test src/share-format.test.ts",
+    "test": "node --import tsx --test src/share-format.test.ts",
     "prepublishOnly": "pnpm build"
   },
   "keywords": [
@@ -25,13 +25,13 @@
   "author": "Neurcode AI",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neurcode-ai/share.git",
+    "url": "git+https://github.com/neurcode-ai/cut.git",
     "directory": "packages/format"
   },
   "bugs": {
-    "url": "https://github.com/neurcode-ai/share/issues"
+    "url": "https://github.com/neurcode-ai/cut/issues"
   },
-  "homepage": "https://github.com/neurcode-ai/share#readme",
+  "homepage": "https://cut.neurcode.com",
   "publishConfig": {
     "access": "public"
   },

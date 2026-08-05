@@ -94,7 +94,7 @@ export function sanitizeRepoRelativePath(repoRoot: string, candidate: string): s
   const absolute = isAbsolute(candidate) ? resolve(candidate) : resolve(root, candidate);
   const rel = relative(root, absolute);
   if (!rel || rel === '.') {
-    throw new Error('A Share item must name a file, not the repository root.');
+    throw new Error('A Cut item must name a file, not the repository root.');
   }
   if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
     throw new Error(`Selection escapes the repository boundary: ${candidate}`);

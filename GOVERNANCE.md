@@ -16,5 +16,5 @@ Routine implementation decisions use lazy consensus. Irreversible changes,
 including relicensing, trademark policy, or transferring project stewardship,
 require a public proposal and explicit maintainer decision.
 
-The hosted Neurcode Share service is operated separately and is not governed as
+The hosted Cut by Neurcode service is operated separately and is not governed as
 open-source code by this repository.

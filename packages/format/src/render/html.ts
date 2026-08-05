@@ -16,7 +16,7 @@ function escapeAttribute(value: string): string {
 function blobText(bundle: ShareBundle, hash: string | undefined): string {
   if (!hash) return '';
   const blob = bundle.blobs.get(hash);
-  if (!blob) throw new Error(`Missing Share blob: ${hash}`);
+  if (!blob) throw new Error(`Missing Cut blob: ${hash}`);
   return blob.toString('utf8');
 }
 
@@ -139,7 +139,7 @@ export function renderHtml(bundle: ShareBundle, options: { cut1ArchiveCompatibil
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
-  <title>${escapeHtml(manifest.title)} · Neurcode Share</title>
+  <title>${escapeHtml(manifest.title)} · Cut by Neurcode</title>
   <style>
     :root{color-scheme:light;--ink:#17201d;--muted:#61706a;--paper:#f5f3ec;--card:#fffefa;--line:#d8d9d1;--accent:#136f63;--code:#131816;--codeInk:#e9f0eb}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -160,19 +160,19 @@ export function renderHtml(bundle: ShareBundle, options: { cut1ArchiveCompatibil
 <body>
 <main>
   <article class="brief">
-    <span class="eyebrow">Neurcode Share · local preview</span>
+    <span class="eyebrow">Cut by Neurcode · local preview</span>
     <h1>${escapeHtml(manifest.title)}</h1>
     <p class="intent"><strong>Author intent · asserted:</strong> ${escapeHtml(manifest.intent || 'No intent supplied.')}</p>
     <p class="origin">${escapeHtml(manifest.origin.remote)} @ ${escapeHtml(manifest.origin.head)} · ${escapeHtml(manifest.origin.branch || '(detached)')} · ${manifest.origin.dirty ? 'uncommitted worktree' : 'clean checkout'} · captured ${escapeHtml(manifest.createdAt)}${cut1ArchiveCompatibility ? '' : ` · digest ${escapeHtml(manifest.digest)}`}</p>
   </article>
   <div class="layout">
-    <nav aria-label="Share inventory"><h2>Inventory · ${bundle.cut.pack.items.length} item(s)</h2><ul>${inventory}</ul></nav>
+    <nav aria-label="Cut inventory"><h2>Inventory · ${bundle.cut.pack.items.length} item(s)</h2><ul>${inventory}</ul></nav>
     <article>${items}</article>
   </div>
   <footer>
     <p><strong>Snapshot honesty:</strong> this is captured source and observed output from one point in time. Provenance labels describe how bytes entered; they are not endorsements.</p>
     <p>Revocation can stop future access through Neurcode, but cannot recall copies already downloaded, cached, screenshotted, or consumed by agents.</p>
-    <p>Made with <code>${cut1ArchiveCompatibility ? 'npx @neurcode-ai/cli share' : 'npx @neurcode-ai/share'}</code>.</p>
+    <p>Made with <code>${cut1ArchiveCompatibility ? 'npx @neurcode-ai/cli share' : 'npx @neurcode-ai/cut@0.1.0'}</code>.</p>
   </footer>
 </main>
 </body>

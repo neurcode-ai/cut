@@ -14,5 +14,5 @@ versions and transitive packages.
 | `tsx` | TypeScript test execution | MIT |
 | `@types/node` | Node.js type declarations | MIT |
 
-Generated Share archives and user-provided content are not Neurcode-owned
+Generated Cut archives and user-provided content are not Neurcode-owned
 source and are not covered by this repository's license.

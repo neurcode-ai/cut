@@ -20,6 +20,7 @@ execFileSync('pnpm', ['build'], { cwd: root, stdio: 'inherit' });
 const packages = [
   ['@neurcode-ai/share-format', 'packages/format'],
   ['@neurcode-ai/share', 'packages/cli'],
+  ['@neurcode-ai/cut', 'packages/cut'],
   ['@neurcode-ai/share-viewer', 'packages/viewer'],
   ['@neurcode-ai/share-sdk', 'packages/sdk'],
 ];
@@ -40,7 +41,7 @@ for (const [name, packageDirectory] of packages) {
   ));
   if (unexpected.length) throw new Error(`${name} packed unexpected source: ${unexpected.join(', ')}`);
 
-  const extract = mkdtempSync(join(tmpdir(), 'neurcode-share-pack-'));
+  const extract = mkdtempSync(join(tmpdir(), 'neurcode-cut-pack-'));
   try {
     execFileSync('tar', ['-xzf', tarball, '-C', extract]);
     for (const entry of entries.filter((value) => value.startsWith('package/dist/') && !value.endsWith('/'))) {

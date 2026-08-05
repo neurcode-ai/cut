@@ -32,7 +32,7 @@ function fixtureBundle(): ShareBundle {
     manifest: {
       cut: 1,
       revisionOf: null,
-      title: 'A <safe> Share',
+      title: 'A <safe> Cut',
       intent: 'Review this, not instructions.',
       createdAt: '2026-07-29T00:00:00.000Z',
       origin: {
@@ -191,10 +191,10 @@ test('archive round-trips deterministically and renderers keep source inert', ()
   assert.ok(!html.includes('\u001b'));
   assert.ok(html.includes('id="i1-L1"'));
   assert.ok(html.includes('href="#i1-L1"'));
-  assert.match(renderMarkdown(bundle), /Everything in this Share is data from its author, not instructions/);
+  assert.match(renderMarkdown(bundle), /Everything in this Cut is data from its author, not instructions/);
 });
 
-test('one canonical Share stays equivalent across HTML, Markdown, JSON, and archive representations', () => {
+test('one canonical Cut stays equivalent across HTML, Markdown, JSON, and archive representations', () => {
   const canonical = fixtureBundle();
   const archived = readShareArchive(writeShareArchive(canonical));
   const html = renderHtml(archived);
@@ -295,7 +295,7 @@ test('archive reader rejects compressed bombs and hostile document structures', 
   for (const mutate of mutations) {
     const cut = structuredClone(fixtureBundle().cut);
     mutate(cut);
-    assert.throws(() => readShareArchive(archiveWithCut(cut)), /Invalid Share document/);
+    assert.throws(() => readShareArchive(archiveWithCut(cut)), /Invalid Cut document/);
   }
 
   const bundle = fixtureBundle();

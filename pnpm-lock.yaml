@@ -40,6 +40,16 @@ importers:
         specifier: ^5.3.0
         version: 5.9.3
 
+  packages/cut:
+    dependencies:
+      '@neurcode-ai/share':
+        specifier: workspace:*
+        version: link:../cli
+    devDependencies:
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
   packages/format:
     devDependencies:
       '@types/node':

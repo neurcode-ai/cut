@@ -1,9 +1,9 @@
-# `@neurcode-ai/share`
+# Cut CLI
 
-Create and verify a Share locally:
+Create and verify a Cut locally:
 
 ```sh
-npx @neurcode-ai/share@0.3.0
+npx @neurcode-ai/cut@0.1.0
 ```
 
 No account or upload is required for local creation and HTML, Markdown, JSON,
@@ -16,9 +16,9 @@ Compare exact file and excerpt bytes from a local archive with the current
 repository. Local archives need no account or network:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 verify review.tar.gz
-npx @neurcode-ai/share@0.3.0 verify review.tar.gz --repo ../project --staged --json
-npx @neurcode-ai/share@0.3.0 verify review.tar.gz --repo ../project --against main --output report.json
+npx @neurcode-ai/cut@0.1.0 verify review.tar.gz
+npx @neurcode-ai/cut@0.1.0 verify review.tar.gz --repo ../project --staged --json
+npx @neurcode-ai/cut@0.1.0 verify review.tar.gz --repo ../project --against main --output report.json
 ```
 
 Verification reports `current`, `moved`, `drifted`, `deleted`, `ambiguous`, or
@@ -30,8 +30,8 @@ existing short-lived browser sign-in.
 Prepare a new local archive with the exact old digest in `revisionOf`:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
-npx @neurcode-ai/share@0.3.0 refresh review.tar.gz --decision i2=keep --decision i3=remove --yes
+npx @neurcode-ai/cut@0.1.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+npx @neurcode-ai/cut@0.1.0 refresh review.tar.gz --decision i2=keep --decision i3=remove --yes
 ```
 
 Every non-current item requires `keep`, `use`, `remove`, or `abort`. Using
@@ -43,5 +43,5 @@ Authorized reviewers and owners can read restricted feedback in repository
 address form:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 comments 'https://share.neurcode.com/s/SHARE_ID'
+npx @neurcode-ai/cut@0.1.0 comments 'https://cut.neurcode.com/c/CUT_ID'
 ```

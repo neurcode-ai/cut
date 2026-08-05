@@ -45,7 +45,7 @@ function draftDirectory(cwd: string): string {
 }
 
 function draftPath(cwd: string, id: string): string {
-  if (!/^[a-f0-9]{24}$/.test(id)) throw new Error('Invalid local Share draft ID.');
+  if (!/^[a-f0-9]{24}$/.test(id)) throw new Error('Invalid local Cut draft ID.');
   return join(draftDirectory(cwd), `${id}.json`);
 }
 
@@ -88,7 +88,7 @@ function serialize(draft: ComposerDraft): SerializedDraft {
 
 function deserialize(value: SerializedDraft): ComposerDraft {
   if (value.schemaVersion !== 1 || !/^[a-f0-9]{24}$/.test(value.id)) {
-    throw new Error('Local Share draft has an unsupported format.');
+    throw new Error('Local Cut draft has an unsupported format.');
   }
   const evidence = value.evidence
     ? {
@@ -110,7 +110,7 @@ function deserialize(value: SerializedDraft): ComposerDraft {
     0,
   );
   if (localItems.length > 100 || aggregate > 12 * 1024 * 1024) {
-    throw new Error('Local Share draft browser items exceed safe limits.');
+    throw new Error('Local Cut draft browser items exceed safe limits.');
   }
   return {
     ...value,

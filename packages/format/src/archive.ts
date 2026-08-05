@@ -83,7 +83,7 @@ function safeArchivePath(name: string): boolean {
 
 function parseOctal(field: Buffer): number {
   const value = field.toString('ascii').replace(/\0.*$/, '').trim();
-  if (!/^[0-7]*$/.test(value)) throw new Error('Invalid numeric field in Share archive.');
+  if (!/^[0-7]*$/.test(value)) throw new Error('Invalid numeric field in Cut archive.');
   return value ? Number.parseInt(value, 8) : 0;
 }
 
@@ -92,7 +92,7 @@ function verifyChecksum(header: Buffer): void {
   const copy = Buffer.from(header);
   copy.fill(0x20, 148, 156);
   const actual = copy.reduce((sum, byte) => sum + byte, 0);
-  if (actual !== expected) throw new Error('Share archive header checksum mismatch.');
+  if (actual !== expected) throw new Error('Cut archive header checksum mismatch.');
 }
 
 export function writeShareArchive(bundle: ShareBundle): Buffer {
@@ -100,7 +100,7 @@ export function writeShareArchive(bundle: ShareBundle): Buffer {
   // tar representations are allocated.
   validateShareBundle(bundle);
   if (4 + bundle.blobs.size > SHARE_LIMITS.maxArchiveEntries) {
-    throw new Error('Share archive would exceed the entry-count limit.');
+    throw new Error('Cut archive would exceed the entry-count limit.');
   }
   const entries: ArchiveEntry[] = derivedEntries(bundle);
   for (const [hash, content] of [...bundle.blobs.entries()].sort(([a], [b]) => a.localeCompare(b))) {
@@ -110,29 +110,29 @@ export function writeShareArchive(bundle: ShareBundle): Buffer {
   }
   const expandedBytes = tarExpandedBytes(entries);
   if (expandedBytes > SHARE_LIMITS.maxArchiveExpandedBytes) {
-    throw new Error(`Share archive exceeds the ${SHARE_LIMITS.maxArchiveExpandedBytes}-byte expanded limit.`);
+    throw new Error(`Cut archive exceeds the ${SHARE_LIMITS.maxArchiveExpandedBytes}-byte expanded limit.`);
   }
   // Node emits a zero gzip MTIME for reproducible output; tar headers above
   // likewise use zero timestamps and stable ordering.
   const output = gzipSync(tar(entries), { level: 9 });
   if (output.length > SHARE_LIMITS.compressedPackBytes) {
-    throw new Error(`Share archive exceeds the ${SHARE_LIMITS.compressedPackBytes}-byte compressed limit.`);
+    throw new Error(`Cut archive exceeds the ${SHARE_LIMITS.compressedPackBytes}-byte compressed limit.`);
   }
   return output;
 }
 
 export function readShareArchive(input: Uint8Array): ShareBundle {
   if (input.byteLength > SHARE_LIMITS.compressedPackBytes) {
-    throw new Error('Compressed Share archive exceeds the allowed size.');
+    throw new Error('Compressed Cut archive exceeds the allowed size.');
   }
   let expanded: Buffer;
   try {
     expanded = gunzipSync(input, { maxOutputLength: SHARE_LIMITS.maxArchiveExpandedBytes });
   } catch (error) {
-    throw new Error(`Invalid or oversized Share archive: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`Invalid or oversized Cut archive: ${error instanceof Error ? error.message : String(error)}`);
   }
   if (expanded.length > SHARE_LIMITS.maxArchiveExpandedBytes) {
-    throw new Error('Expanded Share archive exceeds the allowed size.');
+    throw new Error('Expanded Cut archive exceeds the allowed size.');
   }
 
   const entries = new Map<string, Buffer>();
@@ -148,48 +148,48 @@ export function readShareArchive(input: Uint8Array): ShareBundle {
     verifyChecksum(header);
     const name = header.subarray(0, 100).toString('utf8').replace(/\0.*$/, '');
     const type = header[156];
-    if (!safeArchivePath(name)) throw new Error(`Unsafe path in Share archive: ${name}`);
+    if (!safeArchivePath(name)) throw new Error(`Unsafe path in Cut archive: ${name}`);
     if (type !== 0 && type !== 0x30) {
-      throw new Error(`Unsupported non-regular entry in Share archive: ${name}`);
+      throw new Error(`Unsupported non-regular entry in Cut archive: ${name}`);
     }
-    if (entries.has(name)) throw new Error(`Duplicate entry in Share archive: ${name}`);
+    if (entries.has(name)) throw new Error(`Duplicate entry in Cut archive: ${name}`);
     const size = parseOctal(header.subarray(124, 136));
-    if (size < 0 || offset + size > expanded.length) throw new Error('Truncated Share archive entry.');
-    if (entries.size >= SHARE_LIMITS.maxArchiveEntries) throw new Error('Share archive has too many entries.');
+    if (size < 0 || offset + size > expanded.length) throw new Error('Truncated Cut archive entry.');
+    if (entries.size >= SHARE_LIMITS.maxArchiveEntries) throw new Error('Cut archive has too many entries.');
     entries.set(name, Buffer.from(expanded.subarray(offset, offset + size)));
     offset += size + ((BLOCK - (size % BLOCK)) % BLOCK);
   }
   if (!terminated || !expanded.subarray(offset).every((byte) => byte === 0)) {
-    throw new Error('Share archive has an invalid or non-zero trailer.');
+    throw new Error('Cut archive has an invalid or non-zero trailer.');
   }
 
   const cutBytes = entries.get('cut.json');
-  if (!cutBytes) throw new Error('Share archive is missing cut.json.');
+  if (!cutBytes) throw new Error('Cut archive is missing cut.json.');
   let parsed: unknown;
   try {
     parsed = JSON.parse(cutBytes.toString('utf8'));
   } catch {
-    throw new Error('Share archive cut.json is invalid.');
+    throw new Error('Cut archive cut.json is invalid.');
   }
   const cut: ShareDocument = validateShareDocument(parsed);
   const recomputed = computeShareDigest({
     ...cut,
     manifest: { ...cut.manifest, digest: undefined },
   });
-  if (recomputed !== cut.manifest.digest) throw new Error('Share archive document digest mismatch.');
+  if (recomputed !== cut.manifest.digest) throw new Error('Cut archive document digest mismatch.');
 
   const blobs = new Map<string, Buffer>();
   for (const blob of cut.pack.blobs) {
     if (!/^sha256:[a-f0-9]{64}$/.test(blob.hash) || !Number.isSafeInteger(blob.bytes) || blob.bytes < 0) {
-      throw new Error('Share archive contains an invalid blob index entry.');
+      throw new Error('Cut archive contains an invalid blob index entry.');
     }
     const hex = blob.hash.slice('sha256:'.length);
     const name = `blobs/sha256/${hex.slice(0, 2)}/${hex.slice(2)}`;
     const content = entries.get(name);
-    if (!content) throw new Error(`Share archive is missing ${blob.hash}.`);
-    if (content.length !== blob.bytes) throw new Error(`Share archive blob size mismatch: ${blob.hash}.`);
+    if (!content) throw new Error(`Cut archive is missing ${blob.hash}.`);
+    if (content.length !== blob.bytes) throw new Error(`Cut archive blob size mismatch: ${blob.hash}.`);
     const actual = createHash('sha256').update(content).digest('hex');
-    if (actual !== hex) throw new Error(`Share archive blob digest mismatch: ${blob.hash}.`);
+    if (actual !== hex) throw new Error(`Cut archive blob digest mismatch: ${blob.hash}.`);
     blobs.set(blob.hash, content);
   }
   const expectedEntries = new Set([
@@ -203,16 +203,16 @@ export function readShareArchive(input: Uint8Array): ShareBundle {
     }),
   ]);
   for (const required of expectedEntries) {
-    if (!entries.has(required)) throw new Error(`Share archive is missing ${required}.`);
+    if (!entries.has(required)) throw new Error(`Cut archive is missing ${required}.`);
   }
   for (const name of entries.keys()) {
-    if (!expectedEntries.has(name)) throw new Error(`Share archive contains an unknown entry: ${name}.`);
+    if (!expectedEntries.has(name)) throw new Error(`Cut archive contains an unknown entry: ${name}.`);
   }
   const bundle = { cut, blobs };
   validateShareBundle(bundle);
   for (const expected of derivedEntries(bundle)) {
     if (!entries.get(expected.name)?.equals(expected.content)) {
-      throw new Error(`Share archive derived entry mismatch: ${expected.name}.`);
+      throw new Error(`Cut archive derived entry mismatch: ${expected.name}.`);
     }
   }
   return bundle;

@@ -51,13 +51,13 @@ class BoundedStream {
 
   finish(): { content: Buffer; truncated: boolean } {
     if (!this.truncated) return { content: this.full, truncated: false };
-    let marker = Buffer.from('\n… [Neurcode Share bounded output] …\n');
+    let marker = Buffer.from('\n… [Cut by Neurcode bounded output] …\n');
     for (let pass = 0; pass < 2; pass += 1) {
       const available = Math.max(0, this.limit - marker.length);
       const headLength = Math.min(this.head.length, Math.floor(available / 2));
       const tailLength = Math.min(this.tail.length, available - headLength);
       const omitted = Math.max(0, this.total - headLength - tailLength);
-      marker = Buffer.from(`\n… [Neurcode Share omitted ${omitted} bytes from the middle] …\n`);
+      marker = Buffer.from(`\n… [Cut by Neurcode omitted ${omitted} bytes from the middle] …\n`);
     }
     const available = Math.max(0, this.limit - marker.length);
     const headLength = Math.min(this.head.length, Math.floor(available / 2));

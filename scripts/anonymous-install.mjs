@@ -19,7 +19,7 @@ if (!existsSync(join(artifacts, 'public-package-manifest.json'))) {
   execFileSync('node', ['scripts/package-parity.mjs'], { cwd: root, stdio: 'inherit' });
 }
 const manifest = JSON.parse(readFileSync(join(artifacts, 'public-package-manifest.json'), 'utf8'));
-const scratch = mkdtempSync(join(tmpdir(), 'neurcode-share-anonymous-'));
+const scratch = mkdtempSync(join(tmpdir(), 'neurcode-cut-anonymous-'));
 
 try {
   const consumer = join(scratch, 'consumer');
@@ -31,17 +31,25 @@ try {
     stdio: 'pipe',
   });
   execFileSync('node', ['-e', [
+    "require.resolve('@neurcode-ai/cut')",
     "require('@neurcode-ai/share-sdk')",
     "require('@neurcode-ai/share-viewer')",
     "require('@neurcode-ai/share-format')",
   ].join(';')], { cwd: consumer });
   const cli = join(consumer, 'node_modules', '@neurcode-ai', 'share', 'dist', 'index.js');
+  const cutCli = join(consumer, 'node_modules', '@neurcode-ai', 'cut', 'dist', 'index.js');
   execFileSync('node', [cli, '--help'], { cwd: consumer, stdio: 'pipe' });
+  execFileSync('node', [cutCli, '--help'], { cwd: consumer, stdio: 'pipe' });
   const cliVersion = execFileSync('node', [cli, '--version'], {
     cwd: consumer,
     encoding: 'utf8',
   }).trim();
-  if (cliVersion !== '0.3.0') throw new Error(`Anonymous CLI version was ${cliVersion}, not 0.3.0.`);
+  if (cliVersion !== '0.4.0') throw new Error(`Anonymous CLI version was ${cliVersion}, not 0.4.0.`);
+  const cutVersion = execFileSync('node', [cutCli, '--version'], {
+    cwd: consumer,
+    encoding: 'utf8',
+  }).trim();
+  if (cutVersion !== '0.4.0') throw new Error(`Cut entry point reported ${cutVersion}, not 0.4.0.`);
   const consumerRequire = createRequire(join(consumer, 'smoke.cjs'));
   const format = consumerRequire('@neurcode-ai/share-format');
 

@@ -15,13 +15,14 @@ function collect(value: string, previous: string[]): string[] {
 
 export function shareCommand(program: Command, toolVersion: string): void {
   program
-    .command('share [selections...]')
-    .description('Turn exact source, diffs, and observed command output into a safe local Share')
+    .command('cut [selections...]')
+    .alias('share')
+    .description('Turn exact source, diffs, and observed command output into a safe local Cut')
     .option('--staged', 'Include the staged unified diff')
     .option('--diff [A..B]', 'Include the working-tree diff, or a commit range with --diff=A..B')
     .option('--run <command>', 'Run a bounded command and include its observed output')
     .option('--run-timeout <seconds>', 'Evidence timeout in seconds (1 to 600)', '60')
-    .option('-m, --message <text>', 'Share title and short intent')
+    .option('-m, --message <text>', 'Cut title and short intent')
     .option('--note <file=text>', 'Attach a short asserted note to a selected file, diff, or run', collect, [])
     .option('--force-include <file>', 'Override an ignored or credential-like exclusion for this exact named file', collect, [])
     .option('--strip-context <file-or-id>', 'Omit the fixed ±20-line context for an excerpt', collect, [])
@@ -30,10 +31,10 @@ export function shareCommand(program: Command, toolVersion: string): void {
     .option('--publish', 'Publish after the local disclosure review')
     .option('--visibility <mode>', 'Hosted access: unlisted, restricted, or public', 'unlisted')
     .option('--recipient <email>', 'Allow a signed-in email for restricted access', collect, [])
-    .option('--api-url <url>', 'Override the hosted Share API URL')
+    .option('--api-url <url>', 'Override the hosted Cut API URL')
     .option('--no-browser', 'Use the guided terminal fallback instead of the local browser Composer')
     .option('--draft <id>', 'Resume a local browser Composer draft by ID')
-    .option('--handoff', 'Start a Share-format interrupted-session handoff preset')
+    .option('--handoff', 'Start a Cut-format interrupted-session handoff preset')
     .option('--out <file>', 'Write .tar.gz, .md, .json, or .html')
     .option('--preview [file]', 'Write a self-contained local HTML preview')
     .option('--copy [format]', 'Copy Markdown (default) or JSON to the clipboard')
@@ -43,18 +44,18 @@ export function shareCommand(program: Command, toolVersion: string): void {
     .addHelpText(
       'after',
       '\nExamples:\n'
-        + '  neurcode share src/queue.ts:20-80 tests/queue.test.ts -m "race in drain loop?" --preview\n'
-        + '  neurcode share --diff --run "npm test -- queue" --yes --out share.tar.gz\n'
-        + '  neurcode share --diff=main..HEAD --yes --out ctx.md\n'
-        + '  npx @neurcode-ai/share                         # local browser Composer\n'
-        + '  neurcode-share --no-browser                    # guided terminal fallback\n'
-        + '  neurcode-share --handoff                       # Share-format handoff preset\n'
+        + '  neurcode-cut src/queue.ts:20-80 tests/queue.test.ts -m "race in drain loop?" --preview\n'
+        + '  neurcode-cut --diff --run "npm test -- queue" --yes --out cut.tar.gz\n'
+        + '  neurcode-cut --diff=main..HEAD --yes --out context.md\n'
+        + '  npx @neurcode-ai/cut@0.1.0                    # local browser Composer\n'
+        + '  neurcode-cut --no-browser                     # guided terminal fallback\n'
+        + '  neurcode-cut --handoff                        # Cut-format handoff preset\n'
         + '\nLocal creation never requires an account. Publish authenticates only after “Review what will be shared.”\n',
     )
     .action(async (selections: string[], options) => {
       if (selections?.[0] === 'fetch') {
         if (!selections[1] || selections.length > 2) {
-          throw new Error('Usage: neurcode share fetch <share-or-agent-link> [--out file] [--stdout md|json]');
+          throw new Error('Usage: neurcode-cut fetch <cut-or-agent-link> [--out file] [--stdout md|json]');
         }
         await fetchHostedShare({
           url: selections[1],
@@ -85,7 +86,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
         && !options.copy
         && !options.stdout
         && !options.dryRun;
-      // --handoff is a Share-format preset, not a second UI. It opens the visual
+      // --handoff is a Cut-format preset, not a second UI. It opens the visual
       // Composer only when nothing forces headless mode; with --no-browser or any
       // export flag it falls through to the terminal/headless path below and the
       // preset is applied as "share the current working-tree diff".
@@ -112,7 +113,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
 
       // Headless --handoff preset: capture the current working-tree diff when the
       // caller did not name their own selections, so agents can produce a handoff
-      // Share non-interactively (e.g. --handoff --yes --out handoff.tar.gz).
+      // Cut non-interactively (e.g. --handoff --yes --out handoff.tar.gz).
       if (
         options.handoff === true
         && terminalSelections.length === 0
@@ -135,7 +136,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
         }
         const repository = discoverShareRepository();
         process.stdout.write(
-          `\nNeurcode Share · guided terminal fallback\n`
+          `\nCut by Neurcode · guided terminal fallback\n`
           + `${repository.name} · ${repository.branch || 'detached'} · ${repository.dirty ? 'local changes' : 'clean'}\n\n`
           + '1  Current changes\n2  Staged changes\n3  Specific files or line ranges\n4  Commit range\n',
         );
@@ -155,7 +156,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
           terminalMessage = (await prompt.question('What should the recipient understand, review, or answer? ')).trim();
           const command = (await prompt.question('Optional bounded evidence command (Enter to skip): ')).trim();
           terminalRun = command || undefined;
-          terminalOut = 'neurcode-share.tar.gz';
+          terminalOut = 'neurcode-cut.tar.gz';
           terminalPreview = true;
         } finally {
           prompt.close();

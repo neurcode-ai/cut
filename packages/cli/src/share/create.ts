@@ -92,7 +92,7 @@ function buildFrames(items: ShareItem[], noteValues: string[]): StoryFrame[] {
   const frames: StoryFrame[] = [];
   for (const [target, note] of notes) {
     const item = items.find((candidate) => noteTarget(candidate).includes(target));
-    if (!item) throw new Error(`--note target is not in this Share: ${target}`);
+    if (!item) throw new Error(`--note target is not in this Cut: ${target}`);
     frames.push({
       id: `f${frames.length + 1}`,
       cite: { item: item.id },
@@ -149,7 +149,7 @@ export function rebuildBlobIndex(draft: ShareDocumentDraft, blobs: Map<string, B
   pruneUnreferencedBlobs(draft.pack.items, blobs);
   const aggregateBytes = [...blobs.values()].reduce((sum, content) => sum + content.length, 0);
   if (aggregateBytes > SHARE_LIMITS.maxAggregateBlobBytes) {
-    throw new Error(`Share exceeds the ${SHARE_LIMITS.maxAggregateBlobBytes}-byte aggregate uncompressed limit.`);
+    throw new Error(`Cut exceeds the ${SHARE_LIMITS.maxAggregateBlobBytes}-byte aggregate uncompressed limit.`);
   }
   draft.pack.blobs = [...blobs.entries()]
     .map(([hash, content]) => ({ hash, bytes: content.length }))
@@ -164,9 +164,9 @@ function titleAndIntent(
   const intent = message?.trim() ?? '';
   const title = explicitTitle?.trim().slice(0, 180)
     || intent.split(/\r?\n/, 1)[0]?.slice(0, 180)
-    || `Share from ${repositoryName}`;
-  if (explicitTitle && !explicitTitle.trim()) throw new Error('Share title cannot be empty.');
-  if (intent.length > 8_000) throw new Error('Share intent exceeds 8,000 characters.');
+    || `Cut from ${repositoryName}`;
+  if (explicitTitle && !explicitTitle.trim()) throw new Error('Cut title cannot be empty.');
+  if (intent.length > 8_000) throw new Error('Cut intent exceeds 8,000 characters.');
   return { title, intent };
 }
 
@@ -213,7 +213,7 @@ function outputFormat(path: string): 'archive' | 'markdown' | 'json' | 'html' {
   if (lower.endsWith('.md')) return 'markdown';
   if (lower.endsWith('.json')) return 'json';
   if (lower.endsWith('.html')) return 'html';
-  throw new Error(`Unsupported Share output extension: ${extname(path) || '(none)'}. Use .tar.gz, .md, .json, or .html.`);
+  throw new Error(`Unsupported Cut output extension: ${extname(path) || '(none)'}. Use .tar.gz, .md, .json, or .html.`);
 }
 
 function bytesForFormat(bundle: ShareBundle, format: 'archive' | 'markdown' | 'json' | 'html'): Buffer {
@@ -257,17 +257,17 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
   const copyFormat = normalizeMachineFormat(options.copy);
   let out = options.out;
   if (!options.dryRun && !out && !options.preview && !copyFormat && !stdoutFormat && !options.hostedPublish) {
-    out = 'neurcode-share.tar.gz';
+    out = 'neurcode-cut.tar.gz';
   }
   const outPlan = out
     ? { absolute: resolve(out), format: outputFormat(out) }
     : null;
   const previewPlan = options.preview
-    ? resolve(typeof options.preview === 'string' ? options.preview : 'neurcode-share-preview.html')
+    ? resolve(typeof options.preview === 'string' ? options.preview : 'neurcode-cut-preview.html')
     : null;
   const plannedPaths = [outPlan?.absolute, previewPlan].filter((value): value is string => Boolean(value));
   if (new Set(plannedPaths).size !== plannedPaths.length) {
-    throw new Error('Share output and preview must use different paths.');
+    throw new Error('Cut output and preview must use different paths.');
   }
   for (const path of plannedPaths) {
     if (existsSync(path)) throw new Error(`Refusing to overwrite existing output: ${path}`);
@@ -281,7 +281,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
         ...(copyFormat ? [`${copyFormat.toUpperCase()} payload on the local clipboard`] : []),
         ...(options.hostedPublish
           ? [
-              `hosted ${options.hostedPublish.visibility} Share after browser authentication`
+              `hosted ${options.hostedPublish.visibility} Cut after browser authentication`
               + ` · expires in ${options.hostedPublish.expiryHours} hours`
               + ` · ${options.hostedPublish.recipientCount} allowed recipient(s)`,
             ]
@@ -314,7 +314,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
       throw new Error(`Browser item ${local.path} must contain 1 to ${SHARE_LIMITS.maxTextBlobBytes} bytes of text.`);
     }
     if (items.some((item) => (item.kind === 'file' || item.kind === 'excerpt') && item.path === local.path)) {
-      throw new Error(`Duplicate Share path: ${local.path}`);
+      throw new Error(`Duplicate Cut path: ${local.path}`);
     }
     const blob = addBlob(blobs, content);
     const opaqueOrigin = `local/opaque-${sha256Bytes(Buffer.from(`${local.path}\0${blob}`)).slice(7, 23)}`;
@@ -346,7 +346,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
       repoRoot: selection.repository.root,
       timeoutMs,
       // Never emit unscanned or unbounded command output. A bounded capture is
-      // replayed only after every Share field has passed the secret scan.
+      // replayed only after every Cut field has passed the secret scan.
       stream: false,
     });
     capturedEvidence = evidence;
@@ -372,7 +372,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
     };
     items.push(item);
   }
-  if (items.length > SHARE_LIMITS.maxItems) throw new Error(`Share exceeds the ${SHARE_LIMITS.maxItems}-item limit.`);
+  if (items.length > SHARE_LIMITS.maxItems) throw new Error(`Cut exceeds the ${SHARE_LIMITS.maxItems}-item limit.`);
   applyItemOrder(items, options.itemOrder);
 
   const frames = buildFrames(items, options.notes);
@@ -457,7 +457,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
   }
 
   const log = options.stdout ? process.stderr : process.stdout;
-  log.write(`\nShare ready · ${bundle.cut.manifest.digest}\n`);
+  log.write(`\nCut ready · ${bundle.cut.manifest.digest}\n`);
   for (const output of outputs) log.write(`  ${output}\n`);
   if (copyFormat) log.write(`  ${copyFormat.toUpperCase()} copied to clipboard\n`);
   log.write('Nothing was uploaded. Use Publish only after reviewing the exact disclosure.\n');

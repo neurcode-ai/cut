@@ -14,7 +14,7 @@ import { root } from './lib.mjs';
 
 const require = createRequire(import.meta.url);
 const current = require(join(root, 'packages/format/dist/index.js'));
-const scratch = mkdtempSync(join(tmpdir(), 'neurcode-share-compat-'));
+const scratch = mkdtempSync(join(tmpdir(), 'neurcode-cut-compat-'));
 
 try {
   writeFileSync(join(scratch, 'package.json'), '{"name":"compatibility-consumer","private":true}\n');
@@ -74,4 +74,4 @@ try {
   rmSync(scratch, { recursive: true, force: true });
 }
 
-process.stdout.write('Format compatibility green: 0.1.0 ↔ 0.3.0 deterministic replay.\n');
+process.stdout.write('Format compatibility green: 0.1.0 ↔ 0.4.0 deterministic replay.\n');

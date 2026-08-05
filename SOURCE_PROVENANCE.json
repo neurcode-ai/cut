@@ -9,7 +9,7 @@
     "distinctAuthorIdentities": 1
   },
   "exportedComponents": [
-    "Share format and archive verification",
+    "Cut format and archive verification",
     "local capture and disclosure airlock",
     "loopback Composer and resumable drafts",
     "canonical renderers",

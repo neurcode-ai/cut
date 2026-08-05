@@ -16,7 +16,7 @@ state before they can respond.
 
 ## Value proposition
 
-Stop pasting code. Share the exact code, complete diff, notes, and observed test
+Stop pasting code. Cut the exact code, complete diff, notes, and observed test
 evidence in one clear link for a teammate or an AI agent.
 
 ## Example workflows
@@ -33,14 +33,14 @@ evidence in one clear link for a teammate or an AI agent.
 
 ## Visual demo storyboard
 
-1. Run `npx @neurcode-ai/share@0.3.0`.
+1. Run `npx @neurcode-ai/cut@0.1.0`.
 2. Select an exact source range, complete diff, and bounded test command.
 3. Review the disclosure cut and confirm that everything else stays local.
 4. Publish one public revision.
 5. Open the human viewer, then switch to copy-ready Markdown and structured JSON
    for an AI agent.
 
-The visual should read as one continuous terminal-to-Share path. It should show
+The visual should read as one continuous terminal-to-Cut path. It should show
 real product labels, make the local review boundary visible, avoid fake activity
 or social proof, and remain legible on GitHub and the production landing page.
 
@@ -51,5 +51,5 @@ or social proof, and remain legible on GitHub and the production landing page.
 - Guarantees that sensitive-material scanning finds every secret
 - Claims that provenance proves code correctness or authorship
 - Claims that revocation can recall copies already delivered
-- Claims that AI output is trustworthy because it came from a Share
+- Claims that AI output is trustworthy because it came from a Cut
 - Generic platform or enterprise-transformation framing

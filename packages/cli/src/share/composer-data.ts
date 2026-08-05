@@ -122,7 +122,7 @@ export function readComposerFile(cwd: string, requestedPath: string): {
     || sensitivePath(requestedPath)
     || requestedPath.startsWith('-')
   ) {
-    throw new Error('This path is not available to the Share Composer.');
+    throw new Error('This path is not available to the Cut Composer.');
   }
   const selection = readShareSelections(cwd, {
     selections: [requestedPath],

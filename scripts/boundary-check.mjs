@@ -28,7 +28,7 @@ for (const absolute of allFiles) {
     pattern.lastIndex = 0;
     if (pattern.test(text)) failures.push(`${path}: contains ${label}`);
   }
-  if (/^packages\/(?:format|cli|viewer|sdk)\/src\//.test(path)) {
+  if (/^packages\/(?:format|cli|cut|viewer|sdk)\/src\//.test(path)) {
     for (const [pattern, label] of sourceForbidden) {
       pattern.lastIndex = 0;
       if (pattern.test(text)) failures.push(`${path}: contains ${label}`);
@@ -36,12 +36,12 @@ for (const absolute of allFiles) {
   }
 }
 
-for (const packagePath of ['packages/format', 'packages/cli', 'packages/viewer', 'packages/sdk']) {
+for (const packagePath of ['packages/format', 'packages/cli', 'packages/cut', 'packages/viewer', 'packages/sdk']) {
   const manifest = JSON.parse(readFileSync(join(root, packagePath, 'package.json'), 'utf8'));
   if (manifest.license !== 'Apache-2.0') failures.push(`${packagePath}: license is not Apache-2.0`);
   if (manifest.private === true) failures.push(`${packagePath}: publishable package is marked private`);
-  if (!String(manifest.repository?.url || '').includes('github.com/neurcode-ai/share')) {
-    failures.push(`${packagePath}: repository metadata does not point to neurcode-ai/share`);
+  if (!String(manifest.repository?.url || '').includes('github.com/neurcode-ai/cut')) {
+    failures.push(`${packagePath}: repository metadata does not point to neurcode-ai/cut`);
   }
 }
 

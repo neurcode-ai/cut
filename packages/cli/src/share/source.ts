@@ -41,10 +41,10 @@ export async function loadShareSource(input: {
     const path = resolve(input.source);
     const info = lstatSync(path);
     if (info.isSymbolicLink() || !info.isFile()) {
-      throw new Error('Local Share source must be a regular non-link archive file.');
+      throw new Error('Local Cut source must be a regular non-link archive file.');
     }
     if (info.size < 1 || info.size > SHARE_LIMITS.compressedPackBytes) {
-      throw new Error('Local Share archive exceeds the bounded compressed size.');
+      throw new Error('Local Cut archive exceeds the bounded compressed size.');
     }
     const bundle = readShareArchive(readFileSync(path));
     return { bundle, entirelyLocal: true, source: path };

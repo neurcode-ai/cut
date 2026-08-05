@@ -22,7 +22,7 @@ const STORY_ROLES = new Set(['explanation', 'question', 'warning', 'todo', 'head
 const OBSERVERS = new Set(['author-cli', 'ci', 'unknown']);
 
 function fail(message: string): never {
-  throw new Error(`Invalid Share document: ${message}`);
+  throw new Error(`Invalid Cut document: ${message}`);
 }
 
 function objectAt(value: unknown, label: string): ObjectValue {
@@ -419,7 +419,7 @@ export function validateShareBundle(bundle: ShareBundle): {
   const estimatedExpandedBytes = [
     cutUpper,
     markdownUpper,
-    Buffer.byteLength('# Neurcode Share consumption contract\n', 'utf8') + 4_096,
+    Buffer.byteLength('# Cut by Neurcode consumption contract\n', 'utf8') + 4_096,
     htmlUpper,
     ...cut.pack.blobs.map((blob) => blob.bytes),
   ].reduce((sum, bytes) => sum + paddedTarEntrySize(bytes), 1_024);

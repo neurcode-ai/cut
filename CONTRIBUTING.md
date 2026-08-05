@@ -7,7 +7,7 @@ code. Small fixes may go directly to a pull request.
 2. Run `pnpm install --frozen-lockfile`.
 3. Run `pnpm release:local`.
 4. Add tests for observable behavior and compatibility.
-5. Never commit credentials, personal data, real Share payloads, access links,
+5. Never commit credentials, personal data, real Cut payloads, access links,
    or production configuration.
 
 By submitting a contribution, you agree to license it under Apache License 2.0

@@ -38,7 +38,7 @@ export class ShareClient {
     format: ShareFormat,
     access: ShareAccess = {},
   ): Promise<Uint8Array> {
-    if (!/^shr_[A-Za-z0-9_-]{20,26}$/.test(shareId)) throw new Error('Invalid Share ID.');
+    if (!/^shr_[A-Za-z0-9_-]{20,26}$/.test(shareId)) throw new Error('Invalid Cut ID.');
     const suffix = format === 'html' ? '' : `/${format}`;
     const headers: Record<string, string> = {};
     if (access.bearerToken) headers.authorization = `Bearer ${access.bearerToken}`;
@@ -51,7 +51,7 @@ export class ShareClient {
       { headers },
     );
     if (!response.ok) {
-      let message = `Share request failed (${response.status}).`;
+      let message = `Cut request failed (${response.status}).`;
       try {
         const body = await response.json() as { message?: unknown };
         if (typeof body.message === 'string') message = body.message;
@@ -66,7 +66,7 @@ export class ShareClient {
       `${this.apiUrl}/api/v1/share/library?view=${view}`,
       { headers: { authorization: `Bearer ${bearerToken}` } },
     );
-    if (!response.ok) throw new Error(`Share library request failed (${response.status}).`);
+    if (!response.ok) throw new Error(`Cut library request failed (${response.status}).`);
     const body = await response.json() as { items?: ShareSummary[] };
     return Array.isArray(body.items) ? body.items : [];
   }

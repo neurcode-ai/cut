@@ -56,7 +56,7 @@ function writeInventory(
   output: NodeJS.WritableStream,
 ): void {
   const hasBlockingFindings = state.findings.some((finding) => !acknowledged.has(finding.id));
-  output.write('\nNeurcode Share: Review what will be shared\n');
+  output.write('\nCut by Neurcode: Review what will be shared\n');
   output.write('Nothing is uploaded until you explicitly choose Publish.\n\n');
   for (const item of state.draft.pack.items) {
     const label = hasBlockingFindings
@@ -120,7 +120,7 @@ function excludeItem(state: AirlockState, id: string): boolean {
   const index = state.draft.pack.items.findIndex((item) => item.id === id);
   if (index < 0) return false;
   const next = state.draft.pack.items.filter((_, itemIndex) => itemIndex !== index);
-  if (!hasSource(next)) throw new Error('A Share cannot remove its last source or diff item.');
+  if (!hasSource(next)) throw new Error('A Cut cannot remove its last source or diff item.');
   state.draft.pack.items = next;
   state.draft.story.frames = state.draft.story.frames.filter((frame) => frame.cite.item !== id);
   pruneUnreferencedBlobs(state.draft.pack.items, state.blobs);
@@ -154,7 +154,7 @@ export async function runAirlock(input: {
   const blocking = (): SecretFinding[] => state.findings.filter((finding) => !acknowledged.has(finding.id));
   if (input.yes) {
     if (blocking().length > 0) {
-      throw new Error('Secret findings block this Share. Review them, then acknowledge each exact ID with --acknowledge-finding <id>.');
+      throw new Error('Secret findings block this Cut. Review them, then acknowledge each exact ID with --acknowledge-finding <id>.');
     }
     return { ...state, proceed: true, consent: 'yes' };
   }
@@ -165,7 +165,7 @@ export async function runAirlock(input: {
   const prompt = createInterface({ input: process.stdin, output });
   try {
     while (true) {
-      output.write('Commands: y create local Share · s <item> strip context · x <item> exclude · q abort\n');
+      output.write('Commands: y create local Cut · s <item> strip context · x <item> exclude · q abort\n');
       const answer = (await prompt.question('review> ')).trim();
       if (answer === 'q' || answer === '') return { ...state, proceed: false };
       if (answer === 'y') {

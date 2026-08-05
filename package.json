@@ -1,8 +1,8 @@
 {
-  "name": "@neurcode-ai/share-workspace",
+  "name": "@neurcode-ai/cut-workspace",
   "version": "0.1.0",
   "private": true,
-  "description": "Open-core workspace for the Neurcode Share format, CLI, viewer, and SDK",
+  "description": "Open-core workspace for Cut by Neurcode: the universal link for code",
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.16.1",
   "engines": {

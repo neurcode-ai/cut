@@ -489,7 +489,7 @@ function validatePinForItem(
       )
     )
   ) {
-    throw new Error('Citation pin does not match its Share item.');
+    throw new Error('Citation pin does not match its Cut item.');
   }
   return pin;
 }
@@ -701,8 +701,8 @@ export function verifyShareBundle(input: {
         item,
         'unverifiable',
         repositoryMatch === 'mismatched'
-          ? 'The comparison repository identity does not match the Share.'
-          : 'The Share does not contain a verifiable repository identity.',
+          ? 'The comparison repository identity does not match the Cut.'
+          : 'The Cut does not contain a verifiable repository identity.',
         {
           citationPath: item.kind === 'file' || item.kind === 'excerpt' ? item.path : undefined,
           citationRange: item.kind === 'excerpt' ? item.range : undefined,
@@ -713,7 +713,7 @@ export function verifyShareBundle(input: {
       return statusResult(
         item,
         'unverifiable',
-        `${item.kind} items do not carry a source citation pin in Share Format cut 1.`,
+        `${item.kind} items do not carry a source citation pin in Cut Format cut 1.`,
       );
     }
     return verifyCitation(input.bundle, item, target);
@@ -768,12 +768,12 @@ export function humanVerification(report: VerificationReport): string {
     unverifiable: 'unverifiable',
   };
   const lines = [
-    'Share verification',
+    'Cut verification',
     '',
     `Digest: ${report.shareDigest}`,
     `Compared against: ${report.dirtyStateDisclosure}`,
     `Repository: ${report.repositoryMatch}`,
-    `Entirely local: ${report.entirelyLocal ? 'yes' : 'no (the Share archive was fetched)'}`,
+    `Entirely local: ${report.entirelyLocal ? 'yes' : 'no (the Cut archive was fetched)'}`,
     '',
   ];
   for (const item of report.items) {
@@ -797,12 +797,12 @@ export function humanVerification(report: VerificationReport): string {
       .map((status) => `${symbols[status]} ${report.counts[status]} ${labels[status]}`),
     '',
     report.aggregate === 'current'
-      ? 'This Share matches the selected repository state.'
+      ? 'This Cut matches the selected repository state.'
       : report.aggregate === 'unverifiable'
-        ? 'This Share could not be verified against the selected repository state.'
+        ? 'This Cut could not be verified against the selected repository state.'
         : report.aggregate === 'partially_outdated'
-          ? 'This Share is partially outdated.'
-          : 'This Share is outdated.',
+          ? 'This Cut is partially outdated.'
+          : 'This Cut is outdated.',
     'Verification compares cited bytes only; it does not prove code correctness.',
   );
   return `${lines.join('\n')}\n`;

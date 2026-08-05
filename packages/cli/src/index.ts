@@ -4,10 +4,10 @@ import { Command } from 'commander';
 import { shareCommand } from './command';
 import { livingShareCommands } from './living-commands';
 
-const version = '0.3.0';
+const version = '0.4.0';
 const program = new Command()
-  .name('neurcode-share')
-  .description('Create deterministic, reviewable code-context Shares locally or publish them securely')
+  .name('neurcode-cut')
+  .description('Turn the exact code that matters into one Cut for people and AI agents')
   .version(version);
 
 shareCommand(program, version);
@@ -15,7 +15,8 @@ livingShareCommands(program, version);
 
 const first = process.argv[2];
 if (
-  first !== 'share'
+  first !== 'cut'
+  && first !== 'share'
   && first !== 'verify'
   && first !== 'refresh'
   && first !== 'comments'
@@ -24,7 +25,7 @@ if (
   && first !== '--version'
   && first !== '-V'
 ) {
-  process.argv.splice(2, 0, 'share');
+  process.argv.splice(2, 0, 'cut');
 }
 
 program.parseAsync().catch((error) => {

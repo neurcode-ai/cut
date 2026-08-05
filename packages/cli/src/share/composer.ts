@@ -331,7 +331,7 @@ function safeAccess(value: unknown): 'unlisted' | 'restricted' | 'public' {
 export async function launchShareComposer(options: ShareComposerOptions): Promise<ShareComposerHandle> {
   const cwd = options.cwd ?? process.cwd();
   const apiUrl = (options.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
-  const shareOrigin = (options.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://share.neurcode.com').replace(/\/+$/, '');
+  const shareOrigin = (options.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://cut.neurcode.com').replace(/\/+$/, '');
   const repository = readComposerRepository(cwd);
   let draft = options.draftId ? loadComposerDraft(cwd, options.draftId) : newComposerDraft(options.preset);
   saveComposerDraft(cwd, draft);
@@ -360,7 +360,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
       }
 
       if (isCallback && request.method === 'GET') {
-        if (!pendingAuth) throw new HttpError('No Share publishing authorization is pending.', 409);
+        if (!pendingAuth) throw new HttpError('No Cut publishing authorization is pending.', 409);
         const code = requestUrl.searchParams.get('code') ?? '';
         const state = requestUrl.searchParams.get('state') ?? '';
         const sessionId = requestUrl.searchParams.get('session') ?? '';
@@ -379,7 +379,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
         if (!exchange.ok) throw new HttpError('Secure publishing authorization could not be exchanged.', 502);
         const payload = await exchange.json() as { publishToken: string };
         pendingAuth.publishToken = payload.publishToken;
-        const body = `<!doctype html><meta charset="utf-8"><title>Neurcode Share authorized</title><body><h1>Publishing authorized</h1><p>Return to the local Share Composer. You can close this window.</p></body>`;
+        const body = `<!doctype html><meta charset="utf-8"><title>Cut by Neurcode authorized</title><body><h1>Publishing authorized</h1><p>Return to the local Cut Composer. You can close this window.</p></body>`;
         response.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-length': Buffer.byteLength(body) });
         response.end(body);
         return;
@@ -481,11 +481,11 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
         let type: string;
         let filename: string;
         if (format === 'archive') {
-          bytes = reviewCache.archive; type = 'application/gzip'; filename = 'neurcode-share.tar.gz';
+          bytes = reviewCache.archive; type = 'application/gzip'; filename = 'neurcode-cut.tar.gz';
         } else if (format === 'json') {
-          bytes = Buffer.from(renderAgentJson(reviewCache.bundle)); type = 'application/json; charset=utf-8'; filename = 'neurcode-share.json';
+          bytes = Buffer.from(renderAgentJson(reviewCache.bundle)); type = 'application/json; charset=utf-8'; filename = 'neurcode-cut.json';
         } else if (format === 'markdown') {
-          bytes = Buffer.from(renderMarkdown(reviewCache.bundle)); type = 'text/markdown; charset=utf-8'; filename = 'neurcode-share.md';
+          bytes = Buffer.from(renderMarkdown(reviewCache.bundle)); type = 'text/markdown; charset=utf-8'; filename = 'neurcode-cut.md';
         } else throw new HttpError('Export format is not supported.');
         response.writeHead(200, {
           'content-type': type,
@@ -538,7 +538,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
           },
           body: JSON.stringify({ archiveBase64: reviewCache.archive.toString('base64') }),
         });
-        if (!upload.ok) throw new HttpError('The hosted server rejected this Share upload.', upload.status);
+        if (!upload.ok) throw new HttpError('The hosted server rejected this Cut upload.', upload.status);
         const uploaded = await upload.json() as { uploadId: string };
         const finalizeKey = createHash('sha256').update(`finalize\0${draft.id}\0${uploaded.uploadId}`).digest('hex');
         const finalized = await fetch(`${apiUrl}/api/v1/share/uploads/${encodeURIComponent(uploaded.uploadId)}/finalize`, {
@@ -550,7 +550,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
           },
           body: JSON.stringify({ visibility: access, expiryHours, recipients }),
         });
-        if (!finalized.ok) throw new HttpError('The hosted server could not finalize this Share.', finalized.status);
+        if (!finalized.ok) throw new HttpError('The hosted server could not finalize this Cut.', finalized.status);
         const published = await finalized.json();
         json(response, 200, published);
         return;
@@ -594,10 +594,10 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
       const open = (await import('open')).default;
       await open(url);
     } catch {
-      process.stdout.write(`Open the local Share Composer:\n${url}\n`);
+      process.stdout.write(`Open the local Cut Composer:\n${url}\n`);
     }
   }
-  process.stdout.write(`Share Composer · ${url}\nLocal draft · ${draft.id}\nNothing uploads until you choose Publish.\n`);
+  process.stdout.write(`Cut Composer · ${url}\nLocal draft · ${draft.id}\nNothing uploads until you choose Publish.\n`);
   return {
     url,
     draftId: draft.id,

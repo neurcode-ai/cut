@@ -1,10 +1,10 @@
-# ADR 0001: Verifiable Living Share V0
+# ADR 0001: Verifiable Living Cut V0
 
 Status: accepted for experimental implementation
 
 ## Context
 
-Share Format cut 1 already contains the inputs needed for conservative local
+Cut Format cut 1 already contains the inputs needed for conservative local
 verification:
 
 - `manifest.origin.remote` is a sanitized repository identity and
@@ -28,10 +28,10 @@ fetched through the existing public, unlisted-capability, restricted signed-in,
 or scoped-agent authorization paths. The existing browser PKCE flow is the only
 CLI user-authentication mechanism; it remains short lived and header-only.
 
-Share Cloud already stores immutable revisions, item/line comments restricted
-to authorized email-restricted Shares, and source-free access events including
+Cut Cloud already stores immutable revisions, item/line comments restricted
+to authorized email-restricted Cuts, and source-free access events including
 `recipient_to_creator`. It has owner/recipient isolation but deliberately has
-no organization or workspace tenancy model. Library and Share viewer routes
+no organization or workspace tenancy model. Library and Cut viewer routes
 are the focused UI surfaces.
 
 ## Decision
@@ -39,7 +39,7 @@ are the focused UI surfaces.
 ### Format and verification
 
 Cut 1 is unchanged. Verification is a CLI behavior over a fully validated
-archive, not a new Share document field.
+archive, not a new Cut document field.
 
 Statuses are:
 
@@ -80,14 +80,14 @@ reviewed replacement, remove, or abort decision. The successor sets
 
 ### Receipts and trust
 
-A verification receipt is separate source-free metadata bound to one Share
+A verification receipt is separate source-free metadata bound to one Cut
 digest. Its deterministic digest excludes the server submission time. A local
-receipt is labelled `locally verified`; when an owner submits it, Share Cloud
-labels it `creator-reported verification` and shows `Last checked`. Share Cloud
+receipt is labelled `locally verified`; when an owner submits it, Cut Cloud
+labels it `creator-reported verification` and shows `Last checked`. Cut Cloud
 does not claim `server verified`, continuous monitoring, or code correctness:
 it has not independently read repository bytes.
 
-Only the Share owner may submit a bounded receipt. The server verifies its
+Only the Cut owner may submit a bounded receipt. The server verifies its
 digest and exact revision binding, rejects absolute paths and unknown fields,
 and stores no repository source.
 
@@ -95,7 +95,7 @@ and stores no repository source.
 
 The existing item/line anchor remains valid. A nullable citation pin is added
 for new comments. The service accepts it only when it exactly equals the
-current revision item pin; invented and cross-Share pins fail. Authorized
+current revision item pin; invented and cross-Cut pins fail. Authorized
 comment reads may receive its safe path/range. A successful comment by a real
 allowed recipient, but never the owner, records `recipient_to_creator`.
 
@@ -129,7 +129,7 @@ configuration is created in V0.
 
 ## Consequences
 
-No Share Format migration or package-major change is required. Share Cloud
+No Cut Format migration or package-major change is required. Cut Cloud
 needs one additive migration for receipts and nullable comment pins. Private
 repositories cannot be server verified without future repository access.
 Worktree-only renames that Git cannot resolve remain deleted or unverifiable

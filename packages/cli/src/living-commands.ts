@@ -75,15 +75,15 @@ function commentHuman(shareId: string, comments: Array<Record<string, unknown>>)
 export function livingShareCommands(program: Command, toolVersion: string): void {
   program
     .command('verify <share-source>')
-    .description('Compare a verified immutable Share with a selected local repository state')
+    .description('Compare a verified immutable Cut with a selected local repository state')
     .option('--repo <path>', 'Repository to compare (default: current repository)')
     .option('--against <revision>', 'Compare with one named Git commit')
     .option('--staged', 'Compare with the staged index')
     .option('--json', 'Emit byte-stable normalized JSON')
     .option('--output <path>', 'Write the verification report to a new file')
-    .option('--submit', 'Submit the deterministic receipt to the hosted Share as its signed-in owner')
-    .option('--api-url <url>', 'Override the hosted Share API URL')
-    .option('--no-auth', 'Do not open browser authentication for a restricted hosted Share')
+    .option('--submit', 'Submit the deterministic receipt to the hosted Cut as its signed-in owner')
+    .option('--api-url <url>', 'Override the hosted Cut API URL')
+    .option('--no-auth', 'Do not open browser authentication for a restricted hosted Cut')
     .action(async (source: string, options) => {
       const loaded = await loadShareSource({
         source,
@@ -108,7 +108,7 @@ export function livingShareCommands(program: Command, toolVersion: string): void
         process.stdout.write(rendered);
       }
       if (options.submit === true) {
-        if (!loaded.hostedUrl) throw new Error('--submit requires a hosted Share URL.');
+        if (!loaded.hostedUrl) throw new Error('--submit requires a hosted Cut URL.');
         const apiUrl = (options.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
         const token = loaded.bearerToken
           ?? await browserCliToken(apiUrl, shareOrigin(loaded.hostedUrl), 'receipt');
@@ -118,7 +118,7 @@ export function livingShareCommands(program: Command, toolVersion: string): void
           receipt: report.receipt as unknown as Record<string, unknown>,
           apiUrl,
         });
-        process.stdout.write('Creator-reported verification receipt submitted for this exact Share digest.\n');
+        process.stdout.write('Creator-reported verification receipt submitted for this exact Cut digest.\n');
       }
     });
 
@@ -131,9 +131,9 @@ export function livingShareCommands(program: Command, toolVersion: string): void
     .option('--decision <item=decision>', 'keep, use, remove, or abort a non-current item', collect, [])
     .option('--replacement <item=path[:start-end]>', 'Explicit current material for a use decision', collect, [])
     .option('--acknowledge-finding <id>', 'Acknowledge one exact scanner finding', collect, [])
-    .option('--output <path>', 'Write the new local archive', 'neurcode-share-refresh.tar.gz')
-    .option('--api-url <url>', 'Override the hosted Share API URL')
-    .option('--no-auth', 'Do not open browser authentication for a restricted hosted Share')
+    .option('--output <path>', 'Write the new local archive', 'neurcode-cut-refresh.tar.gz')
+    .option('--api-url <url>', 'Override the hosted Cut API URL')
+    .option('--no-auth', 'Do not open browser authentication for a restricted hosted Cut')
     .option('--yes', 'Confirm non-interactively after the full decision and disclosure review')
     .action(async (source: string, options) => {
       const loaded = await loadShareSource({
@@ -164,15 +164,15 @@ export function livingShareCommands(program: Command, toolVersion: string): void
         yes: options.yes === true,
         toolVersion,
       });
-      if (result.aborted) process.stdout.write('Refresh aborted. The original Share remains unchanged.\n');
+      if (result.aborted) process.stdout.write('Refresh aborted. The original Cut remains unchanged.\n');
     });
 
   program
     .command('comments <share-url>')
-    .description('Read authorized Share comments as repository-addressable feedback')
+    .description('Read authorized Cut comments as repository-addressable feedback')
     .option('--json', 'Emit normalized JSON')
     .option('--output <path>', 'Write comments to a new file')
-    .option('--api-url <url>', 'Override the hosted Share API URL')
+    .option('--api-url <url>', 'Override the hosted Cut API URL')
     .action(async (url: string, options) => {
       const apiUrl = (options.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
       const token = await browserCliToken(apiUrl, shareOrigin(url), 'comments');

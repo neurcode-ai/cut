@@ -1,20 +1,26 @@
-# Neurcode Share
+<p align="center">
+  <img src="docs/assets/cut-mark.svg" width="96" height="96" alt="Cut by Neurcode" />
+</p>
 
-[![npm](https://img.shields.io/npm/v/%40neurcode-ai%2Fshare?label=npm&color=0d7667)](https://www.npmjs.com/package/@neurcode-ai/share)
+<h1 align="center">Cut by Neurcode</h1>
+
+<p align="center"><strong>The universal link for code.</strong></p>
+
+[![npm](https://img.shields.io/npm/v/%40neurcode-ai%2Fcut?label=npm&color=0d7667)](https://www.npmjs.com/package/@neurcode-ai/cut)
 [![license](https://img.shields.io/badge/license-Apache--2.0-171b1a)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-171b1a)](package.json)
 
-**The universal link for code.** Select the exact code once. One canonical
-Share becomes a readable review for a teammate or bounded Markdown, JSON, or
+Select the exact code once. One canonical
+Cut becomes a readable review for a teammate or bounded Markdown, JSON, or
 archive context for an AI agent.
 
-[Create in the browser](https://share.neurcode.com/new) ·
-[Open a real example](https://share.neurcode.com/examples/code-review) ·
+[Create in the browser](https://cut.neurcode.com/new) ·
+[Open a real example](https://cut.neurcode.com/examples/code-review) ·
 [Read the privacy boundary](docs/PRIVACY.md)
 
-Neurcode Share is the open format, CLI, SDK, and viewer for creating a bounded,
+Cut by Neurcode is the open format, CLI, SDK, and viewer for creating a bounded,
 reviewable code handoff. The hosted service at
-[share.neurcode.com](https://share.neurcode.com) publishes that handoff as a
+[cut.neurcode.com](https://cut.neurcode.com) publishes that handoff as a
 link when you choose to.
 
 ## 15-second quick start
@@ -22,7 +28,7 @@ link when you choose to.
 From any Git repository:
 
 ```sh
-npx @neurcode-ai/share@0.3.0
+npx @neurcode-ai/cut@0.1.0
 ```
 
 The Composer binds only to loopback, inventories the exact disclosure, scans
@@ -32,29 +38,29 @@ choose Publish.
 For a non-interactive local archive:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/cut@0.1.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
 ```
 
-## One canonical Share, native representations
+## One canonical Cut, native representations
 
-![Neurcode Share terminal-to-recipient workflow](docs/assets/terminal-to-share.gif)
+![One Cut delivered to people and AI](docs/assets/cut-social.png)
 
-Select the exact material, review the disclosure cut locally, then publish one
+Select the exact material, review the disclosure boundary locally, then publish one
 immutable revision and one URL. A person gets inert readable HTML; an AI agent
 gets the equivalent bounded Markdown, JSON, or verified archive without the
-creator manually repackaging anything. The example uses the released `0.3.0`
-CLI and the same canonical Share as this
-[public focused-review Share](https://share.neurcode.com/examples/code-review).
+creator manually repackaging anything. The example uses the released Cut CLI
+and the same canonical Cut as this
+[public focused-review Cut](https://cut.neurcode.com/examples/code-review).
 
 ## Three public workflows
 
 | Workflow | What the recipient gets | Open |
 | --- | --- | --- |
-| Focused code review | Implementation, complete diff, relevant test, passing evidence, and one review question | [View Share](https://share.neurcode.com/examples/code-review) |
-| Debugging handoff | Failing path, bounded reproducer, observed failure, controls, and an asserted hypothesis | [View Share](https://share.neurcode.com/examples/debugging-handoff) |
-| AI-agent handoff | Cited task scope, current work, contract context, evidence, remaining work, and trust guidance | [View Share](https://share.neurcode.com/examples/ai-agent-handoff) |
+| Focused code review | Implementation, complete diff, relevant test, passing evidence, and one review question | [View Cut](https://cut.neurcode.com/examples/code-review) |
+| Debugging handoff | Failing path, bounded reproducer, observed failure, controls, and an asserted hypothesis | [View Cut](https://cut.neurcode.com/examples/debugging-handoff) |
+| AI-agent handoff | Cited task scope, current work, contract context, evidence, remaining work, and trust guidance | [View Cut](https://cut.neurcode.com/examples/ai-agent-handoff) |
 
-See [public Share examples](docs/EXAMPLES.md) for the included and excluded
+See [public Cut examples](docs/EXAMPLES.md) for the included and excluded
 scope plus direct Markdown and JSON delivery.
 
 ## Local-only usage
@@ -63,10 +69,10 @@ Local creation needs no account. Export a deterministic archive, inert HTML,
 Markdown, or agent JSON:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 src/queue.ts --yes --out queue-review.html
-npx @neurcode-ai/share@0.3.0 --staged --yes --out staged-review.md
-npx @neurcode-ai/share@0.3.0 --diff=main..HEAD --yes --out change.json
-npx @neurcode-ai/share@0.3.0 --run "pnpm test queue" --yes --out evidence.tar.gz
+npx @neurcode-ai/cut@0.1.0 src/queue.ts --yes --out queue-review.html
+npx @neurcode-ai/cut@0.1.0 --staged --yes --out staged-review.md
+npx @neurcode-ai/cut@0.1.0 --diff=main..HEAD --yes --out change.json
+npx @neurcode-ai/cut@0.1.0 --run "pnpm test queue" --yes --out evidence.tar.gz
 ```
 
 Commands are bounded by time and output limits. Sensitive paths are denied by
@@ -76,8 +82,8 @@ Verify exact cited bytes against a selected local repository state, or prepare
 a reviewed immutable successor without publishing:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 verify review.tar.gz --repo ../project
-npx @neurcode-ai/share@0.3.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+npx @neurcode-ai/cut@0.1.0 verify review.tar.gz --repo ../project
+npx @neurcode-ai/cut@0.1.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
 ```
 
 See the [CLI guide](packages/cli/README.md) for deterministic JSON, named
@@ -91,32 +97,32 @@ Neurcode identity and a loopback PKCE flow, so no hosted token is copied into
 the terminal:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 src/session.ts --publish --visibility unlisted
+npx @neurcode-ai/cut@0.1.0 src/session.ts --publish --visibility unlisted
 ```
 
-The hosted service at [share.neurcode.com](https://share.neurcode.com) is
+The hosted service at [cut.neurcode.com](https://cut.neurcode.com) is
 proprietary and is not implemented in this repository. Its documented client
 contract is available through `@neurcode-ai/share-sdk`.
 
 ## Recipient workflows
 
 For a person, send the viewer link. They see the question, selected context,
-provenance, and comments subject to the Share's access policy.
+provenance, and comments subject to the Cut's access policy.
 
 For an AI agent, use the same accessible URL with content negotiation, an
 adjacent canonical representation, or create a short-lived, revision-pinned
 agent link in the hosted library and fetch its scoped format:
 
 ```sh
-npx @neurcode-ai/share@0.3.0 fetch 'AGENT_LINK' --stdout md
+npx @neurcode-ai/cut@0.1.0 fetch 'AGENT_LINK' --stdout md
 ```
 
 Capability and agent secrets remain in URL fragments at rest and are sent in
 request headers, not request paths.
 
-## What is in a Share?
+## What is in a Cut?
 
-A Share archive contains canonical `cut.json`, narrative `story.json`,
+A Cut archive contains canonical `cut.json`, narrative `story.json`,
 provenance `pins.json`, and content-addressed blobs. The digest excludes
 wall-clock capture time but includes the selected content, intent, evidence,
 and provenance. Identical meaningful inputs therefore produce identical
@@ -147,26 +153,27 @@ See [privacy](docs/PRIVACY.md), the [threat model](docs/THREAT_MODEL.md), and
 | Chat paste | rarely | no | no | prose | chat-specific |
 | Gist | commit-level | no | no | source | link and comments |
 | Pull request | strong | diff review | CI-dependent | diff/API | repository workflow |
-| Neurcode Share | content pins and digest | yes | yes | Markdown, JSON, archive | optional |
+| Cut by Neurcode | content pins and digest | yes | yes | Markdown, JSON, archive | optional |
 
-Share complements pull requests when the review context is smaller, unfinished,
+Cut complements pull requests when the review context is smaller, unfinished,
 cross-file, or intended for an external person or agent.
 
 ## Packages
 
+- `@neurcode-ai/cut`: primary product entry point
 - `@neurcode-ai/share-format`: schema, archive, verifier, renderers, scanner
-- `@neurcode-ai/share`: focused CLI and local Composer
+- `@neurcode-ai/share`: compatible CLI engine and legacy entry point
 - `@neurcode-ai/share-viewer`: verified local/static rendering helpers
 - `@neurcode-ai/share-sdk`: public hosted client contracts
 
 ## Current limitations
 
 - Text/code files only; binary assets are not captured.
-- A Share contains an explicit cut, not a live repository mirror.
+- A Cut contains an explicit cut, not a live repository mirror.
 - Secret scanning is heuristic.
 - Hosted publishing depends on the separately operated Neurcode service.
 - Browser-only hosted creation is available at
-  [share.neurcode.com/new](https://share.neurcode.com/new), not in this
+  [cut.neurcode.com/new](https://cut.neurcode.com/new), not in this
   open-core repository.
 
 ## Contributing

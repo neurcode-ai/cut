@@ -11,7 +11,7 @@ import {
 import { DEFAULT_API_URL } from '../config';
 
 function apiError(status: number, payload: any): Error {
-  return new Error(payload?.message || `Hosted Share request failed (${status}).`);
+  return new Error(payload?.message || `Hosted Cut request failed (${status}).`);
 }
 
 async function jsonFetch(url: string, init: RequestInit): Promise<any> {
@@ -43,26 +43,26 @@ export interface HostedShareLink {
 
 export function parseHostedShareLink(value: string): HostedShareLink {
   if (typeof value !== 'string' || value.length < 1 || value.length > 16_384) {
-    throw new Error('Hosted Share URL is not a bounded string.');
+    throw new Error('Hosted Cut URL is not a bounded string.');
   }
   const link = new URL(value);
   const localHttp = link.protocol === 'http:'
     && (link.hostname === '127.0.0.1' || link.hostname === 'localhost');
   if ((link.protocol !== 'https:' && !localHttp) || link.username || link.password) {
-    throw new Error('Hosted Share URLs must use HTTPS.');
+    throw new Error('Hosted Cut URLs must use HTTPS.');
   }
   const fragment = new URLSearchParams(link.hash.replace(/^#/, ''));
   const agent = link.pathname.match(/^\/agent\/(shr_[A-Za-z0-9_-]{20,26})\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
-  const normal = link.pathname.match(/^\/s\/(shr_[A-Za-z0-9_-]{20,26})$/i);
+  const normal = link.pathname.match(/^\/(?:c|s)\/(shr_[A-Za-z0-9_-]{20,26})$/i);
   const shareId = agent?.[1] || normal?.[1];
-  if (!shareId) throw new Error('Hosted Share URL is not recognized.');
+  if (!shareId) throw new Error('Hosted Cut URL is not recognized.');
   const revisionRaw = link.searchParams.get('revision');
   const revisionNumber = revisionRaw === null ? undefined : Number(revisionRaw);
   if (
     revisionRaw !== null
     && (!/^[1-9]\d*$/.test(revisionRaw) || !Number.isSafeInteger(revisionNumber) || revisionNumber! > 100_000)
   ) {
-    throw new Error('Hosted Share revision must be a positive bounded integer.');
+    throw new Error('Hosted Cut revision must be a positive bounded integer.');
   }
   const capability = fragment.get('cap') ?? undefined;
   const agentSecret = fragment.get('token') ?? undefined;
@@ -87,7 +87,7 @@ export function hostedAccessHeaders(link: HostedShareLink): Record<string, strin
 async function boundedResponseBytes(response: Response, limit: number): Promise<Buffer> {
   const declared = Number(response.headers.get('content-length'));
   if (Number.isFinite(declared) && declared > limit) {
-    throw new Error('Hosted Share response exceeds the bounded size limit.');
+    throw new Error('Hosted Cut response exceeds the bounded size limit.');
   }
   if (!response.body) return Buffer.alloc(0);
   const chunks: Buffer[] = [];
@@ -95,7 +95,7 @@ async function boundedResponseBytes(response: Response, limit: number): Promise<
   for await (const chunk of response.body as any) {
     const bytes = Buffer.from(chunk);
     total += bytes.length;
-    if (total > limit) throw new Error('Hosted Share response exceeds the bounded size limit.');
+    if (total > limit) throw new Error('Hosted Cut response exceeds the bounded size limit.');
     chunks.push(bytes);
   }
   return Buffer.concat(chunks);
@@ -133,12 +133,12 @@ export async function browserCliToken(
         'content-security-policy': "default-src 'none'; frame-ancestors 'none'",
         'cache-control': 'no-store',
       });
-      response.end('Neurcode Share CLI authorized. Return to the terminal.');
+      response.end('Cut by Neurcode CLI authorized. Return to the terminal.');
       complete(exchanged.publishToken);
     } catch (error) {
       response.writeHead(400, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
-      response.end('Neurcode Share CLI authorization failed.');
-      fail(error instanceof Error ? error : new Error('Neurcode Share CLI authorization failed.'));
+      response.end('Cut by Neurcode CLI authorization failed.');
+      fail(error instanceof Error ? error : new Error('Cut by Neurcode CLI authorization failed.'));
     } finally {
       setImmediate(() => server.close());
     }
@@ -166,7 +166,7 @@ export async function browserCliToken(
       || `${shareOrigin}/authorize-publish?session=${encodeURIComponent(initialized.sessionId)}`,
   );
   authorization.searchParams.set('state', state);
-  process.stdout.write(`Sign in to authorize Share ${purpose}:\n${authorization.toString()}\n`);
+  process.stdout.write(`Sign in to authorize Cut ${purpose}:\n${authorization.toString()}\n`);
   try {
     const open = (await import('open')).default;
     await open(authorization.toString());
@@ -175,7 +175,7 @@ export async function browserCliToken(
   }
   const timeout = setTimeout(() => {
     server.close();
-    fail(new Error('Share CLI authorization expired. Local files were preserved.'));
+    fail(new Error('Cut CLI authorization expired. Local files were preserved.'));
   }, 10 * 60 * 1000);
   timeout.unref();
   try {
@@ -217,7 +217,7 @@ export async function fetchHostedComments(input: {
 }): Promise<{ shareId: string; comments: Array<Record<string, unknown>> }> {
   const link = parseHostedShareLink(input.url);
   if (link.revisionNumber) {
-    throw new Error('Comments are currently available only for the current Share revision.');
+    throw new Error('Comments are currently available only for the current Cut revision.');
   }
   const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
   const response = await fetch(
@@ -247,7 +247,7 @@ export async function submitHostedVerificationReceipt(input: {
 }): Promise<Record<string, unknown>> {
   const link = parseHostedShareLink(input.url);
   if (link.revisionNumber) {
-    throw new Error('Verification receipts may be submitted only for the current Share revision.');
+    throw new Error('Verification receipts may be submitted only for the current Cut revision.');
   }
   const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
   return jsonFetch(
@@ -272,7 +272,7 @@ export async function publishHostedShare(input: {
   expiryHours: number;
 }): Promise<{ url: string; share: Record<string, unknown> }> {
   const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
-  const shareOrigin = (input.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://share.neurcode.com').replace(/\/+$/, '');
+  const shareOrigin = (input.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://cut.neurcode.com').replace(/\/+$/, '');
   const publishToken = await browserCliToken(apiUrl, shareOrigin, 'publish');
   const archive = writeShareArchive(input.bundle);
   const digest = input.bundle.cut.manifest.digest;
@@ -336,7 +336,7 @@ export async function fetchHostedShare(input: {
   if (input.out) {
     const target = resolve(input.out);
     writeFileSync(target, bytes, { mode: 0o600, flag: 'wx' });
-    process.stdout.write(`Verified Share fetched · ${target}\n`);
+    process.stdout.write(`Verified Cut fetched · ${target}\n`);
   } else {
     process.stdout.write(bytes);
   }

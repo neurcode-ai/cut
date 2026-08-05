@@ -96,10 +96,10 @@ export function discoverShareRepository(
   bounds: RepositoryDiscoveryOptions = {},
 ): RepositorySnapshot {
   const root = tryGit(cwd, ['rev-parse', '--show-toplevel'], bounds);
-  if (!root) throw new Error('Neurcode Share must run inside a Git repository.');
+  if (!root) throw new Error('Cut by Neurcode must run inside a Git repository.');
   const head = tryGit(root, ['rev-parse', '--verify', 'HEAD'], bounds);
   if (!head || !/^[a-f0-9]{40,64}$/i.test(head)) {
-    throw new Error('Neurcode Share requires a repository with at least one commit.');
+    throw new Error('Cut by Neurcode requires a repository with at least one commit.');
   }
   const remote = tryGit(root, ['remote', 'get-url', 'origin'], bounds);
   const branch = tryGit(root, ['branch', '--show-current'], bounds) ?? '';
@@ -260,14 +260,14 @@ function expandSelections(
     const key = `${selection.path}:${selection.range?.start ?? ''}-${selection.range?.end ?? ''}`;
     if (selectionKeys.has(key)) return;
     if (selectionKeys.size >= SHARE_LIMITS.maxItems) {
-      throw new Error(`Share selection exceeds the ${SHARE_LIMITS.maxItems}-item limit during directory traversal.`);
+      throw new Error(`Cut selection exceeds the ${SHARE_LIMITS.maxItems}-item limit during directory traversal.`);
     }
     if (!sizedPaths.has(selection.path)) {
       if (bytes > SHARE_LIMITS.maxTextBlobBytes) {
         throw new Error(`${selection.path}: exceeds the ${SHARE_LIMITS.maxTextBlobBytes}-byte text limit.`);
       }
       if (aggregateBytes + bytes > SHARE_LIMITS.maxAggregateBlobBytes) {
-        throw new Error(`Share selection exceeds the ${SHARE_LIMITS.maxAggregateBlobBytes}-byte aggregate limit during directory traversal.`);
+        throw new Error(`Cut selection exceeds the ${SHARE_LIMITS.maxAggregateBlobBytes}-byte aggregate limit during directory traversal.`);
       }
       aggregateBytes += bytes;
       sizedPaths.add(selection.path);
@@ -583,9 +583,9 @@ export function readShareSelections(cwd: string, options: SelectionOptions): Sel
   const items = files.items;
   const diff = buildDiffItem(repository, options, blobs);
   if (diff) items.push(diff);
-  if (!options.allowEmpty && items.length === 0) throw new Error('A Share must contain source or a diff.');
+  if (!options.allowEmpty && items.length === 0) throw new Error('A Cut must contain source or a diff.');
   if (items.length > SHARE_LIMITS.maxItems) {
-    throw new Error(`Share selection exceeds the ${SHARE_LIMITS.maxItems}-item limit.`);
+    throw new Error(`Cut selection exceeds the ${SHARE_LIMITS.maxItems}-item limit.`);
   }
   items.forEach((item, index) => {
     item.id = `i${index + 1}`;

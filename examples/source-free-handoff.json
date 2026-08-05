@@ -1,5 +1,5 @@
 {
-  "example": "source-free Share handoff",
+  "example": "source-free Cut handoff",
   "format": "cut/1",
   "title": "Investigate the queue shutdown race",
   "intent": "Explain whether an in-flight task can be lost after shutdown begins.",
@@ -23,5 +23,5 @@
       "content": "withheld from this source-free example"
     }
   ],
-  "privacy": "This fixture contains no real repository content, user data, capability, or hosted Share identifier."
+  "privacy": "This fixture contains no real repository content, user data, capability, or hosted Cut identifier."
 }

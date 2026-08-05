@@ -1,16 +1,16 @@
 # `@neurcode-ai/share-format`
 
-Apache-2.0 primitives for deterministic Neurcode Share archives, validation,
+Apache-2.0 primitives for deterministic Cut by Neurcode archives, validation,
 secret scanning, provenance pins, and inert HTML/Markdown/JSON rendering.
 
-Pure, local primitives for Neurcode Share Public Alpha V0.
+Pure, local primitives for Cut by Neurcode Public Alpha V0.
 
 The package owns the immutable artifact model, sanitized source addresses,
 canonical digest, bounded archive, secret scanning, and deterministic local
 renderers. It has no Neurcode runtime, governance, authentication, network, or
 hosted-service dependency.
 
-The `sha256:` Share digest is the content-addressed identity of selected bytes,
+The `sha256:` Cut digest is the content-addressed identity of selected bytes,
 their provenance-bearing repository state, author intent and notes, observed
 evidence, and security decisions. `manifest.createdAt` and an evidence item's
 `startedAt` remain visible descriptive metadata but are deliberately excluded

@@ -41,11 +41,11 @@ const stepPills = (active) => {
 
 const terminalBody = (frame) => {
   const base = [
-    text(94, 174, '$ npx @neurcode-ai/share@0.3.0', { fill: '#f5f7f5', size: 18, weight: 650 }),
+    text(94, 174, '$ npx @neurcode-ai/cut@0.1.0', { fill: '#f5f7f5', size: 18, weight: 650 }),
   ];
   if (frame === 0) {
     base.push(
-      text(94, 222, 'Starting local Share Composer…', { fill: '#8bc8ba', size: 16 }),
+      text(94, 222, 'Starting local Cut Composer…', { fill: '#8bc8ba', size: 16 }),
       '<rect x="94" y="248" width="11" height="22" rx="2" fill="#73b8a8"/>',
     );
   }
@@ -74,7 +74,7 @@ const terminalBody = (frame) => {
   if (frame >= 2) {
     base.push(
       text(94, 466, '✓ Revision 1 published', { fill: '#8bc8ba', size: 16, weight: 750 }),
-      text(94, 500, 'share.neurcode.com/examples/code-review', { fill: '#f5f7f5', size: 14 }),
+      text(94, 500, 'cut.neurcode.com/examples/code-review', { fill: '#f5f7f5', size: 14 }),
       text(94, 542, 'Public • immutable revision • 4 items', { fill: '#93a099', size: 13 }),
     );
   }
@@ -85,7 +85,7 @@ const viewerBody = (frame) => {
   if (frame === 0) {
     return `
       ${text(720, 208, 'Nothing uploaded', { fill: '#238271', size: 13, weight: 800, family: 'Arial, sans-serif' })}
-      ${text(720, 250, 'Your Share appears here', { fill: '#171b1a', size: 28, weight: 800, family: 'Arial, sans-serif' })}
+      ${text(720, 250, 'Your Cut appears here', { fill: '#171b1a', size: 28, weight: 800, family: 'Arial, sans-serif' })}
       ${text(720, 282, 'only after local review.', { fill: '#171b1a', size: 28, weight: 800, family: 'Arial, sans-serif' })}
       <rect x="720" y="330" width="344" height="14" rx="7" fill="#eceeeb"/>
       <rect x="720" y="360" width="280" height="14" rx="7" fill="#eceeeb"/>
@@ -134,7 +134,7 @@ const frameSvg = (frame) => {
   <rect x="28" y="24" width="1144" height="627" rx="24" fill="#fff" stroke="#dfe2dd"/>
   <rect x="60" y="56" width="38" height="38" rx="9" fill="#171b1a"/>
   ${text(79, 82, '[/]', { fill: '#fff', size: 14, weight: 800, anchor: 'middle' })}
-  ${text(112, 81, 'Neurcode Share', { fill: '#171b1a', size: 18, weight: 800, family: 'Arial, sans-serif' })}
+  ${text(112, 81, 'Cut by Neurcode', { fill: '#171b1a', size: 18, weight: 800, family: 'Arial, sans-serif' })}
   ${stepPills(activeStep)}
   <rect x="60" y="120" width="510" height="506" rx="14" fill="#111614"/>
   <circle cx="84" cy="145" r="5" fill="#59645f"/>

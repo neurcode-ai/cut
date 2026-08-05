@@ -48,7 +48,7 @@ function fixtureRepository(): string {
   const root = testRoot();
   git(root, ['init', '-q', '-b', 'main']);
   git(root, ['config', 'user.email', 'share-test@neurcode.local']);
-  git(root, ['config', 'user.name', 'Share Test']);
+  git(root, ['config', 'user.name', 'Cut Test']);
   mkdirSync(join(root, 'src'));
   writeFileSync(join(root, '.gitignore'), 'ignored.txt\n.env*\n');
   writeFileSync(
@@ -147,7 +147,7 @@ test('bounded evidence preserves head and tail and marks omitted middle', async 
   assert.equal(evidence.exit, 0);
   assert.ok(evidence.stdout.length <= 160);
   assert.equal(evidence.stdoutTruncated, true);
-  assert.match(evidence.stdout.toString(), /Neurcode Share omitted/);
+  assert.match(evidence.stdout.toString(), /Cut by Neurcode omitted/);
   assert.match(evidence.stdout.toString(), /HEAD-/);
   assert.match(evidence.stdout.toString(), /-TAIL/);
 });
@@ -380,7 +380,7 @@ test('--yes airlock prints every cut metadata field and omits Git author identit
     assert.ok(printed.includes(field), `missing airlock metadata ${field}`);
   }
   assert.ok(!printed.includes('"author"'));
-  assert.ok(!printed.includes('Share Test'));
+  assert.ok(!printed.includes('Cut Test'));
   assert.ok(!printed.includes('share-test@neurcode.local'));
 });
 
@@ -398,7 +398,7 @@ test('local end-to-end creates a valid archive and no hosted side effects', asyn
       diff: true,
       run: `node -e 'console.log("evidence-ok")'`,
       runTimeoutSeconds: 5,
-      message: 'Check the local Share',
+      message: 'Check the local Cut',
       notes: ['src/app.ts=The selected range is the question.'],
       forceInclude: [],
       stripContext: [],
@@ -417,7 +417,7 @@ test('local end-to-end creates a valid archive and no hosted side effects', asyn
     const archive = readShareArchive(readFileSync(output));
     assert.equal(archive.cut.manifest.origin.remote, 'example.com/acme/fixture');
     assert.equal(archive.cut.pack.items.length, 3);
-    assert.match(readFileSync(preview, 'utf8'), /Neurcode Share · local preview/);
+    assert.match(readFileSync(preview, 'utf8'), /Cut by Neurcode · local preview/);
     assert.ok(!readFileSync(preview, 'utf8').includes(root));
   } finally {
     if (priorEpoch === undefined) delete process.env.SOURCE_DATE_EPOCH;
@@ -572,7 +572,7 @@ test('--handoff honors headless flags instead of forcing the browser Composer', 
   const printed = `${headless.stdout}${headless.stderr}`;
   // The loopback Composer must not start; the current diff must be captured.
   assert.equal(headless.status, 0);
-  assert.doesNotMatch(printed, /Share Composer ·/);
+  assert.doesNotMatch(printed, /Cut Composer ·/);
   assert.match(headless.stdout, /format: neurcode-share-v1/);
   assert.match(headless.stdout, /# Continue this work/);
   assert.match(printed, /unified diff/);

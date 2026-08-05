@@ -242,10 +242,10 @@ export async function refreshShare(input: {
   const decisions = await interactiveDecisions(input.report, input.decisions ?? new Map());
   const itemIds = new Set(input.report.items.map((item) => item.itemId));
   for (const itemId of decisions.keys()) {
-    if (!itemIds.has(itemId)) throw new Error(`Refresh decision names an item outside this Share: ${itemId}.`);
+    if (!itemIds.has(itemId)) throw new Error(`Refresh decision names an item outside this Cut: ${itemId}.`);
   }
   for (const itemId of input.replacements?.keys() ?? []) {
-    if (!itemIds.has(itemId)) throw new Error(`Refresh replacement names an item outside this Share: ${itemId}.`);
+    if (!itemIds.has(itemId)) throw new Error(`Refresh replacement names an item outside this Cut: ${itemId}.`);
     if (decisions.get(itemId) !== 'use') {
       throw new Error(`Refresh replacement for ${itemId} requires --decision ${itemId}=use.`);
     }
