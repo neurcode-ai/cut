@@ -4,7 +4,7 @@
 into one focused Cut for teammates and AI agents.
 
 ```sh
-npx @neurcode-ai/cut@0.1.0
+npx @neurcode-ai/cut@0.2.0
 ```
 
 This package is the stable product entry point for the open-source Cut CLI. It

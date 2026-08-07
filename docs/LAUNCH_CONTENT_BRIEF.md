@@ -33,7 +33,7 @@ evidence in one clear link for a teammate or an AI agent.
 
 ## Visual demo storyboard
 
-1. Run `npx @neurcode-ai/cut@0.1.0`.
+1. Run `npx @neurcode-ai/cut@0.2.0`.
 2. Select an exact source range, complete diff, and bounded test command.
 3. Review the disclosure cut and confirm that everything else stays local.
 4. Publish one public revision.

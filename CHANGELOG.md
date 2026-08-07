@@ -1,5 +1,15 @@
 # Changelog
 
+## Cut 0.2.0 / compatible engine 0.5.0 / format 0.4.1 - 2026-08-07
+
+- Add deterministic zero-argument `cut` working-set proposals from staged,
+  modified, and untracked non-ignored Git state.
+- Keep every proposed disclosure local and removable before export or publish,
+  with strict traversal, item-count, byte, diff, archive, and output bounds.
+- Stabilize disclosure finding acknowledgements across nondeterministic command
+  output while keeping concrete credential findings fail-closed.
+- Preserve the legacy `@neurcode-ai/share` engine and cut/1 archive contracts.
+
 ## Cut 0.1.0 / compatible engine 0.4.0 - 2026-08-06
 
 - Introduce **Cut by Neurcode** as the product identity and “The universal link

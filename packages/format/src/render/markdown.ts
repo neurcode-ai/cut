@@ -138,7 +138,7 @@ ${items}
 
 Security note: revocation can stop future access through Neurcode, but cannot recall copies already downloaded, cached, screenshotted, or consumed by agents.
 
-Made with \`${options.cut1ArchiveCompatibility ? 'npx @neurcode-ai/cli share' : 'npx @neurcode-ai/cut@0.1.0'}\`.
+Made with \`${options.cut1ArchiveCompatibility ? 'npx @neurcode-ai/cli share' : 'npx @neurcode-ai/cut@0.2.0'}\`.
 
 ${options.cut1ArchiveCompatibility ? CUT1_AGENT_GUIDANCE : AGENT_GUIDANCE}`;
 }

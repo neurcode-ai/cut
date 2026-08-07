@@ -177,7 +177,7 @@ export function renderHtml(bundle: ShareBundle, options: { cut1ArchiveCompatibil
   <footer>
     <p><strong>Snapshot honesty:</strong> this is captured source and observed output from one point in time. Provenance labels describe how bytes entered; they are not endorsements.</p>
     <p>Revocation can stop future access through Neurcode, but cannot recall copies already downloaded, cached, screenshotted, or consumed by agents.</p>
-    <p>Made with <code>${cut1ArchiveCompatibility ? 'npx @neurcode-ai/cli share' : 'npx @neurcode-ai/cut@0.1.0'}</code>.</p>
+    <p>Made with <code>${cut1ArchiveCompatibility ? 'npx @neurcode-ai/cli share' : 'npx @neurcode-ai/cut@0.2.0'}</code>.</p>
   </footer>
 </main>
 </body>

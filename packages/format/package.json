@@ -1,6 +1,6 @@
 {
   "name": "@neurcode-ai/share-format",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Pure local format, safety, archive, and rendering primitives for Cut by Neurcode",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

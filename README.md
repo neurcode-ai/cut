@@ -28,7 +28,7 @@ link when you choose to.
 From any Git repository:
 
 ```sh
-npx @neurcode-ai/cut@0.1.0
+npx @neurcode-ai/cut@0.2.0
 ```
 
 The local Composer asks Git for the changed, staged, and non-ignored untracked
@@ -40,8 +40,8 @@ Publish.
 For a non-interactive local archive:
 
 ```sh
-npx @neurcode-ai/cut@0.1.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
-npx @neurcode-ai/cut@0.1.0 --message "Review this working set" --yes --out working-set.tar.gz
+npx @neurcode-ai/cut@0.2.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/cut@0.2.0 --message "Review this working set" --yes --out working-set.tar.gz
 ```
 
 ## One canonical Cut, native representations
@@ -72,10 +72,10 @@ Local creation needs no account. Export a deterministic archive, inert HTML,
 Markdown, or agent JSON:
 
 ```sh
-npx @neurcode-ai/cut@0.1.0 src/queue.ts --yes --out queue-review.html
-npx @neurcode-ai/cut@0.1.0 --staged --yes --out staged-review.md
-npx @neurcode-ai/cut@0.1.0 --diff=main..HEAD --yes --out change.json
-npx @neurcode-ai/cut@0.1.0 --run "pnpm test queue" --yes --out evidence.tar.gz
+npx @neurcode-ai/cut@0.2.0 src/queue.ts --yes --out queue-review.html
+npx @neurcode-ai/cut@0.2.0 --staged --yes --out staged-review.md
+npx @neurcode-ai/cut@0.2.0 --diff=main..HEAD --yes --out change.json
+npx @neurcode-ai/cut@0.2.0 --run "pnpm test queue" --yes --out evidence.tar.gz
 ```
 
 Commands are bounded by time and output limits. Sensitive paths are denied by
@@ -85,8 +85,8 @@ Verify exact cited bytes against a selected local repository state, or prepare
 a reviewed immutable successor without publishing:
 
 ```sh
-npx @neurcode-ai/cut@0.1.0 verify review.tar.gz --repo ../project
-npx @neurcode-ai/cut@0.1.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+npx @neurcode-ai/cut@0.2.0 verify review.tar.gz --repo ../project
+npx @neurcode-ai/cut@0.2.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
 ```
 
 See the [CLI guide](packages/cli/README.md) for deterministic JSON, named
@@ -100,7 +100,7 @@ Neurcode identity and a loopback PKCE flow, so no hosted token is copied into
 the terminal:
 
 ```sh
-npx @neurcode-ai/cut@0.1.0 src/session.ts --publish --visibility unlisted
+npx @neurcode-ai/cut@0.2.0 src/session.ts --publish --visibility unlisted
 ```
 
 The hosted service at [cut.neurcode.com](https://cut.neurcode.com) is
@@ -117,7 +117,7 @@ adjacent canonical representation, or create a short-lived, revision-pinned
 agent link in the hosted library and fetch its scoped format:
 
 ```sh
-npx @neurcode-ai/cut@0.1.0 fetch 'AGENT_LINK' --stdout md
+npx @neurcode-ai/cut@0.2.0 fetch 'AGENT_LINK' --stdout md
 ```
 
 Capability and agent secrets remain in URL fragments at rest and are sent in

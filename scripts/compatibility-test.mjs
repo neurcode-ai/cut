@@ -74,4 +74,4 @@ try {
   rmSync(scratch, { recursive: true, force: true });
 }
 
-process.stdout.write('Format compatibility green: 0.1.0 ↔ 0.4.0 deterministic replay.\n');
+process.stdout.write('Format compatibility green: 0.1.0 ↔ 0.4.1 deterministic replay.\n');
