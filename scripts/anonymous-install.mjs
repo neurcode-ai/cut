@@ -52,6 +52,24 @@ try {
   if (cutVersion !== '0.2.0') throw new Error(`Cut entry point reported ${cutVersion}, not 0.2.0.`);
   const consumerRequire = createRequire(join(consumer, 'smoke.cjs'));
   const format = consumerRequire('@neurcode-ai/share-format');
+  const installedCut = consumerRequire('@neurcode-ai/cut/package.json');
+  const installedShare = consumerRequire('@neurcode-ai/share/package.json');
+  const installedFormat = consumerRequire('@neurcode-ai/share-format/package.json');
+  const installedViewer = consumerRequire('@neurcode-ai/share-viewer/package.json');
+  if (installedCut.version !== '0.2.0' || installedCut.dependencies?.['@neurcode-ai/share'] !== '0.5.0') {
+    throw new Error('Cut did not install with the reviewed Share 0.5.0 dependency contract.');
+  }
+  if (installedShare.version !== '0.5.0'
+      || installedShare.dependencies?.['@neurcode-ai/share-format'] !== '0.4.1') {
+    throw new Error('Share did not install with the reviewed format 0.4.1 dependency contract.');
+  }
+  if (installedFormat.version !== '0.4.1') {
+    throw new Error('The installed format package was not 0.4.1.');
+  }
+  if (installedViewer.version !== '0.2.1'
+      || installedViewer.dependencies?.['@neurcode-ai/share-format'] !== '0.4.1') {
+    throw new Error('Viewer did not install with its reviewed format 0.4.1 dependency contract.');
+  }
 
   const repository = join(scratch, 'repo');
   mkdirSync(join(repository, 'src'), { recursive: true });
