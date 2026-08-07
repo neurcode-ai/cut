@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc && chmod +x dist/index.js",
-    "test": "node --import tsx --test src/share/share-local.test.ts src/share/composer.test.ts src/share/verification.test.ts",
+    "test": "node --import tsx --test src/share/share-local.test.ts src/share/composer.test.ts src/share/working-set.test.ts src/share/verification.test.ts",
     "prepack": "pnpm build"
   },
   "keywords": [

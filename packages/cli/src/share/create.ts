@@ -35,6 +35,8 @@ export interface CreateShareOptions {
   notes: string[];
   forceInclude: string[];
   stripContext: string[];
+  diffPaths?: string[];
+  proposedExclusions?: string[];
   acknowledgeFindings: string[];
   expire?: string;
   out?: string;
@@ -294,6 +296,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
     diff: options.diff,
     forceInclude: options.forceInclude,
     stripContext: options.stripContext,
+    diffPaths: options.diffPaths,
     allowEmpty: Boolean(options.browserItems?.length),
   });
   const { title, intent } = titleAndIntent(options.message, selection.repository.name, options.title);
@@ -400,7 +403,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
     draft,
     blobs,
     findings: scanFields(fieldsForScan({ draft, blobs })),
-    exclusions: selection.warnings,
+    exclusions: [...new Set([...selection.warnings, ...(options.proposedExclusions ?? [])])],
     destinations,
   };
   if (

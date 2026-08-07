@@ -121,3 +121,68 @@ test('loopback Composer is local-only, resumable, provenance-honest, and blocks 
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('zero-argument Composer boots from Git and removal also narrows the proposed diff', async () => {
+  const root = fixture();
+  const handle = await launchShareComposer({
+    cwd: root,
+    toolVersion: 'test',
+    apiUrl: 'http://127.0.0.1:9',
+    preset: 'working-set',
+    openBrowser: false,
+    idleTimeoutMs: 60_000,
+  });
+  try {
+    const url = new URL(handle.url);
+    const html = await (await fetch(handle.url)).text();
+    const configMatch = html.match(/window\.__NEURCODE_SHARE_COMPOSER__=(\{[^;]+\});/);
+    assert.ok(configMatch);
+    const config = JSON.parse(configMatch[1]) as { basePath: string; csrfToken: string };
+    const bootstrap = await (await fetch(`${url.origin}${config.basePath}/api/bootstrap`)).json() as any;
+
+    assert.equal(bootstrap.draft.captureMode, 'zero-argument');
+    assert.equal(bootstrap.draft.title, `Cut from ${bootstrap.repository.repository.name}`);
+    assert.deepEqual(bootstrap.draft.selections, ['src/current.ts', 'src/staged.ts']);
+    assert.deepEqual(bootstrap.draft.workingSet.diffPaths, ['src/current.ts', 'src/staged.ts']);
+    assert.equal(bootstrap.draft.workingSet.initialItemCount, 3);
+
+    const update = {
+      ...bootstrap.draft,
+      intent: 'Please review only the staged change.',
+      selections: ['src/staged.ts'],
+      order: ['selection:src/staged.ts', 'diff'],
+    };
+    const savedResponse = await fetch(`${url.origin}${config.basePath}/api/draft`, {
+      method: 'POST',
+      headers: {
+        origin: url.origin,
+        'content-type': 'application/json',
+        'x-neurcode-share-csrf': config.csrfToken,
+      },
+      body: JSON.stringify({ draft: update }),
+    });
+    assert.equal(savedResponse.status, 200);
+    const saved = await savedResponse.json() as any;
+    assert.deepEqual(saved.workingSet.diffPaths, ['src/staged.ts']);
+    assert.equal(saved.workingSet.removedItemCount, 1);
+
+    const reviewResponse = await fetch(`${url.origin}${config.basePath}/api/review`, {
+      method: 'POST',
+      headers: {
+        origin: url.origin,
+        'content-type': 'application/json',
+        'x-neurcode-share-csrf': config.csrfToken,
+      },
+      body: JSON.stringify({ version: saved.version }),
+    });
+    assert.equal(reviewResponse.status, 200);
+    const review = await reviewResponse.json() as any;
+    assert.match(review.previewMarkdown, /src\/staged\.ts/);
+    assert.doesNotMatch(review.previewMarkdown, /src\/current\.ts/);
+  } finally {
+    // Closing before Publish is a local cancellation. The deliberately invalid
+    // API endpoint would make any accidental hosted request fail this test.
+    await handle.close();
+    rmSync(root, { recursive: true, force: true });
+  }
+});

@@ -16,6 +16,7 @@ import { captureEvidence } from './evidence';
 import { createLocalShare } from './create';
 import { composerHtml } from './composer-ui';
 import { readComposerFile, readComposerRepository } from './composer-data';
+import { proposeGitWorkingSet } from './working-set';
 import {
   loadComposerDraft,
   newComposerDraft,
@@ -48,7 +49,7 @@ export interface ShareComposerOptions {
   apiUrl?: string;
   shareOrigin?: string;
   draftId?: string;
-  preset?: 'handoff';
+  preset?: 'handoff' | 'working-set';
   openBrowser?: boolean;
   idleTimeoutMs?: number;
 }
@@ -212,12 +213,29 @@ function validateDraftUpdate(current: ComposerDraft, value: any): ComposerDraft 
   if (!Number.isInteger(expiryHours) || expiryHours < 1 || expiryHours > 720) {
     throw new HttpError('Expiry must be from 1 through 720 hours.');
   }
+  let diff = validateDiff(value.diff);
+  let workingSet = current.workingSet;
+  if (workingSet) {
+    const selected = new Set(selections);
+    const removedPaths = new Set(workingSet.selectionPaths.filter((path) => !selected.has(path)));
+    const diffPaths = diff.kind === 'current'
+      ? workingSet.diffPaths.filter((path) => !removedPaths.has(path))
+      : [];
+    if (diff.kind === 'current' && diffPaths.length === 0) diff = { kind: 'none' };
+    const retainedSelections = workingSet.selectionPaths.filter((path) => selected.has(path)).length;
+    const retainedDiff = diff.kind === 'current' && diffPaths.length > 0 ? 1 : 0;
+    workingSet = {
+      ...workingSet,
+      diffPaths,
+      removedItemCount: Math.max(0, workingSet.initialItemCount - retainedSelections - retainedDiff),
+    };
+  }
   return {
     ...current,
     title: String(value.title ?? '').trim().slice(0, 180),
     intent: String(value.intent ?? '').trim().slice(0, 8_000),
     selections,
-    diff: validateDiff(value.diff),
+    diff,
     notes,
     order,
     localItems,
@@ -226,6 +244,7 @@ function validateDraftUpdate(current: ComposerDraft, value: any): ComposerDraft 
     expiryHours,
     updatedAt: new Date().toISOString(),
     version: current.version + 1,
+    workingSet,
   };
 }
 
@@ -310,6 +329,8 @@ async function reviewDraft(
     cwd,
     itemOrder: draft.order,
     browserItems: draft.localItems,
+    diffPaths: draft.workingSet?.diffPaths,
+    proposedExclusions: draft.workingSet?.exclusions,
     reviewOutput: emptyWritable(),
   });
   const state = result.reviewState;
@@ -337,7 +358,15 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
   const apiUrl = (options.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
   const shareOrigin = (options.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://cut.neurcode.com').replace(/\/+$/, '');
   const repository = readComposerRepository(cwd);
-  let draft = options.draftId ? loadComposerDraft(cwd, options.draftId) : newComposerDraft(options.preset);
+  const proposal = !options.draftId && options.preset === 'working-set'
+    ? proposeGitWorkingSet(cwd)
+    : undefined;
+  if (proposal && proposal.initialItemCount === 0) {
+    throw new Error('No changed, staged, or untracked files were found in the current Git subtree.');
+  }
+  let draft = options.draftId
+    ? loadComposerDraft(cwd, options.draftId)
+    : newComposerDraft(options.preset, proposal);
   saveComposerDraft(cwd, draft);
   const sessionToken = randomBytes(24).toString('base64url');
   const csrfToken = randomBytes(24).toString('base64url');

@@ -62,7 +62,8 @@ export function composerHtml(input: {
     <section class="editor" aria-label="Cut Composer">
       <div class="compose-head">
         <input class="title" id="title" maxlength="180" placeholder="Give this Cut a clear title" aria-label="Cut title">
-        <textarea class="intent" id="intent" maxlength="8000" placeholder="What should the recipient understand, review, or answer?" aria-label="Question or intent"></textarea>
+        <textarea class="intent" id="intent" maxlength="8000" placeholder="What should the recipient understand or help with?" aria-label="Question or intent"></textarea>
+        <p id="proposalSummary" class="muted"></p>
       </div>
       <div class="toolbar">
         <div class="context" id="fileContext">Choose a file to select lines</div>
@@ -214,8 +215,7 @@ export function composerHtml(input: {
         savePromise = post('draft', { draft: payload });
         try {
           const saved = await savePromise;
-          draft.version = saved.version;
-          draft.updatedAt = saved.updatedAt;
+          draft = saved;
           savedGeneration = targetGeneration;
           setSaved('Saved locally · no account');
         } finally {
@@ -388,6 +388,15 @@ export function composerHtml(input: {
       normalizeOrder();
       const outline = $('outline'); outline.replaceChildren();
       $('outlineCount').textContent = draft.order.length + ' block' + (draft.order.length === 1 ? '' : 's');
+      const proposal = $('proposalSummary');
+      if (draft.workingSet) {
+        const removed = draft.workingSet.removedItemCount;
+        const scope = draft.workingSet.scope ? ' under ' + draft.workingSet.scope : '';
+        proposal.textContent = 'Proposed by local Git' + scope + ': ' + draft.workingSet.initialItemCount
+          + ' item(s), ' + removed + ' removed. ' + draft.workingSet.exclusions.join(' ');
+      } else {
+        proposal.textContent = '';
+      }
       if (!draft.order.length) {
         const empty = document.createElement('div'); empty.className = 'outline-empty'; empty.textContent = 'Add code or a diff from the repository browser.'; outline.append(empty); return;
       }

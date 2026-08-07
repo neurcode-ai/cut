@@ -6,6 +6,18 @@ Create and verify a Cut locally:
 npx @neurcode-ai/cut@0.1.0
 ```
 
+With no file arguments, Cut deterministically proposes the changed, staged,
+and non-ignored untracked files in the current Git subtree, plus the relevant
+bounded diff. No shell history, LLM, or remote inference is used. Every item is
+removable before the existing disclosure review. Explicit files, line ranges,
+staged diffs, and commit ranges remain available for focused captures.
+
+For a noninteractive local-only export, supply the intent explicitly:
+
+```sh
+npx @neurcode-ai/cut@0.1.0 --message "What should we change here?" --yes --out review.tar.gz
+```
+
 No account or upload is required for local creation and HTML, Markdown, JSON,
 or archive export. Hosted publishing starts only after the local disclosure
 review and uses loopback PKCE without token copying.

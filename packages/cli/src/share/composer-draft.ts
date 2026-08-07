@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { EvidenceCapture } from './evidence';
 import { composerGitDirectory } from './composer-data';
+import type { ProposedGitWorkingSet } from './working-set';
 
 export type ComposerDiffMode =
   | { kind: 'none' }
@@ -31,6 +32,15 @@ export interface ComposerDraft {
   expiryHours: number;
   updatedAt: string;
   version: number;
+  captureMode: 'explicit' | 'zero-argument';
+  workingSet: null | {
+    scope: string;
+    initialItemCount: number;
+    selectionPaths: string[];
+    diffPaths: string[];
+    exclusions: string[];
+    removedItemCount: number;
+  };
 }
 
 interface SerializedDraft extends Omit<ComposerDraft, 'evidence'> {
@@ -49,18 +59,35 @@ function draftPath(cwd: string, id: string): string {
   return join(draftDirectory(cwd), `${id}.json`);
 }
 
-export function newComposerDraft(preset?: 'handoff'): ComposerDraft {
+export function newComposerDraft(
+  preset?: 'handoff' | 'working-set',
+  proposal?: ProposedGitWorkingSet,
+): ComposerDraft {
+  if (preset === 'working-set' && !proposal) {
+    throw new Error('The zero-argument Composer requires a bounded Git working-set proposal.');
+  }
+  const selectionPaths = proposal?.selections ?? [];
+  const includesDiff = Boolean(proposal?.diffPaths.length);
   return {
     schemaVersion: 1,
     id: randomBytes(12).toString('hex'),
-    title: preset === 'handoff' ? 'Continue this work' : '',
+    title: preset === 'handoff'
+      ? 'Continue this work'
+      : preset === 'working-set'
+        ? `Cut from ${proposal?.repository.name}`
+        : '',
     intent: preset === 'handoff'
       ? 'What should the next person or AI agent understand, verify, or do next?'
       : '',
-    selections: [],
-    diff: preset === 'handoff' ? { kind: 'current' } : { kind: 'none' },
+    selections: selectionPaths,
+    diff: preset === 'handoff' || includesDiff ? { kind: 'current' } : { kind: 'none' },
     notes: {},
-    order: preset === 'handoff' ? ['diff'] : [],
+    order: preset === 'handoff'
+      ? ['diff']
+      : [
+          ...selectionPaths.map((path) => `selection:${path}`),
+          ...(includesDiff ? ['diff'] : []),
+        ],
     evidence: null,
     localItems: [],
     visibility: 'unlisted',
@@ -68,6 +95,17 @@ export function newComposerDraft(preset?: 'handoff'): ComposerDraft {
     expiryHours: 168,
     updatedAt: new Date().toISOString(),
     version: 1,
+    captureMode: preset === 'working-set' ? 'zero-argument' : 'explicit',
+    workingSet: proposal
+      ? {
+          scope: proposal.scope,
+          initialItemCount: proposal.initialItemCount,
+          selectionPaths,
+          diffPaths: proposal.diffPaths,
+          exclusions: proposal.exclusions,
+          removedItemCount: 0,
+        }
+      : null,
   };
 }
 
@@ -119,6 +157,8 @@ function deserialize(value: SerializedDraft): ComposerDraft {
     visibility: value.visibility === 'restricted' || value.visibility === 'public' ? value.visibility : 'unlisted',
     recipients: Array.isArray(value.recipients) ? value.recipients : [],
     expiryHours: Number.isInteger(value.expiryHours) ? value.expiryHours : 168,
+    captureMode: value.captureMode === 'zero-argument' ? 'zero-argument' : 'explicit',
+    workingSet: value.workingSet ?? null,
   };
 }
 

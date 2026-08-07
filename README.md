@@ -31,14 +31,17 @@ From any Git repository:
 npx @neurcode-ai/cut@0.1.0
 ```
 
-The Composer binds only to loopback, inventories the exact disclosure, scans
-for sensitive material, and creates nothing remotely unless you explicitly
-choose Publish.
+The local Composer asks Git for the changed, staged, and non-ignored untracked
+files in the current directory subtree. It proposes that bounded working set
+without an LLM or remote inference. Remove any item, add the question, then
+review the exact disclosure; nothing is uploaded unless you explicitly choose
+Publish.
 
 For a non-interactive local archive:
 
 ```sh
 npx @neurcode-ai/cut@0.1.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/cut@0.1.0 --message "Review this working set" --yes --out working-set.tar.gz
 ```
 
 ## One canonical Cut, native representations

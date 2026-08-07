@@ -3,6 +3,7 @@ import { createInterface } from 'node:readline/promises';
 import { createLocalShare } from './share/create';
 import { startShareComposer } from './share/composer';
 import { discoverShareRepository } from './share/git-reader';
+import { proposeGitWorkingSet } from './share/working-set';
 import {
   expiryHours,
   fetchHostedShare,
@@ -76,11 +77,14 @@ export function shareCommand(program: Command, toolVersion: string): void {
         || Boolean(options.copy)
         || Boolean(options.stdout)
         || options.dryRun === true;
-      const browserComposer = options.browser !== false
-        && (selections?.length ?? 0) === 0
+      const zeroArgumentRequested = (selections?.length ?? 0) === 0
         && options.staged !== true
         && options.diff === undefined
         && !options.run
+        && options.handoff !== true
+        && !options.draft;
+      const browserComposer = options.browser !== false
+        && zeroArgumentRequested
         && !options.out
         && !options.preview
         && !options.copy
@@ -96,7 +100,11 @@ export function shareCommand(program: Command, toolVersion: string): void {
           toolVersion,
           apiUrl: options.apiUrl,
           draftId: options.draft,
-          preset: options.handoff === true ? 'handoff' : undefined,
+          preset: options.handoff === true
+            ? 'handoff'
+            : zeroArgumentRequested
+              ? 'working-set'
+              : undefined,
         });
         return;
       }
@@ -110,6 +118,8 @@ export function shareCommand(program: Command, toolVersion: string): void {
       let terminalMessage = options.message as string | undefined;
       let terminalOut = options.out as string | undefined;
       let terminalPreview = options.preview as boolean | string | undefined;
+      let terminalDiffPaths: string[] | undefined;
+      let proposedExclusions: string[] | undefined;
 
       // Headless --handoff preset: capture the current working-tree diff when the
       // caller did not name their own selections, so agents can produce a handoff
@@ -125,39 +135,52 @@ export function shareCommand(program: Command, toolVersion: string): void {
         if (!terminalMessage) terminalMessage = 'Continue this work';
       }
 
-      if (
-        options.browser === false
-        && terminalSelections.length === 0
-        && !terminalStaged
-        && terminalDiff === false
-      ) {
-        if (!process.stdin.isTTY) {
-          throw new Error('--no-browser without explicit selections requires an interactive terminal.');
+      if (zeroArgumentRequested) {
+        const proposal = proposeGitWorkingSet();
+        if (proposal.initialItemCount === 0) {
+          throw new Error('No changed, staged, or untracked files were found in the current Git subtree.');
         }
-        const repository = discoverShareRepository();
+        terminalSelections = proposal.selections;
+        terminalDiff = proposal.diffPaths.length > 0;
+        terminalDiffPaths = proposal.diffPaths;
+        proposedExclusions = proposal.exclusions;
+        const nonInteractive = options.yes === true || !process.stdin.isTTY;
+        if (nonInteractive && !terminalMessage?.trim()) {
+          throw new Error('A noninteractive zero-argument Cut requires --message <text>.');
+        }
+        if (!process.stdin.isTTY && options.yes !== true) {
+          throw new Error('A noninteractive zero-argument Cut requires --yes after explicit disclosure options.');
+        }
+        if (options.browser === false && process.stdin.isTTY) {
+          const repository = discoverShareRepository();
+          process.stdout.write(
+            `\nCut by Neurcode · proposed Git working set\n`
+            + `${repository.name} · ${repository.branch || 'detached'} · ${repository.dirty ? 'local changes' : 'clean'}\n`
+            + `${proposal.initialItemCount} proposed item(s) in ${proposal.scope || '.'}\n`
+            + proposal.selections.map((path, index) => `  ${index + 1}  ${path}\n`).join('')
+            + (proposal.diffPaths.length
+              ? `  ${proposal.selections.length + 1}  Relevant staged/worktree diff (${proposal.diffPaths.length} path(s))\n`
+              : '')
+            + proposal.exclusions.map((exclusion) => `  Excluded: ${exclusion}\n`).join('')
+            + '\n',
+          );
+        }
+      }
+
+      if (options.browser === false && zeroArgumentRequested && process.stdin.isTTY) {
         process.stdout.write(
-          `\nCut by Neurcode · guided terminal fallback\n`
-          + `${repository.name} · ${repository.branch || 'detached'} · ${repository.dirty ? 'local changes' : 'clean'}\n\n`
-          + '1  Current changes\n2  Staged changes\n3  Specific files or line ranges\n4  Commit range\n',
+          'Each proposed item remains removable in “Review what will be shared.”\n',
         );
         const prompt = createInterface({ input: process.stdin, output: process.stdout });
         try {
-          const choice = (await prompt.question('Choose what to share [1-4]: ')).trim();
-          if (choice === '1') terminalDiff = true;
-          else if (choice === '2') terminalStaged = true;
-          else if (choice === '3') {
-            const raw = await prompt.question('Files/ranges (comma-separated, e.g. src/a.ts:10-40,tests/a.test.ts): ');
-            terminalSelections = raw.split(',').map((value) => value.trim()).filter(Boolean);
-          } else if (choice === '4') {
-            terminalDiff = (await prompt.question('Commit range (A..B): ')).trim();
-          } else {
-            throw new Error('Choose 1, 2, 3, or 4.');
+          if (!terminalMessage?.trim()) {
+            terminalMessage = (await prompt.question('What should the recipient understand or help with? ')).trim();
           }
-          terminalMessage = (await prompt.question('What should the recipient understand, review, or answer? ')).trim();
-          const command = (await prompt.question('Optional bounded evidence command (Enter to skip): ')).trim();
-          terminalRun = command || undefined;
-          terminalOut = 'neurcode-cut.tar.gz';
-          terminalPreview = true;
+          if (!terminalMessage) throw new Error('A Cut needs a question or intent.');
+          if (!terminalOut && !terminalPreview && !options.copy && !options.stdout && options.publish !== true) {
+            terminalOut = 'neurcode-cut.tar.gz';
+            terminalPreview = true;
+          }
         } finally {
           prompt.close();
         }
@@ -185,6 +208,8 @@ export function shareCommand(program: Command, toolVersion: string): void {
         notes: options.note ?? [],
         forceInclude: options.forceInclude ?? [],
         stripContext: options.stripContext ?? [],
+        diffPaths: terminalDiffPaths,
+        proposedExclusions,
         acknowledgeFindings: options.acknowledgeFinding ?? [],
         expire: options.expire,
         out: terminalOut,

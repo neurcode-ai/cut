@@ -38,6 +38,7 @@ export interface SelectionOptions {
   forceInclude: string[];
   stripContext: string[];
   allowEmpty?: boolean;
+  diffPaths?: string[];
 }
 
 export interface SelectionResult {
@@ -164,7 +165,7 @@ function isIgnored(root: string, path: string): boolean {
   return result.status === 0;
 }
 
-function exclusionReason(path: string): string | null {
+export function exclusionReason(path: string): string | null {
   const lower = path.toLowerCase();
   const parts = lower.split('/');
   const base = parts[parts.length - 1];
@@ -183,7 +184,7 @@ function exclusionReason(path: string): string | null {
   return null;
 }
 
-function looksBinary(content: Buffer): boolean {
+export function looksBinary(content: Buffer): boolean {
   if (content.includes(0)) return true;
   const sample = content.subarray(0, Math.min(content.length, 8192));
   if (sample.length === 0) return false;
@@ -486,6 +487,14 @@ function buildDiffItem(
 ): DiffItem | null {
   if (!options.staged && options.diff === false) return null;
   if (options.staged && options.diff !== false) throw new Error('Use either --staged or --diff, not both.');
+  if (typeof options.diff === 'string' && options.diffPaths !== undefined) {
+    throw new Error('A bounded working-set path list cannot be combined with a commit-range diff.');
+  }
+  if (options.diffPaths !== undefined && options.diffPaths.length === 0) return null;
+
+  const boundedDiffPaths = options.diffPaths === undefined
+    ? undefined
+    : [...new Set(options.diffPaths.map((path) => sanitizeRepoRelativePath(repository.root, path)))].sort();
 
   let args: string[];
   let base: string;
@@ -514,6 +523,11 @@ function buildDiffItem(
     base = `${repository.origin}@${repository.head}`;
     head = `${repository.origin}@worktree`;
     provenance = 'worktree-captured';
+  }
+
+  if (boundedDiffPaths) {
+    args.push('--', ...boundedDiffPaths);
+    nameStatusArgs.push('--', ...boundedDiffPaths);
   }
 
   assertDiffPathsAllowed(repository, nameStatusArgs, resolveForceSet(repository, options.forceInclude));

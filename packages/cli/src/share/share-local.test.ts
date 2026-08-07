@@ -641,6 +641,37 @@ test('--handoff honors headless flags instead of forcing the browser Composer', 
   assert.match(printed, /unified diff/);
 });
 
+test('zero-argument noninteractive capture requires intent and supports local-only export', () => {
+  const root = fixtureRepository();
+  writeFileSync(join(root, 'src/worker.ts'), 'export const state = "zero argument";\n');
+  writeFileSync(join(root, 'src/untracked.ts'), 'export const untracked = true;\n');
+  const cli = resolve(process.cwd(), 'dist/index.js');
+  const missingIntent = spawnSync(process.execPath, [
+    cli,
+    '--yes',
+    '--out', join(root, 'missing.tar.gz'),
+  ], { cwd: root, encoding: 'utf8', input: '' });
+  assert.equal(missingIntent.status, 1);
+  assert.match(missingIntent.stderr, /requires --message/);
+  assert.equal(existsSync(join(root, 'missing.tar.gz')), false);
+
+  const output = join(root, 'working-set.tar.gz');
+  const created = spawnSync(process.execPath, [
+    cli,
+    '--message', 'Review the deterministic local working set.',
+    '--yes',
+    '--out', output,
+  ], { cwd: root, encoding: 'utf8', input: '' });
+  assert.equal(created.status, 0, created.stderr);
+  assert.equal(existsSync(output), true);
+  assert.doesNotMatch(`${created.stdout}${created.stderr}`, /Published securely/);
+  const bundle = readShareArchive(readFileSync(output));
+  assert.ok(bundle.cut.pack.items.some((item) => item.kind === 'diff'));
+  assert.ok(bundle.cut.pack.items.some((item) => (
+    (item.kind === 'file' || item.kind === 'excerpt') && item.path === 'src/untracked.ts'
+  )));
+});
+
 test('terminal disclosure surfaces absolute-path warnings like the visual Composer', () => {
   const root = fixtureRepository();
   writeFileSync(
