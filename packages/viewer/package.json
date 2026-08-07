@@ -1,6 +1,6 @@
 {
   "name": "@neurcode-ai/share-viewer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Local and static rendering helpers for verified Cut archives",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

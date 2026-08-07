@@ -1,15 +1,15 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:9a699a05-7896-a731-94bd-4895109400b8",
+  "serialNumber": "urn:uuid:f337866a-4c31-b72c-1080-f92103a66034",
   "version": 1,
   "metadata": {
     "component": {
       "type": "library",
-      "bom-ref": "pkg:npm/%40neurcode-ai/share-format@0.4.0",
+      "bom-ref": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
       "name": "@neurcode-ai/share-format",
-      "version": "0.4.0",
-      "purl": "pkg:npm/%40neurcode-ai/share-format@0.4.0",
+      "version": "0.4.1",
+      "purl": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
       "licenses": [
         {
           "license": {
@@ -20,17 +20,17 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "9919cc0ae37a7bb57adca332e844322d10057220dac04150e6ce54fa60c2b0a2"
+          "content": "af4edab1028be3576b4e871c9fea302aa896d2d0f7053a504ba53cdedae0e379"
         }
       ],
       "properties": [
         {
           "name": "neurcode:packed-file",
-          "value": "neurcode-ai-share-format-0.4.0.tgz"
+          "value": "neurcode-ai-share-format-0.4.1.tgz"
         },
         {
           "name": "neurcode:packed-bytes",
-          "value": "39860"
+          "value": "39861"
         }
       ]
     }
@@ -38,7 +38,7 @@
   "components": [],
   "dependencies": [
     {
-      "ref": "pkg:npm/%40neurcode-ai/share-format@0.4.0",
+      "ref": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
       "dependsOn": []
     }
   ]

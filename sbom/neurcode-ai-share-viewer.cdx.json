@@ -1,15 +1,15 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:16401e20-bf63-8946-78f7-4f66ad05b5ee",
+  "serialNumber": "urn:uuid:75507ed3-98b8-5528-8fa8-9192d40bde35",
   "version": 1,
   "metadata": {
     "component": {
       "type": "library",
-      "bom-ref": "pkg:npm/%40neurcode-ai/share-viewer@0.2.0",
+      "bom-ref": "pkg:npm/%40neurcode-ai/share-viewer@0.2.1",
       "name": "@neurcode-ai/share-viewer",
-      "version": "0.2.0",
-      "purl": "pkg:npm/%40neurcode-ai/share-viewer@0.2.0",
+      "version": "0.2.1",
+      "purl": "pkg:npm/%40neurcode-ai/share-viewer@0.2.1",
       "licenses": [
         {
           "license": {
@@ -20,17 +20,17 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "f05ac20de9a39aa8caa82fbabcada2e39baccd2c98dd77ccc294d2ffff782144"
+          "content": "25c9e9773ad714432b47a002674ce44dd701056203098ef459435cfa37acdcf7"
         }
       ],
       "properties": [
         {
           "name": "neurcode:packed-file",
-          "value": "neurcode-ai-share-viewer-0.2.0.tgz"
+          "value": "neurcode-ai-share-viewer-0.2.1.tgz"
         },
         {
           "name": "neurcode:packed-bytes",
-          "value": "5879"
+          "value": "5883"
         }
       ]
     }
@@ -38,10 +38,10 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40neurcode-ai/share-format@0.4.0",
+      "bom-ref": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
       "name": "@neurcode-ai/share-format",
-      "version": "0.4.0",
-      "purl": "pkg:npm/%40neurcode-ai/share-format@0.4.0",
+      "version": "0.4.1",
+      "purl": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
       "licenses": [
         {
           "license": {
@@ -53,13 +53,13 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:npm/%40neurcode-ai/share-format@0.4.0",
+      "ref": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40neurcode-ai/share-viewer@0.2.0",
+      "ref": "pkg:npm/%40neurcode-ai/share-viewer@0.2.1",
       "dependsOn": [
-        "pkg:npm/%40neurcode-ai/share-format@0.4.0"
+        "pkg:npm/%40neurcode-ai/share-format@0.4.1"
       ]
     }
   ]

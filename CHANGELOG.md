@@ -2,6 +2,8 @@
 
 ## Cut 0.2.0 / compatible engine 0.5.0 / format 0.4.1 - 2026-08-07
 
+- Publish viewer 0.2.1 solely to bind its packed format dependency to 0.4.1;
+  viewer source and API contracts are otherwise unchanged.
 - Add deterministic zero-argument `cut` working-set proposals from staged,
   modified, and untracked non-ignored Git state.
 - Keep every proposed disclosure local and removable before export or publish,
