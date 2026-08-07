@@ -23,11 +23,14 @@ const scratch = mkdtempSync(join(tmpdir(), 'neurcode-cut-anonymous-'));
 
 try {
   const consumer = join(scratch, 'consumer');
+  const npmCache = join(scratch, 'npm-cache');
   mkdirSync(consumer);
+  mkdirSync(npmCache);
   writeFileSync(join(consumer, 'package.json'), '{"name":"anonymous-consumer","private":true}\n');
   const tarballs = manifest.artifacts.map((artifact) => join(artifacts, artifact.file));
   execFileSync('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', ...tarballs], {
     cwd: consumer,
+    env: { ...process.env, npm_config_cache: npmCache },
     stdio: 'pipe',
   });
   execFileSync('node', ['-e', [
