@@ -31,6 +31,10 @@ interface ReviewCache {
   findings: SecretFinding[];
 }
 
+function blockingFindings(findings: SecretFinding[]): SecretFinding[] {
+  return findings.filter((finding) => finding.severity !== 'warning');
+}
+
 interface PendingPublishAuth {
   sessionId: string;
   verifier: string;
@@ -448,7 +452,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
         const warnings = absolutePathWarnings(bundle);
         json(response, 200, {
           version: reviewCache.version,
-          digest: reviewCache.findings.length ? null : bundle.cut.manifest.digest,
+          digest: blockingFindings(reviewCache.findings).length ? null : bundle.cut.manifest.digest,
           findings: reviewCache.findings,
           items: bundle.cut.pack.items.map((item) => ({
             id: item.id,
@@ -465,8 +469,8 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
           access: draft.visibility,
           expiryHours: draft.expiryHours,
           recipients: draft.recipients,
-          previewHtml: reviewCache.findings.length ? null : renderHtml(bundle),
-          previewMarkdown: reviewCache.findings.length ? null : renderMarkdown(bundle),
+          previewHtml: blockingFindings(reviewCache.findings).length ? null : renderHtml(bundle),
+          previewMarkdown: blockingFindings(reviewCache.findings).length ? null : renderMarkdown(bundle),
         });
         return;
       }
@@ -475,7 +479,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
         if (!reviewCache || Number(body.version) !== reviewCache.version || body.confirmed !== true) {
           throw new HttpError('Complete the current disclosure review before export.', 409);
         }
-        if (reviewCache.findings.length) throw new HttpError('Exact security findings block export.', 422);
+        if (blockingFindings(reviewCache.findings).length) throw new HttpError('Exact security findings block export.', 422);
         const format = body.format;
         let bytes: Buffer;
         let type: string;
@@ -501,7 +505,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
         if (!reviewCache || Number(body.version) !== reviewCache.version || body.confirmed !== true) {
           throw new HttpError('Complete the current disclosure review before publishing.', 409);
         }
-        if (reviewCache.findings.length) throw new HttpError('Exact security findings block publishing.', 422);
+        if (blockingFindings(reviewCache.findings).length) throw new HttpError('Exact security findings block publishing.', 422);
         if (!pendingAuth?.publishToken) {
           const verifier = randomBytes(48).toString('base64url');
           const state = randomBytes(32).toString('base64url');

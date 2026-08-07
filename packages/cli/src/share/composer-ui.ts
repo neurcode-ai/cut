@@ -437,10 +437,11 @@ export function composerHtml(input: {
         $('reviewOverlay').classList.add('open');
         $('reviewIdentity').textContent = review.digest || 'Blocked before identity';
         const status = $('reviewStatus'); status.replaceChildren();
+        const blockingFindings = review.findings.filter((finding) => finding.severity !== 'warning');
         if (review.findings.length) {
           review.findings.forEach((finding) => {
             const div = document.createElement('div'); div.className = 'finding';
-            div.textContent = finding.id + ' · ' + finding.scope + ':' + finding.line + ': ' + finding.summary; status.append(div);
+            div.textContent = (finding.severity === 'warning' ? 'Warning · ' : 'Blocking · ') + finding.id + ' · ' + finding.scope + ':' + finding.line + ': ' + finding.summary; status.append(div);
           });
         } else {
           const div = document.createElement('div'); div.className = 'ok'; div.textContent = 'No exact secret or sensitive-path findings. Scanners have limits; complete the human review below.'; status.append(div);
@@ -473,11 +474,11 @@ export function composerHtml(input: {
         $('previewAiButton').classList.remove('active');
         $('previewAiButton').setAttribute('aria-selected', 'false');
         $('confirmReview').checked = false;
-        $('actionMessage').textContent = review.findings.length ? 'Remove or replace every finding before export or upload.' : '';
-        document.querySelectorAll('[data-export]').forEach((button) => button.disabled = review.findings.length > 0);
-        $('copyAi').disabled = review.findings.length > 0;
-        $('copyJson').disabled = review.findings.length > 0;
-        $('publishButton').disabled = review.findings.length > 0;
+        $('actionMessage').textContent = blockingFindings.length ? 'Remove or replace every blocking finding before export or upload.' : '';
+        document.querySelectorAll('[data-export]').forEach((button) => button.disabled = blockingFindings.length > 0);
+        $('copyAi').disabled = blockingFindings.length > 0;
+        $('copyJson').disabled = blockingFindings.length > 0;
+        $('publishButton').disabled = blockingFindings.length > 0;
       } catch (error) { toast(error.message); }
       finally { $('reviewButton').disabled = false; }
     }

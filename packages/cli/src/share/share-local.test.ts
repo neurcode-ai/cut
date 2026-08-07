@@ -475,6 +475,69 @@ test('a planted credential blocks local creation before any output is written', 
   assert.deepEqual(acknowledged.cut.manifest.security.acknowledgedFindings, [finding.id]);
 });
 
+test('a finding acknowledgement survives unrelated command-output length changes', async () => {
+  const root = fixtureRepository();
+  const key = `AKIA${'E5'.repeat(8)}`;
+  const evidence = (prefix: string) => ({
+    argv: ['synthetic-evidence'],
+    exit: 0,
+    stdout: Buffer.from(`${prefix}\ncredential ${key}\n`),
+    stderr: Buffer.alloc(0),
+    startedAt: '2026-08-07T00:00:00.000Z',
+    durationMs: 1,
+    cwd: '.',
+    timedOut: false,
+    stdoutTruncated: false,
+    stderrTruncated: false,
+  });
+  const first = await createLocalShare({
+    selections: ['src/worker.ts'], staged: false, diff: false,
+    capturedEvidence: evidence('12 ms'), runTimeoutSeconds: 60,
+    notes: [], forceInclude: [], stripContext: [], acknowledgeFindings: [],
+    dryRun: true, yes: false, toolVersion: 'test', cwd: root,
+  });
+  const finding = first.reviewState?.findings.find((candidate) => candidate.kind === 'aws-access-key');
+  assert.ok(finding);
+
+  const output = join(root, 'stable-ack.tar.gz');
+  const next = await createLocalShare({
+    selections: ['src/worker.ts'], staged: false, diff: false,
+    capturedEvidence: evidence('completed after 12.481 seconds with unrelated detail'), runTimeoutSeconds: 60,
+    notes: [], forceInclude: [], stripContext: [], acknowledgeFindings: [finding.id],
+    out: output, dryRun: false, yes: true, toolVersion: 'test', cwd: root,
+  });
+  assert.ok(next.bundle);
+  assert.deepEqual(next.bundle.cut.manifest.security.acknowledgedFindings, [finding.id]);
+});
+
+test('generic high-entropy command evidence warns without hiding the disclosure inventory', async () => {
+  const root = fixtureRepository();
+  const output = join(root, 'warning-only.tar.gz');
+  const chunks: string[] = [];
+  const reviewOutput = new Writable({
+    write(chunk, _encoding, callback) {
+      chunks.push(String(chunk));
+      callback();
+    },
+  });
+  const result = await createLocalShare({
+    selections: ['src/worker.ts'], staged: false, diff: false,
+    capturedEvidence: {
+      argv: ['synthetic-evidence'], exit: 0,
+      stdout: Buffer.from('asset Q7mK2vN9pR4xT8zL3cW6bY1hF5sD0jUa.js\n'), stderr: Buffer.alloc(0),
+      startedAt: '2026-08-07T00:00:00.000Z', durationMs: 1, cwd: '.', timedOut: false,
+      stdoutTruncated: false, stderrTruncated: false,
+    },
+    runTimeoutSeconds: 60, notes: [], forceInclude: [], stripContext: [], acknowledgeFindings: [],
+    out: output, dryRun: false, yes: true, toolVersion: 'test', cwd: root, reviewOutput,
+  });
+  const printed = chunks.join('');
+  assert.ok(result.bundle);
+  assert.match(printed, /WARNING\s+stdout:i2/);
+  assert.match(printed, /Complete cut\.json metadata boundary/);
+  assert.doesNotMatch(printed, /metadata boundary withheld/);
+});
+
 test('secret-shaped filenames, metadata, and captured output stay behind preflight', async () => {
   const root = fixtureRepository();
   const key = `AKIA${'C3'.repeat(8)}`;

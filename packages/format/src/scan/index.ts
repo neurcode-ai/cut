@@ -15,6 +15,7 @@ export type SecretFindingKind =
 export interface SecretFinding {
   id: string;
   kind: SecretFindingKind;
+  severity: 'blocking' | 'warning';
   scope: string;
   line: number;
   summary: string;
@@ -82,9 +83,31 @@ function lineAt(text: string, index: number): number {
   return line;
 }
 
-function findingId(kind: SecretFindingKind, scope: string, index: number, match: string): string {
-  const material = `${kind}\0${scope}\0${index}\0${createHash('sha256').update(match).digest('hex')}`;
+function normalizedScope(scope: string): string {
+  return scope.trim().replace(/\\/g, '/').replace(/\s+/g, ' ');
+}
+
+function normalizedMatch(match: string): string {
+  return match.trim().replace(/\s+/g, ' ');
+}
+
+function findingId(
+  kind: SecretFindingKind,
+  scope: string,
+  match: string,
+  occurrence: number,
+): string {
+  const material = [
+    kind,
+    normalizedScope(scope),
+    createHash('sha256').update(normalizedMatch(match)).digest('hex'),
+    String(occurrence),
+  ].join('\0');
   return `sf_${createHash('sha256').update(material).digest('hex').slice(0, 12)}`;
+}
+
+function isEvidenceOutputScope(scope: string): boolean {
+  return /^(?:stdout|stderr|command-evidence|evidence-output)(?::|$)/i.test(normalizedScope(scope));
 }
 
 function entropy(value: string): number {
@@ -105,14 +128,27 @@ function overlaps(index: number, length: number, occupied: Array<[number, number
 export function scanText(field: ScanField): SecretFinding[] {
   const findings: SecretFinding[] = [];
   const occupied: Array<[number, number]> = [];
+  const occurrences = new Map<string, number>();
+  const nextOccurrence = (kind: SecretFindingKind, value: string): number => {
+    const key = `${kind}\0${normalizedScope(field.scope)}\0${normalizedMatch(value)}`;
+    const ordinal = (occurrences.get(key) ?? 0) + 1;
+    occurrences.set(key, ordinal);
+    return ordinal;
+  };
   const filenameCandidate = field.scope.startsWith('path:') ? field.text : field.scope;
   if (
     (/^(?:file|excerpt|context):/i.test(field.scope) || field.scope.startsWith('path:'))
     && /(?:^|\/)(?:secrets?|credentials?)(?:\.[^/:]+)?(?::|$)|\.(?:pem|p12|pfx|key)(?::|$)/i.test(filenameCandidate)
   ) {
     findings.push({
-      id: findingId('sensitive-filename', field.scope, 0, filenameCandidate),
+      id: findingId(
+        'sensitive-filename',
+        field.scope,
+        filenameCandidate,
+        nextOccurrence('sensitive-filename', filenameCandidate),
+      ),
       kind: 'sensitive-filename',
+      severity: 'blocking',
       scope: field.scope,
       line: 1,
       summary: 'Sensitive filename requires explicit review',
@@ -125,8 +161,9 @@ export function scanText(field: ScanField): SecretFinding[] {
       const index = match.index ?? 0;
       const value = match[0];
       findings.push({
-        id: findingId(rule.kind, field.scope, index, value),
+        id: findingId(rule.kind, field.scope, value, nextOccurrence(rule.kind, value)),
         kind: rule.kind,
+        severity: 'blocking',
         scope: field.scope,
         line: lineAt(field.text, index),
         summary: rule.summary,
@@ -144,8 +181,14 @@ export function scanText(field: ScanField): SecretFinding[] {
     if (/^[A-Za-z]+$/.test(value) || /^[0-9]+$/.test(value)) continue;
     if (new Set(value).size < 10 || entropy(value) < 4.25) continue;
     findings.push({
-      id: findingId('high-entropy-token', field.scope, index, value),
+      id: findingId(
+        'high-entropy-token',
+        field.scope,
+        value,
+        nextOccurrence('high-entropy-token', value),
+      ),
       kind: 'high-entropy-token',
+      severity: isEvidenceOutputScope(field.scope) ? 'warning' : 'blocking',
       scope: field.scope,
       line: lineAt(field.text, index),
       summary: 'High-entropy token-like value',

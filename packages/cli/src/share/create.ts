@@ -403,7 +403,11 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
     exclusions: selection.warnings,
     destinations,
   };
-  if (capturedEvidence && initialState.findings.length === 0 && !options.stdout) {
+  if (
+    capturedEvidence
+    && initialState.findings.every((finding) => finding.severity === 'warning')
+    && !options.stdout
+  ) {
     if (capturedEvidence.stdout.length) process.stdout.write(capturedEvidence.stdout);
     if (capturedEvidence.stderr.length) process.stderr.write(capturedEvidence.stderr);
   }

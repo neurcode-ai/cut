@@ -176,6 +176,28 @@ test('secret scanner covers known shapes and does not expose the matched secret'
   assert.ok(findings.every((finding) => !JSON.stringify(finding).includes(key)));
 });
 
+test('secret finding identity is semantic, stable across preceding output, and ordinal for duplicates', () => {
+  const key = `AKIA${'B2'.repeat(8)}`;
+  const first = scanFields([{ scope: 'stdout:i2', text: `12 ms\ncredential ${key}\n${key}\n` }]);
+  const second = scanFields([{ scope: 'stdout:i2', text: `completed after 12.481 seconds with extra detail\ncredential ${key}\n${key}\n` }]);
+  const firstIds = first.filter((finding) => finding.kind === 'aws-access-key').map((finding) => finding.id);
+  const secondIds = second.filter((finding) => finding.kind === 'aws-access-key').map((finding) => finding.id);
+  assert.deepEqual(firstIds, secondIds);
+  assert.equal(new Set(firstIds).size, 2);
+  assert.ok(first.filter((finding) => finding.kind === 'aws-access-key').every((finding) => finding.severity === 'blocking'));
+});
+
+test('generic high-entropy evidence is a warning while credential patterns remain blocking', () => {
+  const generic = 'Q7mK2vN9pR4xT8zL3cW6bY1hF5sD0jUa';
+  const key = `AKIA${'D4'.repeat(8)}`;
+  const findings = scanFields([{
+    scope: 'stderr:i3',
+    text: `asset-${generic}.js\ncredential ${key}\n`,
+  }]);
+  assert.ok(findings.some((finding) => finding.kind === 'high-entropy-token' && finding.severity === 'warning'));
+  assert.ok(findings.some((finding) => finding.kind === 'aws-access-key' && finding.severity === 'blocking'));
+});
+
 test('archive round-trips deterministically and renderers keep source inert', () => {
   const bundle = fixtureBundle();
   const first = writeShareArchive(bundle);

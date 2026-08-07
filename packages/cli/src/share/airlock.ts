@@ -55,7 +55,9 @@ function writeInventory(
   acknowledged: Set<string>,
   output: NodeJS.WritableStream,
 ): void {
-  const hasBlockingFindings = state.findings.some((finding) => !acknowledged.has(finding.id));
+  const hasBlockingFindings = state.findings.some(
+    (finding) => finding.severity !== 'warning' && !acknowledged.has(finding.id),
+  );
   output.write('\nCut by Neurcode: Review what will be shared\n');
   output.write('Nothing is uploaded until you explicitly choose Publish.\n\n');
   for (const item of state.draft.pack.items) {
@@ -83,7 +85,9 @@ function writeInventory(
   } else {
     output.write(`  Secret scan: ${state.findings.length} finding(s)\n`);
     for (const finding of state.findings) {
-      const status = acknowledged.has(finding.id) ? 'acknowledged' : 'BLOCKING';
+      const status = acknowledged.has(finding.id)
+        ? 'acknowledged'
+        : finding.severity === 'warning' ? 'WARNING' : 'BLOCKING';
       output.write(`    ${finding.id}  ${status.padEnd(12)} ${finding.scope}:${finding.line}: ${finding.summary}\n`);
     }
   }
@@ -151,7 +155,9 @@ export async function runAirlock(input: {
 
   if (input.dryRun) return { ...state, proceed: false };
 
-  const blocking = (): SecretFinding[] => state.findings.filter((finding) => !acknowledged.has(finding.id));
+  const blocking = (): SecretFinding[] => state.findings.filter(
+    (finding) => finding.severity !== 'warning' && !acknowledged.has(finding.id),
+  );
   if (input.yes) {
     if (blocking().length > 0) {
       throw new Error('Secret findings block this Cut. Review them, then acknowledge each exact ID with --acknowledge-finding <id>.');
