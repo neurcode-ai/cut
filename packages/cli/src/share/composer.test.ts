@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -35,6 +35,7 @@ test('loopback Composer is local-only, resumable, provenance-honest, and blocks 
     cwd: root,
     toolVersion: 'test',
     apiUrl: 'http://127.0.0.1:9',
+    replyTo: { shareId: `shr_${'r'.repeat(20)}`, capability: 'memory-only-parent-capability' },
     openBrowser: false,
     idleTimeoutMs: 60_000,
   });
@@ -62,9 +63,11 @@ test('loopback Composer is local-only, resumable, provenance-honest, and blocks 
     assert.ok(bootstrap.repository.stagedChanges.includes('src/staged.ts'));
     assert.ok(bootstrap.repository.recentCommits.length >= 1);
     assert.equal(bootstrap.draft.localItems.length, 0);
+    assert.deepEqual(bootstrap.reply, { parentId: `shr_${'r'.repeat(20)}` });
 
     const draftFile = join(root, '.git', 'neurcode-share', 'drafts', `${handle.draftId}.json`);
     assert.equal(statSync(draftFile).mode & 0o777, 0o600);
+    assert.doesNotMatch(readFileSync(draftFile, 'utf8'), /memory-only-parent-capability/);
 
     const rejectedMutation = await fetch(`${origin}${config.basePath}/api/draft`, {
       method: 'POST',

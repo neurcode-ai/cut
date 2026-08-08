@@ -41,6 +41,21 @@ export interface HostedShareLink {
   agentSecret?: string;
 }
 
+export interface HostedReplyTarget {
+  shareId: string;
+  capability?: string;
+}
+
+export function parseHostedReplyTarget(value: string): HostedReplyTarget {
+  const trimmed = typeof value === 'string' ? value.trim() : '';
+  if (/^shr_[A-Za-z0-9_-]{20,26}$/.test(trimmed)) return { shareId: trimmed };
+  const parsed = parseHostedShareLink(trimmed);
+  if (parsed.agentLinkId || parsed.agentSecret || parsed.revisionNumber) {
+    throw new Error('--reply-to accepts a canonical hosted Cut URL or ID, not an agent link or historical revision.');
+  }
+  return { shareId: parsed.shareId, capability: parsed.capability };
+}
+
 export function parseHostedShareLink(value: string): HostedShareLink {
   if (typeof value !== 'string' || value.length < 1 || value.length > 16_384) {
     throw new Error('Hosted Cut URL is not a bounded string.');
@@ -270,6 +285,7 @@ export async function publishHostedShare(input: {
   visibility: 'unlisted' | 'restricted' | 'public';
   recipients: string[];
   expiryHours: number;
+  replyTo?: HostedReplyTarget;
 }): Promise<{ url: string; share: Record<string, unknown> }> {
   const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
   const shareOrigin = (input.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://cut.neurcode.com').replace(/\/+$/, '');
@@ -290,12 +306,14 @@ export async function publishHostedShare(input: {
     headers: {
       authorization: `Bearer ${publishToken}`,
       'content-type': 'application/json',
-      'idempotency-key': createHash('sha256').update(`cli-finalize\0${upload.uploadId}\0${digest}`).digest('hex'),
+      'idempotency-key': createHash('sha256').update(`cli-finalize\0${upload.uploadId}\0${digest}\0${input.replyTo?.shareId ?? ''}`).digest('hex'),
+      ...(input.replyTo?.capability ? { 'x-share-capability': input.replyTo.capability } : {}),
     },
     body: JSON.stringify({
       visibility: input.visibility,
       recipients: input.recipients,
       expiryHours: input.expiryHours,
+      ...(input.replyTo ? { replyToShareId: input.replyTo.shareId } : {}),
     }),
   });
   return finalized;

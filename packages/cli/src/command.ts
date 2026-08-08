@@ -7,11 +7,31 @@ import { proposeGitWorkingSet } from './share/working-set';
 import {
   expiryHours,
   fetchHostedShare,
+  parseHostedReplyTarget,
   publishHostedShare,
+  type HostedReplyTarget,
 } from './share/hosted';
 
 function collect(value: string, previous: string[]): string[] {
   return [...previous, value];
+}
+
+async function replyTarget(value: unknown): Promise<HostedReplyTarget | undefined> {
+  if (value === undefined) return undefined;
+  if (value !== '-') return parseHostedReplyTarget(String(value));
+  if (process.stdin.isTTY) {
+    throw new Error('--reply-to - expects one Cut URL or ID piped on stdin. This keeps capability URLs out of shell history.');
+  }
+  const lines = createInterface({ input: process.stdin, crlfDelay: Infinity });
+  try {
+    for await (const line of lines) {
+      if (line.length > 16_384) throw new Error('The stdin reply target exceeds 16,384 characters.');
+      if (line.trim()) return parseHostedReplyTarget(line);
+    }
+  } finally {
+    lines.close();
+  }
+  throw new Error('--reply-to - did not receive a Cut URL or ID on stdin.');
 }
 
 export function shareCommand(program: Command, toolVersion: string): void {
@@ -30,6 +50,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
     .option('--acknowledge-finding <id>', 'Acknowledge one exact secret-scan finding', collect, [])
     .option('--expire <duration>', 'Hosted expiry in hours or a bounded duration such as 7d')
     .option('--publish', 'Publish after the local disclosure review')
+    .option('--reply-to <cut-url-or-id>', 'Link a hosted publication as a reply; use - to read the target from stdin')
     .option('--visibility <mode>', 'Hosted access: unlisted, restricted, or public', 'unlisted')
     .option('--recipient <email>', 'Allow a signed-in email for restricted access', collect, [])
     .option('--api-url <url>', 'Override the hosted Cut API URL')
@@ -48,9 +69,11 @@ export function shareCommand(program: Command, toolVersion: string): void {
         + '  neurcode-cut src/queue.ts:20-80 tests/queue.test.ts -m "race in drain loop?" --preview\n'
         + '  neurcode-cut --diff --run "npm test -- queue" --yes --out cut.tar.gz\n'
         + '  neurcode-cut --diff=main..HEAD --yes --out context.md\n'
-        + '  npx @neurcode-ai/cut@0.2.0                    # local browser Composer\n'
+        + '  npx @neurcode-ai/cut@0.3.0                    # local browser Composer\n'
         + '  neurcode-cut --no-browser                     # guided terminal fallback\n'
         + '  neurcode-cut --handoff                        # Cut-format handoff preset\n'
+        + '  printf \'%s\\n\' "$CUT_REPLY_URL" | neurcode-cut src/reply.ts --reply-to - --publish\n'
+        + '\nCapability-bearing URLs can be retained in shell history when passed as arguments. Prefer --reply-to - with piped stdin.\n'
         + '\nLocal creation never requires an account. Publish authenticates only after “Review what will be shared.”\n',
     )
     .action(async (selections: string[], options) => {
@@ -66,6 +89,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
         });
         return;
       }
+      const replyTo = await replyTarget(options.replyTo);
       const timeout = Number(options.runTimeout);
       if (!Number.isFinite(timeout) || timeout < 0.001 || timeout > 600) {
         throw new Error('--run-timeout must be between 0.001 and 600 seconds.');
@@ -105,6 +129,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
             : zeroArgumentRequested
               ? 'working-set'
               : undefined,
+          replyTo,
         });
         return;
       }
@@ -224,9 +249,13 @@ export function shareCommand(program: Command, toolVersion: string): void {
               visibility: publishVisibility,
               expiryHours: publishExpiryHours,
               recipientCount: publishRecipients.length,
+              reply: Boolean(replyTo),
             }
           : undefined,
       });
+      if (replyTo && options.publish !== true) {
+        process.stderr.write('Local artifact created. Reply relationships are hosted metadata and are applied only during hosted publication.\n');
+      }
       if (options.publish === true) {
         if (!result.bundle) throw new Error('Publishing requires a completed local disclosure review.');
         if (result.bundle.cut.manifest.security.acknowledgedFindings.length > 0) {
@@ -240,6 +269,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
           visibility: publishVisibility,
           recipients: publishRecipients,
           expiryHours: publishExpiryHours,
+          replyTo,
         });
         process.stdout.write(`Published securely · ${published.url}\n`);
       }

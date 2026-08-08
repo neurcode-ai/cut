@@ -17,6 +17,7 @@ import { createLocalShare } from './create';
 import { composerHtml } from './composer-ui';
 import { readComposerFile, readComposerRepository } from './composer-data';
 import { proposeGitWorkingSet } from './working-set';
+import type { HostedReplyTarget } from './hosted';
 import {
   loadComposerDraft,
   newComposerDraft,
@@ -52,6 +53,7 @@ export interface ShareComposerOptions {
   preset?: 'handoff' | 'working-set';
   openBrowser?: boolean;
   idleTimeoutMs?: number;
+  replyTo?: HostedReplyTarget;
 }
 
 export interface ShareComposerHandle {
@@ -428,7 +430,11 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
         return;
       }
       if (relative === '/api/bootstrap' && request.method === 'GET') {
-        json(response, 200, { repository, draft: draftForClient(draft) });
+        json(response, 200, {
+          repository,
+          draft: draftForClient(draft),
+          reply: options.replyTo ? { parentId: options.replyTo.shareId } : null,
+        });
         return;
       }
       if (relative === '/api/file' && request.method === 'GET') {
@@ -498,6 +504,7 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
           access: draft.visibility,
           expiryHours: draft.expiryHours,
           recipients: draft.recipients,
+          reply: Boolean(options.replyTo),
           previewHtml: blockingFindings(reviewCache.findings).length ? null : renderHtml(bundle),
           previewMarkdown: blockingFindings(reviewCache.findings).length ? null : renderMarkdown(bundle),
         });
@@ -573,15 +580,23 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
         });
         if (!upload.ok) throw new HttpError('The hosted server rejected this Cut upload.', upload.status);
         const uploaded = await upload.json() as { uploadId: string };
-        const finalizeKey = createHash('sha256').update(`finalize\0${draft.id}\0${uploaded.uploadId}`).digest('hex');
+        const finalizeKey = createHash('sha256')
+          .update(`finalize\0${draft.id}\0${uploaded.uploadId}\0${options.replyTo?.shareId ?? ''}`)
+          .digest('hex');
         const finalized = await fetch(`${apiUrl}/api/v1/share/uploads/${encodeURIComponent(uploaded.uploadId)}/finalize`, {
           method: 'POST',
           headers: {
             authorization: `Bearer ${pendingAuth.publishToken}`,
             'content-type': 'application/json',
             'idempotency-key': finalizeKey,
+            ...(options.replyTo?.capability ? { 'x-share-capability': options.replyTo.capability } : {}),
           },
-          body: JSON.stringify({ visibility: access, expiryHours, recipients }),
+          body: JSON.stringify({
+            visibility: access,
+            expiryHours,
+            recipients,
+            ...(options.replyTo ? { replyToShareId: options.replyTo.shareId } : {}),
+          }),
         });
         if (!finalized.ok) throw new HttpError('The hosted server could not finalize this Cut.', finalized.status);
         const published = await finalized.json();

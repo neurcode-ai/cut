@@ -1,6 +1,6 @@
 {
   "name": "@neurcode-ai/share",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Local-first capture, review, export, and secure publishing for Cut by Neurcode",
   "bin": {
     "neurcode-cut": "dist/index.js",

@@ -22,7 +22,7 @@ import {
 } from '@neurcode-ai/share-format';
 import { refreshShare } from './refresh';
 import { readShareSelections } from './git-reader';
-import { parseHostedShareLink } from './hosted';
+import { parseHostedReplyTarget, parseHostedShareLink } from './hosted';
 import {
   normalizedVerificationJson,
   parseCitationPin,
@@ -340,6 +340,23 @@ test('bounds hosted URL parsing and preserves an explicit immutable revision', (
   assert.throws(() => parseHostedShareLink(`ftp://localhost/s/${shareId}`));
   assert.throws(() => parseHostedShareLink(`https://user:password@share.neurcode.com/s/${shareId}`));
   assert.throws(() => parseHostedShareLink(`https://share.neurcode.com/s/${shareId}?revision=0`));
+});
+
+test('accepts only canonical hosted Cut IDs or current links as reply targets', () => {
+  const shareId = `shr_${'r'.repeat(20)}`;
+  assert.deepEqual(parseHostedReplyTarget(shareId), { shareId });
+  assert.deepEqual(
+    parseHostedReplyTarget(`https://cut.neurcode.com/c/${shareId}#cap=fragment-secret`),
+    { shareId, capability: 'fragment-secret' },
+  );
+  assert.throws(
+    () => parseHostedReplyTarget(`https://cut.neurcode.com/c/${shareId}?revision=2`),
+    /not an agent link or historical revision/,
+  );
+  assert.throws(
+    () => parseHostedReplyTarget(`https://cut.neurcode.com/agent/${shareId}/11111111-1111-4111-8111-111111111111#token=secret`),
+    /not an agent link or historical revision/,
+  );
 });
 
 test('keeps ordinary p50/p95 below target and a repository with many unrelated files bounded', (context) => {

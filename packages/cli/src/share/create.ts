@@ -60,6 +60,7 @@ export interface CreateShareOptions {
     visibility: 'unlisted' | 'restricted' | 'public';
     expiryHours: number;
     recipientCount: number;
+    reply: boolean;
   };
 }
 
@@ -285,7 +286,8 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
           ? [
               `hosted ${options.hostedPublish.visibility} Cut after browser authentication`
               + ` · expires in ${options.hostedPublish.expiryHours} hours`
-              + ` · ${options.hostedPublish.recipientCount} allowed recipient(s)`,
+              + ` · ${options.hostedPublish.recipientCount} allowed recipient(s)`
+              + (options.hostedPublish.reply ? ' · linked as a hosted reply after parent access is rechecked' : ''),
             ]
           : []),
       ];

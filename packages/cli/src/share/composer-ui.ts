@@ -23,6 +23,7 @@ export function composerHtml(input: {
     .search{width:100%;margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none}.search:focus,.title:focus,.intent:focus,.note:focus,.command:focus,.field:focus{border-color:var(--violet);box-shadow:0 0 0 3px #eeeafe}
     .browser{overflow:auto;padding:8px}.group-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:9px 8px 5px}.file,.commit,.change{width:100%;border:0;background:transparent;text-align:left;padding:8px;border-radius:7px;display:flex;gap:8px;align-items:flex-start;color:#303a49}.file:hover,.commit:hover,.change:hover{background:var(--soft)}.file.active{background:#eeeafe;color:#4733bc}.path{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.badge{font-size:10px;padding:2px 5px;border-radius:10px;background:var(--mint);color:#166347;flex:none}.badge.staged{background:var(--amber);color:#77560b}.commit{display:block}.commit strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}.commit small{display:block;color:var(--muted);margin-top:3px}
     .editor{min-width:0;min-height:0;display:flex;flex-direction:column;background:#fbfcfd}.compose-head{padding:22px 24px 14px;background:#fff;border-bottom:1px solid var(--line)}.title{font-size:23px;line-height:1.2;font-weight:760;letter-spacing:-.025em;border:1px solid transparent;border-radius:7px;width:100%;padding:6px 8px;margin:-6px -8px 5px;outline:none}.intent{width:100%;min-height:58px;resize:vertical;border:1px solid transparent;border-radius:7px;padding:7px 8px;margin-left:-8px;color:#475365;outline:none}
+    .reply-context{margin:0 0 14px;padding:10px 12px;border:1px solid #cfc7ff;border-radius:8px;background:#f3f0ff;color:#4733bc;font-size:12px}.reply-context strong{display:block}.reply-context span{display:block;color:var(--muted);margin-top:3px}
     .toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);min-height:48px}.toolbar .context{min-width:0;margin-right:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}.range{color:var(--violet);font-weight:700}
     .canvas{min-height:0;overflow:auto;padding:18px}.empty{max-width:600px;margin:8vh auto;text-align:center;color:var(--muted)}.empty h3{font-size:22px;color:var(--ink);margin-bottom:7px}.empty .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px;text-align:left}.step{border:1px solid var(--line);padding:13px;border-radius:10px;background:#fff}.step b{display:block;color:var(--ink);margin-bottom:4px}
     .code{background:var(--code);color:var(--codeText);border-radius:10px;box-shadow:0 12px 34px #16203318;overflow:auto;max-width:100%}.code-line{display:grid;grid-template-columns:56px minmax(max-content,1fr);min-height:22px;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre}.line-no{border:0;background:transparent;color:#6f7b8e;text-align:right;padding:0 12px 0 6px;border-right:1px solid #29313e;user-select:none}.line-no:hover{color:#fff;background:#202938}.line-text{padding:0 14px}.code-line.selected{background:#382f78}.code-line.selected .line-no{color:#c8bdff;background:#4b3c9a}
@@ -61,6 +62,7 @@ export function composerHtml(input: {
 
     <section class="editor" aria-label="Cut Composer">
       <div class="compose-head">
+        <div class="reply-context" id="replyContext" hidden><strong>Replying to <span id="replyParentId"></span></strong><span>The creator of the original Cut will always be able to read this reply. Other access is controlled by the settings below.</span></div>
         <input class="title" id="title" maxlength="180" placeholder="Give this Cut a clear title" aria-label="Cut title">
         <textarea class="intent" id="intent" maxlength="8000" placeholder="What should the recipient understand or help with?" aria-label="Question or intent"></textarea>
         <p id="proposalSummary" class="muted"></p>
@@ -466,6 +468,7 @@ export function composerHtml(input: {
           ['Origin', review.origin], ['Commit', review.commit], ['Branch', review.branch || '(detached)'],
           ['Aggregate', review.aggregateBytes + ' bytes'], ['Destinations', 'Local unless Publish is confirmed'],
           ['Access on publish', review.access], ['Expiry on publish', review.expiryHours + ' hours'],
+          ['Relationship', review.reply ? 'Hosted reply; parent access is rechecked during publish' : 'Independent Cut'],
           ['Allowed recipients', review.recipients.length ? review.recipients.join(', ') : 'None'],
           ['Absolute paths', review.absolutePathWarnings.length ? review.absolutePathWarnings.length + ' warning(s) listed below' : 'None detected'],
         ].forEach(([label,value]) => { const fact=document.createElement('div');fact.className='fact';const span=document.createElement('span');span.textContent=label;const strong=document.createElement('strong');strong.textContent=value;fact.append(span,strong);facts.append(fact); });
@@ -598,6 +601,7 @@ export function composerHtml(input: {
       try {
         const bootstrap = await (await api('bootstrap')).json();
         repository = bootstrap.repository; draft = bootstrap.draft;
+        if (bootstrap.reply) { $('replyContext').hidden=false; $('replyParentId').textContent=bootstrap.reply.parentId; }
         $('repoName').textContent = repository.repository.name;
         $('repoMeta').textContent = repository.repository.branch + (repository.repository.dirty ? ' · local changes' : ' · clean');
         $('title').value = draft.title; $('intent').value = draft.intent;
