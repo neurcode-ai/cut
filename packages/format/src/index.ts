@@ -1,4 +1,5 @@
 export * from './archive';
+export * from './applyable';
 export * from './canonical';
 export * from './model';
 export * from './pins';

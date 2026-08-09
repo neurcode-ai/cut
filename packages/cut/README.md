@@ -4,7 +4,7 @@
 into one focused Cut for teammates and AI agents.
 
 ```sh
-npx @neurcode-ai/cut@0.4.0
+npx @neurcode-ai/cut@0.5.0
 ```
 
 After installing it, the memorable team workflow is:

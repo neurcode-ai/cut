@@ -43,3 +43,15 @@ console.log(bundle.cut.manifest.digest);
 console.log(renderMarkdown(bundle));
 console.log(renderAgentJson(bundle));
 ```
+
+## Applyable reply extension
+
+Version 0.5.0 adds the backward-compatible Applyable Replies V1 helpers. An
+applyable reply is still a `cut: 1` archive and carries canonical metadata as
+one ordinary JSON file item, so older readers remain able to open it.
+
+Use `readApplyableReplyMetadata` to detect and strictly validate the extension,
+`createApplyableReplyMetadata` only in a trusted server-side builder, and
+`validateApplyableReplyAgainstParent` to bind it to the exact parent bundle.
+Limits and the exact field/path rules are documented in
+[Applyable Replies V1](../../docs/APPLYABLE_REPLIES_V1.md).

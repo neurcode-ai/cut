@@ -1,15 +1,15 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:ad300b40-c1e5-a8db-7fb9-3ad8c7ac0869",
+  "serialNumber": "urn:uuid:ff811d65-553d-6228-00ae-971877f60d89",
   "version": 1,
   "metadata": {
     "component": {
       "type": "library",
-      "bom-ref": "pkg:npm/%40neurcode-ai/cut@0.4.0",
+      "bom-ref": "pkg:npm/%40neurcode-ai/cut@0.5.0",
       "name": "@neurcode-ai/cut",
-      "version": "0.4.0",
-      "purl": "pkg:npm/%40neurcode-ai/cut@0.4.0",
+      "version": "0.5.0",
+      "purl": "pkg:npm/%40neurcode-ai/cut@0.5.0",
       "licenses": [
         {
           "license": {
@@ -20,13 +20,13 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "b3fd0087acf8725e5f173655d5479315ff9911a75d028852e64036c24355cfc5"
+          "content": "1ae02cabc9e4b1a394545da6d5ca99c3ab47a5f55893ee7cd53e44b115e22ba5"
         }
       ],
       "properties": [
         {
           "name": "neurcode:packed-file",
-          "value": "neurcode-ai-cut-0.4.0.tgz"
+          "value": "neurcode-ai-cut-0.5.0.tgz"
         },
         {
           "name": "neurcode:packed-bytes",
@@ -38,10 +38,10 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
+      "bom-ref": "pkg:npm/%40neurcode-ai/share-format@0.5.0",
       "name": "@neurcode-ai/share-format",
-      "version": "0.4.1",
-      "purl": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
+      "version": "0.5.0",
+      "purl": "pkg:npm/%40neurcode-ai/share-format@0.5.0",
       "licenses": [
         {
           "license": {
@@ -52,10 +52,10 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40neurcode-ai/share@0.7.0",
+      "bom-ref": "pkg:npm/%40neurcode-ai/share@0.8.0",
       "name": "@neurcode-ai/share",
-      "version": "0.7.0",
-      "purl": "pkg:npm/%40neurcode-ai/share@0.7.0",
+      "version": "0.8.0",
+      "purl": "pkg:npm/%40neurcode-ai/share@0.8.0",
       "licenses": [
         {
           "license": {
@@ -221,19 +221,19 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:npm/%40neurcode-ai/cut@0.4.0",
+      "ref": "pkg:npm/%40neurcode-ai/cut@0.5.0",
       "dependsOn": [
-        "pkg:npm/%40neurcode-ai/share@0.7.0"
+        "pkg:npm/%40neurcode-ai/share@0.8.0"
       ]
     },
     {
-      "ref": "pkg:npm/%40neurcode-ai/share-format@0.4.1",
+      "ref": "pkg:npm/%40neurcode-ai/share-format@0.5.0",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40neurcode-ai/share@0.7.0",
+      "ref": "pkg:npm/%40neurcode-ai/share@0.8.0",
       "dependsOn": [
-        "pkg:npm/%40neurcode-ai/share-format@0.4.1",
+        "pkg:npm/%40neurcode-ai/share-format@0.5.0",
         "pkg:npm/commander@11.1.0",
         "pkg:npm/open@10.2.0"
       ]

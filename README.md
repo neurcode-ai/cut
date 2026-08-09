@@ -28,7 +28,7 @@ link when you choose to.
 From any Git repository:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0
+npx @neurcode-ai/cut@0.5.0
 ```
 
 The local Composer asks Git for the changed, staged, and non-ignored untracked
@@ -40,8 +40,8 @@ Publish.
 For a non-interactive local archive:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
-npx @neurcode-ai/cut@0.4.0 --message "Review this working set" --yes --out working-set.tar.gz
+npx @neurcode-ai/cut@0.5.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/cut@0.5.0 --message "Review this working set" --yes --out working-set.tar.gz
 ```
 
 ## One canonical Cut, native representations
@@ -72,10 +72,10 @@ Local creation needs no account. Export a deterministic archive, inert HTML,
 Markdown, or agent JSON:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0 src/queue.ts --yes --out queue-review.html
-npx @neurcode-ai/cut@0.4.0 --staged --yes --out staged-review.md
-npx @neurcode-ai/cut@0.4.0 --diff=main..HEAD --yes --out change.json
-npx @neurcode-ai/cut@0.4.0 --run "pnpm test queue" --yes --out evidence.tar.gz
+npx @neurcode-ai/cut@0.5.0 src/queue.ts --yes --out queue-review.html
+npx @neurcode-ai/cut@0.5.0 --staged --yes --out staged-review.md
+npx @neurcode-ai/cut@0.5.0 --diff=main..HEAD --yes --out change.json
+npx @neurcode-ai/cut@0.5.0 --run "pnpm test queue" --yes --out evidence.tar.gz
 ```
 
 Commands are bounded by time and output limits. Sensitive paths are denied by
@@ -85,13 +85,35 @@ Verify exact cited bytes against a selected local repository state, or prepare
 a reviewed immutable successor without publishing:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0 verify review.tar.gz --repo ../project
-npx @neurcode-ai/cut@0.4.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+npx @neurcode-ai/cut@0.5.0 verify review.tar.gz --repo ../project
+npx @neurcode-ai/cut@0.5.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
 ```
 
 See the [CLI guide](packages/cli/README.md) for deterministic JSON, named
 revisions, staged comparisons, explicit refresh decisions, hosted checks,
 and authorized comments.
+
+## Try and apply suggested edits
+
+An eligible hosted reply may carry exact suggested edits while remaining a
+normal immutable Cut. Preview it in a retained sparse worktree, or apply it
+interactively after reviewing the full diff:
+
+```sh
+npx @neurcode-ai/cut@0.5.0 try 'https://cut.neurcode.com/c/REPLY_ID'
+npx @neurcode-ai/cut@0.5.0 try --list
+npx @neurcode-ai/cut@0.5.0 apply 'https://cut.neurcode.com/c/REPLY_ID'
+```
+
+Neither command runs source, commands, tests, or hooks, commits, or pushes.
+`try` does not copy unrelated working files or change the current worktree;
+`apply` has no force/non-interactive bypass and creates private recovery
+material before writing. See [Cut Try and Apply](docs/CUT_TRY.md) and the
+[Applyable Replies V1 format](docs/APPLYABLE_REPLIES_V1.md).
+
+Use `cut inbox` for a bounded source-free Waiting/Answered view of authorized
+personal and team conversations. Its stable JSON contract and pagination are
+documented in [Cut Inbox](docs/CUT_INBOX.md).
 
 ## Hosted publishing
 
@@ -100,7 +122,7 @@ Neurcode identity and a loopback PKCE flow, so no hosted token is copied into
 the terminal:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0 src/session.ts --publish --visibility unlisted
+npx @neurcode-ai/cut@0.5.0 src/session.ts --publish --visibility unlisted
 ```
 
 The hosted service at [cut.neurcode.com](https://cut.neurcode.com) is
@@ -112,8 +134,8 @@ List the exact slugs available to your signed-in account, then use `--to`; this
 implies hosted publishing and keeps the Cut inside the team-only shared inbox:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0 teams
-npx @neurcode-ai/cut@0.4.0 src/queue.ts --to platform-engineering-a1b2c3 --yes
+npx @neurcode-ai/cut@0.5.0 teams
+npx @neurcode-ai/cut@0.5.0 src/queue.ts --to platform-engineering-a1b2c3 --yes
 ```
 
 With the package installed, the same workflow is `cut teams` followed by
@@ -128,8 +150,8 @@ canonical ID or URL. Parent access is checked again inside finalization; the
 reply keeps its own visibility, recipients, expiry, provenance, and revision:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0 src/reply.ts --reply-to shr_PARENT_ID --publish
-printf '%s\n' "$CUT_REPLY_URL" | npx @neurcode-ai/cut@0.4.0 src/reply.ts --reply-to - --publish
+npx @neurcode-ai/cut@0.5.0 src/reply.ts --reply-to shr_PARENT_ID --publish
+printf '%s\n' "$CUT_REPLY_URL" | npx @neurcode-ai/cut@0.5.0 src/reply.ts --reply-to - --publish
 ```
 
 Capability-bearing URLs may be retained in shell history when supplied as an
@@ -147,7 +169,7 @@ adjacent canonical representation, or create a short-lived, revision-pinned
 agent link in the hosted library and fetch its scoped format:
 
 ```sh
-npx @neurcode-ai/cut@0.4.0 fetch 'AGENT_LINK' --stdout md
+npx @neurcode-ai/cut@0.5.0 fetch 'AGENT_LINK' --stdout md
 ```
 
 Capability and agent secrets remain in URL fragments at rest and are sent in

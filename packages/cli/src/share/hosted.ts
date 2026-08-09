@@ -14,6 +14,42 @@ function apiError(status: number, payload: any): Error {
   return new Error(payload?.message || `Hosted Cut request failed (${status}).`);
 }
 
+export type HostedCliFailureReason =
+  | 'authentication' | 'network' | 'authority' | 'format' | 'repository'
+  | 'preimage' | 'path' | 'bounds' | 'noninteractive' | 'concurrency' | 'unknown';
+
+export type HostedCliProductEvent =
+  | 'try_started' | 'try_succeeded' | 'try_rejected_by_reason_class'
+  | 'apply_started' | 'apply_confirmed' | 'apply_rejected_by_reason_class';
+
+/** Strict source-free CLI telemetry: callers cannot attach content or identifiers. */
+export async function recordHostedCliProductEvent(input: {
+  eventType: HostedCliProductEvent;
+  elapsedMs?: number;
+  failureStage?: HostedCliFailureReason;
+  apiUrl?: string;
+}): Promise<void> {
+  try {
+    const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
+    const elapsedMs = input.elapsedMs === undefined
+      ? undefined
+      : Math.min(86_400_000, Math.max(0, Math.round(input.elapsedMs)));
+    await fetch(`${apiUrl}/api/v1/share/product-events`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        eventType: input.eventType,
+        ...(elapsedMs === undefined ? {} : { elapsedMs }),
+        ...(input.failureStage === undefined ? {} : { failureStage: input.failureStage }),
+      }),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2_000),
+    });
+  } catch {
+    // Aggregate telemetry is best-effort and never changes Cut behavior.
+  }
+}
+
 async function jsonFetch(url: string, init: RequestInit): Promise<any> {
   const response = await fetch(url, init);
   let body: any = null;
@@ -127,7 +163,7 @@ async function boundedResponseBytes(response: Response, limit: number): Promise<
 export async function browserCliToken(
   apiUrl: string,
   shareOrigin: string,
-  purpose: 'publish' | 'verify' | 'comments' | 'receipt' | 'teams' = 'publish',
+  purpose: 'publish' | 'verify' | 'comments' | 'receipt' | 'teams' | 'inbox' = 'publish',
 ): Promise<string> {
   const state = randomBytes(32).toString('base64url');
   const verifier = randomBytes(48).toString('base64url');
@@ -260,6 +296,181 @@ export async function fetchHostedComments(input: {
     shareId: link.shareId,
     comments: Array.isArray(payload?.items) ? payload.items : [],
   };
+}
+
+export interface HostedInboxItem {
+  id: string;
+  title: string;
+  url: string;
+  relationship: 'created' | 'received' | 'team';
+  state: 'waiting' | 'answered';
+  author: 'You' | 'Cut creator';
+  team: { name: string; slug: string } | null;
+  createdAt: string;
+  latestActivityAt: string;
+  feedback: { comments: number; replies: number };
+}
+
+export interface HostedInboxPage {
+  schemaVersion: 1;
+  items: HostedInboxItem[];
+  nextCursor: string | null;
+  limit: number;
+  status: 'all' | 'waiting' | 'answered';
+  team: { name: string; slug: string } | null;
+}
+
+function inboxString(value: unknown, label: string, maxLength: number): string {
+  if (typeof value !== 'string' || value.length < 1 || value.length > maxLength) {
+    throw new Error(`Hosted Cut inbox returned an invalid ${label}.`);
+  }
+  return value;
+}
+
+function inboxCount(value: unknown, label: string): number {
+  if (!Number.isSafeInteger(value) || Number(value) < 0 || Number(value) > 1_000_000) {
+    throw new Error(`Hosted Cut inbox returned an invalid ${label}.`);
+  }
+  return Number(value);
+}
+
+function inboxDate(value: unknown, label: string): string {
+  const result = inboxString(value, label, 64);
+  if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?Z$/.test(result) || Number.isNaN(Date.parse(result))) {
+    throw new Error(`Hosted Cut inbox returned an invalid ${label}.`);
+  }
+  return result;
+}
+
+function inboxTeam(value: unknown): HostedInboxPage['team'] {
+  if (value === null) return null;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Hosted Cut inbox returned an invalid team.');
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    name: inboxString(record.name, 'team name', 180),
+    slug: hostedTeamSlug(record.slug),
+  };
+}
+
+export function normalizeHostedInbox(value: unknown): HostedInboxPage {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Hosted Cut inbox response was invalid.');
+  }
+  const record = value as Record<string, unknown>;
+  if (record.schemaVersion !== 1 || !Array.isArray(record.items) || record.items.length > 100) {
+    throw new Error('Hosted Cut inbox response was invalid.');
+  }
+  const status = record.status;
+  if (status !== 'all' && status !== 'waiting' && status !== 'answered') {
+    throw new Error('Hosted Cut inbox returned an invalid status.');
+  }
+  const limit = inboxCount(record.limit, 'limit');
+  if (limit < 1 || limit > 100 || record.items.length > limit) {
+    throw new Error('Hosted Cut inbox returned an invalid limit.');
+  }
+  const nextCursor = record.nextCursor === null
+    ? null
+    : inboxString(record.nextCursor, 'cursor', 512);
+  if (nextCursor !== null && !/^[A-Za-z0-9_-]+$/.test(nextCursor)) {
+    throw new Error('Hosted Cut inbox returned an invalid cursor.');
+  }
+  const items = record.items.map((raw): HostedInboxItem => {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      throw new Error('Hosted Cut inbox returned an invalid item.');
+    }
+    const item = raw as Record<string, unknown>;
+    const id = inboxString(item.id, 'Cut ID', 32);
+    if (!/^shr_[A-Za-z0-9_-]{20,26}$/.test(id)) {
+      throw new Error('Hosted Cut inbox returned an invalid Cut ID.');
+    }
+    if (item.relationship !== 'created' && item.relationship !== 'received' && item.relationship !== 'team') {
+      throw new Error('Hosted Cut inbox returned an invalid relationship.');
+    }
+    if (item.state !== 'waiting' && item.state !== 'answered') {
+      throw new Error('Hosted Cut inbox returned an invalid item state.');
+    }
+    if (item.author !== 'You' && item.author !== 'Cut creator') {
+      throw new Error('Hosted Cut inbox returned an invalid author.');
+    }
+    const url = inboxString(item.url, 'browser URL', 2_048);
+    const parsedUrl = new URL(url);
+    const localHttp = parsedUrl.protocol === 'http:'
+      && (parsedUrl.hostname === '127.0.0.1' || parsedUrl.hostname === 'localhost');
+    if (
+      (parsedUrl.protocol !== 'https:' && !localHttp)
+      || parsedUrl.username
+      || parsedUrl.password
+      || parsedUrl.search
+      || parsedUrl.hash
+      || parsedUrl.pathname !== `/c/${id}`
+    ) throw new Error('Hosted Cut inbox returned an unsafe browser URL.');
+    const feedback = item.feedback;
+    if (!feedback || typeof feedback !== 'object' || Array.isArray(feedback)) {
+      throw new Error('Hosted Cut inbox returned invalid feedback counts.');
+    }
+    return {
+      id,
+      title: inboxString(item.title, 'title', 180),
+      url,
+      relationship: item.relationship,
+      state: item.state,
+      author: item.author,
+      team: inboxTeam(item.team),
+      createdAt: inboxDate(item.createdAt, 'creation time'),
+      latestActivityAt: inboxDate(item.latestActivityAt, 'activity time'),
+      feedback: {
+        comments: inboxCount((feedback as Record<string, unknown>).comments, 'comment count'),
+        replies: inboxCount((feedback as Record<string, unknown>).replies, 'reply count'),
+      },
+    };
+  });
+  return {
+    schemaVersion: 1,
+    items,
+    nextCursor,
+    limit,
+    status,
+    team: inboxTeam(record.team),
+  };
+}
+
+export async function fetchHostedInbox(input: {
+  bearerToken: string;
+  apiUrl?: string;
+  status?: 'waiting' | 'answered';
+  team?: string;
+  limit?: number;
+  cursor?: string;
+}): Promise<HostedInboxPage> {
+  const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
+  const params = new URLSearchParams();
+  if (input.status) params.set('status', input.status);
+  if (input.team) params.set('team', hostedTeamSlug(input.team));
+  if (input.limit !== undefined) {
+    if (!Number.isInteger(input.limit) || input.limit < 1 || input.limit > 100) {
+      throw new Error('Cut inbox limit must be an integer from 1 through 100.');
+    }
+    params.set('limit', String(input.limit));
+  }
+  if (input.cursor) {
+    if (input.cursor.length > 512 || !/^[A-Za-z0-9_-]+$/.test(input.cursor)) {
+      throw new Error('--cursor is not a bounded Cut inbox cursor.');
+    }
+    params.set('cursor', input.cursor);
+  }
+  const response = await fetch(`${apiUrl}/api/v1/share/inbox?${params.toString()}`, {
+    headers: { authorization: `Bearer ${input.bearerToken}` },
+    cache: 'no-store',
+  });
+  const bytes = await boundedResponseBytes(response, 512 * 1024);
+  let payload: unknown;
+  try { payload = JSON.parse(bytes.toString('utf8')); } catch {
+    throw new Error('Hosted Cut inbox returned invalid JSON.');
+  }
+  if (!response.ok) throw apiError(response.status, payload);
+  return normalizeHostedInbox(payload);
 }
 
 export async function submitHostedVerificationReceipt(input: {

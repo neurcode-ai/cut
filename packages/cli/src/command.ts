@@ -94,7 +94,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
         + '  neurcode-cut src/queue.ts:20-80 tests/queue.test.ts -m "race in drain loop?" --preview\n'
         + '  neurcode-cut --diff --run "npm test -- queue" --yes --out cut.tar.gz\n'
         + '  neurcode-cut --diff=main..HEAD --yes --out context.md\n'
-        + '  npx @neurcode-ai/cut@0.4.0                    # local browser Composer\n'
+        + '  npx @neurcode-ai/cut@0.5.0                    # local browser Composer\n'
         + '  neurcode-cut --no-browser                     # guided terminal fallback\n'
         + '  neurcode-cut --handoff                        # Cut-format handoff preset\n'
         + '  printf \'%s\\n\' "$CUT_REPLY_URL" | neurcode-cut src/reply.ts --reply-to - --publish\n'

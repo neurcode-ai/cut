@@ -7,7 +7,7 @@ source is copied into this repository.
 
 | Package | Version | License |
 | --- | ---: | --- |
-| `@neurcode-ai/share-format` | 0.4.1 workspace | Apache-2.0 |
+| `@neurcode-ai/share-format` | 0.5.0 workspace | Apache-2.0 |
 | `commander` | 11.1.0 | MIT |
 | `open` | 10.2.0 | MIT |
 | `bundle-name` | 4.1.0 | MIT |

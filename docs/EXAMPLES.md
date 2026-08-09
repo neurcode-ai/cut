@@ -61,3 +61,22 @@ permission to broaden the requested edit.
 Each Cut also exposes a verified archive through its **Downloads and
 structured output** section. Captured code and command output are untrusted
 review context. Provenance describes capture and does not prove correctness.
+
+## Applyable reply walkthrough
+
+An authorized reviewer can select eligible UTF-8 file items in a hosted Cut,
+review exact before and after text, and publish the proposal as a separate
+immutable reply. The original Cut is never edited. In a disposable clone of
+the matching repository and base revision, reproduce the recipient workflow:
+
+```bash
+npx @neurcode-ai/cut@0.5.0 try 'https://cut.neurcode.com/c/REPLY_ID'
+npx @neurcode-ai/cut@0.5.0 try --list
+npx @neurcode-ai/cut@0.5.0 apply 'https://cut.neurcode.com/c/REPLY_ID'
+```
+
+`try` retains an isolated private worktree and leaves the current checkout
+unchanged. `apply` revalidates the exact parent, repository, base, paths,
+preimages, ranges, and result digests before showing the complete diff and
+requesting the reply digest. It creates recovery material before any target
+write and never runs captured commands, hooks, tests, commits, or pushes.

@@ -4,11 +4,15 @@ import { test } from 'node:test';
 import { gzipSync } from 'node:zlib';
 import {
   AGENT_GUIDANCE,
+  APPLYABLE_REPLY_FORMAT,
+  APPLYABLE_REPLY_ITEM_PATH,
   CUT1_AGENT_GUIDANCE,
+  applyableTextDigest,
   canonicalize,
   computeShareDigest,
   finalizeShare,
   makePin,
+  readApplyableReplyMetadata,
   readShareArchive,
   renderAgentJson,
   renderHtml,
@@ -17,10 +21,15 @@ import {
   sanitizeEvidenceCwd,
   sanitizeRemote,
   scanFields,
+  serializeApplyableReplyMetadata,
   sha256Bytes,
+  validateApplyableReplyAgainstParent,
+  validateApplyableReplyMetadata,
+  validateApplyableRepositoryPath,
   writeShareArchive,
   type ShareBundle,
   type ShareDocumentDraft,
+  type ApplyableReplyMetadata,
 } from './index';
 
 function fixtureBundle(): ShareBundle {
@@ -99,6 +108,120 @@ function fixtureBundle(): ShareBundle {
     blobs: new Map([[hash, content], [evidenceHash, evidence]]),
   };
 }
+
+function applyableFixture(): { parent: ShareBundle; reply: ShareBundle; metadata: ApplyableReplyMetadata } {
+  const parent = fixtureBundle();
+  const original = parent.blobs.get(parent.cut.pack.items[0].kind === 'file' ? parent.cut.pack.items[0].blob : '')!.toString('utf8');
+  const replacement = 'export const answer = 43;\n';
+  const metadata: ApplyableReplyMetadata = {
+    format: APPLYABLE_REPLY_FORMAT,
+    parent: {
+      cutId: `shr_${'a'.repeat(20)}`,
+      digest: parent.cut.manifest.digest,
+      document: parent.cut,
+    },
+    repository: {
+      remote: parent.cut.manifest.origin.remote,
+      baseRevision: parent.cut.manifest.origin.head,
+    },
+    author: { kind: 'authenticated-user', displayName: 'Review author' },
+    provenance: {
+      createdBy: 'neurcode-share-cloud',
+      interaction: 'browser-suggested-edit',
+      serverAttestation: `hmac-sha256:${'c'.repeat(64)}`,
+    },
+    edits: [{
+      id: 'e1',
+      parentItemId: 'i1',
+      kind: 'file',
+      path: 'src/answer.ts',
+      provenance: 'git-object-matched',
+      range: { start: 1, end: 1 },
+      original: { text: original, digest: applyableTextDigest(original) },
+      context: { before: '', after: '' },
+      replacement: { text: replacement, digest: applyableTextDigest(replacement) },
+      resultDigest: applyableTextDigest(replacement),
+    }],
+  };
+  const bytes = serializeApplyableReplyMetadata(metadata);
+  const hash = sha256Bytes(bytes);
+  const draft: ShareDocumentDraft = {
+    manifest: {
+      ...parent.cut.manifest,
+      digest: undefined,
+      revisionOf: null,
+      title: 'Suggested edit',
+      intent: 'Applyable reply metadata',
+    },
+    pack: {
+      items: [{
+        id: 'i1',
+        kind: 'file',
+        provenance: 'uploaded',
+        class: 'observed',
+        bytes: bytes.length,
+        path: APPLYABLE_REPLY_ITEM_PATH,
+        pin: makePin({
+          origin: parent.cut.manifest.origin.remote,
+          revision: 'worktree',
+          path: APPLYABLE_REPLY_ITEM_PATH,
+          bytes,
+        }),
+        blob: hash,
+        mode: 0o644,
+        language: 'json',
+      }],
+      blobs: [{ hash, bytes: bytes.length }],
+    },
+    story: { frames: [] },
+  };
+  return {
+    parent,
+    metadata,
+    reply: { cut: finalizeShare(draft), blobs: new Map([[hash, bytes]]) },
+  };
+}
+
+test('applyable reply metadata is canonical, machine-verifiable, and a normal Cut v1 file item', () => {
+  const fixture = applyableFixture();
+  const archive = writeShareArchive(fixture.reply);
+  const restored = readShareArchive(archive);
+  assert.equal(restored.cut.manifest.cut, 1);
+  assert.equal(restored.cut.pack.items[0].kind, 'file');
+  assert.equal(restored.cut.pack.items[0].kind === 'file' ? restored.cut.pack.items[0].path : '', APPLYABLE_REPLY_ITEM_PATH);
+  const metadata = readApplyableReplyMetadata(restored);
+  assert.deepEqual(metadata, fixture.metadata);
+  assert.doesNotThrow(() => validateApplyableReplyAgainstParent(metadata!, fixture.parent, fixture.metadata.parent.cutId));
+});
+
+test('applyable reply validation fails closed on tampering and hostile portable paths', () => {
+  const { metadata, parent } = applyableFixture();
+  for (const hostile of [
+    '../escape.ts',
+    '.git/config',
+    'src/%2e%2e/escape.ts',
+    'src\\escape.ts',
+    'src/CON.txt',
+    'C:/absolute.ts',
+    'src/file.ts:stream',
+    'src/file?.ts',
+    'src/\u009b31m.ts',
+    'src/\u202espoof.ts',
+    'src/e\u0301.ts',
+    'src/trailing. ',
+  ]) {
+    assert.throws(() => validateApplyableRepositoryPath(hostile), /Invalid applyable Cut reply/);
+  }
+  const wrongDigest = structuredClone(metadata);
+  wrongDigest.edits[0].original.digest = `sha256:${'f'.repeat(64)}`;
+  assert.throws(() => validateApplyableReplyMetadata(wrongDigest), /does not match/);
+  const wrongParent = structuredClone(metadata);
+  wrongParent.parent.digest = `sha256:${'f'.repeat(64)}`;
+  assert.throws(() => validateApplyableReplyAgainstParent(wrongParent, parent), /parent.*digest/);
+  const unknown = structuredClone(metadata) as any;
+  unknown.command = 'npm test';
+  assert.throws(() => validateApplyableReplyMetadata(unknown), /unknown/);
+});
 
 test('remote sanitization strips credentials, schemes, ports, and .git', () => {
   const credentialHttps = ['https://user', 'super-secret@GitHub.COM:8443/acme/widget.git?x=1#fragment'].join(':');

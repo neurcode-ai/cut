@@ -1,6 +1,6 @@
 {
   "name": "@neurcode-ai/share",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Local-first capture, review, export, and secure publishing for Cut by Neurcode",
   "bin": {
     "neurcode-cut": "dist/index.js",
@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc && chmod +x dist/index.js",
-    "test": "node --import tsx --test src/share/share-local.test.ts src/share/composer.test.ts src/share/working-set.test.ts src/share/verification.test.ts src/share/hosted-team.test.ts",
+    "test": "node --import tsx --test src/share/share-local.test.ts src/share/composer.test.ts src/share/working-set.test.ts src/share/verification.test.ts src/share/hosted-team.test.ts src/share/hosted-inbox.test.ts src/share/try-apply.test.ts",
     "prepack": "pnpm build"
   },
   "keywords": [
