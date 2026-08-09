@@ -41,28 +41,35 @@ try {
   ].join(';')], { cwd: consumer });
   const cli = join(consumer, 'node_modules', '@neurcode-ai', 'share', 'dist', 'index.js');
   const cutCli = join(consumer, 'node_modules', '@neurcode-ai', 'cut', 'dist', 'index.js');
+  if (!existsSync(join(consumer, 'node_modules', '.bin', 'cut'))) {
+    throw new Error('The installed Cut package did not expose the short `cut` command.');
+  }
   execFileSync('node', [cli, '--help'], { cwd: consumer, stdio: 'pipe' });
-  execFileSync('node', [cutCli, '--help'], { cwd: consumer, stdio: 'pipe' });
+  const cutHelp = execFileSync('node', [cutCli, '--help'], { cwd: consumer, encoding: 'utf8' });
+  const createHelp = execFileSync('node', [cutCli, 'cut', '--help'], { cwd: consumer, encoding: 'utf8' });
+  if (!cutHelp.includes('teams') || !createHelp.includes('--to <team-slug>')) {
+    throw new Error('The installed Cut help did not expose Teams discovery and direct publishing.');
+  }
   const cliVersion = execFileSync('node', [cli, '--version'], {
     cwd: consumer,
     encoding: 'utf8',
   }).trim();
-  if (cliVersion !== '0.6.0') throw new Error(`Anonymous CLI version was ${cliVersion}, not 0.6.0.`);
+  if (cliVersion !== '0.7.0') throw new Error(`Anonymous CLI version was ${cliVersion}, not 0.7.0.`);
   const cutVersion = execFileSync('node', [cutCli, '--version'], {
     cwd: consumer,
     encoding: 'utf8',
   }).trim();
-  if (cutVersion !== '0.3.0') throw new Error(`Cut entry point reported ${cutVersion}, not 0.3.0.`);
+  if (cutVersion !== '0.4.0') throw new Error(`Cut entry point reported ${cutVersion}, not 0.4.0.`);
   const consumerRequire = createRequire(join(consumer, 'smoke.cjs'));
   const format = consumerRequire('@neurcode-ai/share-format');
   const installedCut = consumerRequire('@neurcode-ai/cut/package.json');
   const installedShare = consumerRequire('@neurcode-ai/share/package.json');
   const installedFormat = consumerRequire('@neurcode-ai/share-format/package.json');
   const installedViewer = consumerRequire('@neurcode-ai/share-viewer/package.json');
-  if (installedCut.version !== '0.3.0' || installedCut.dependencies?.['@neurcode-ai/share'] !== '0.6.0') {
-    throw new Error('Cut did not install with the reviewed Share 0.6.0 dependency contract.');
+  if (installedCut.version !== '0.4.0' || installedCut.dependencies?.['@neurcode-ai/share'] !== '0.7.0') {
+    throw new Error('Cut did not install with the reviewed Share 0.7.0 dependency contract.');
   }
-  if (installedShare.version !== '0.6.0'
+  if (installedShare.version !== '0.7.0'
       || installedShare.dependencies?.['@neurcode-ai/share-format'] !== '0.4.1') {
     throw new Error('Share did not install with the reviewed format 0.4.1 dependency contract.');
   }

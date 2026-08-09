@@ -33,6 +33,14 @@ export function expiryHours(value: string | undefined): number {
   return hours;
 }
 
+export function hostedTeamSlug(value: unknown): string {
+  const slug = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (!slug || !/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/.test(slug)) {
+    throw new Error('--to requires a team slug shown by `neurcode-cut teams`.');
+  }
+  return slug;
+}
+
 export interface HostedShareLink {
   shareId: string;
   revisionNumber?: number;
@@ -119,7 +127,7 @@ async function boundedResponseBytes(response: Response, limit: number): Promise<
 export async function browserCliToken(
   apiUrl: string,
   shareOrigin: string,
-  purpose: 'publish' | 'verify' | 'comments' | 'receipt' = 'publish',
+  purpose: 'publish' | 'verify' | 'comments' | 'receipt' | 'teams' = 'publish',
 ): Promise<string> {
   const state = randomBytes(32).toString('base64url');
   const verifier = randomBytes(48).toString('base64url');
@@ -286,6 +294,7 @@ export async function publishHostedShare(input: {
   recipients: string[];
   expiryHours: number;
   replyTo?: HostedReplyTarget;
+  teamSlug?: string;
 }): Promise<{ url: string; share: Record<string, unknown> }> {
   const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
   const shareOrigin = (input.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://cut.neurcode.com').replace(/\/+$/, '');
@@ -306,7 +315,7 @@ export async function publishHostedShare(input: {
     headers: {
       authorization: `Bearer ${publishToken}`,
       'content-type': 'application/json',
-      'idempotency-key': createHash('sha256').update(`cli-finalize\0${upload.uploadId}\0${digest}\0${input.replyTo?.shareId ?? ''}`).digest('hex'),
+      'idempotency-key': createHash('sha256').update(`cli-finalize\0${upload.uploadId}\0${digest}\0${input.replyTo?.shareId ?? ''}\0${input.teamSlug ?? ''}`).digest('hex'),
       ...(input.replyTo?.capability ? { 'x-share-capability': input.replyTo.capability } : {}),
     },
     body: JSON.stringify({
@@ -314,9 +323,24 @@ export async function publishHostedShare(input: {
       recipients: input.recipients,
       expiryHours: input.expiryHours,
       ...(input.replyTo ? { replyToShareId: input.replyTo.shareId } : {}),
+      ...(input.teamSlug ? { teamSlug: input.teamSlug } : {}),
     }),
   });
   return finalized;
+}
+
+export async function listHostedTeams(input: {
+  apiUrl?: string;
+  shareOrigin?: string;
+} = {}): Promise<Array<{ id: string; name: string; slug: string; role: 'owner' | 'member' }>> {
+  const apiUrl = (input.apiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
+  const shareOrigin = (input.shareOrigin || process.env.NEURCODE_SHARE_WEB_URL || 'https://cut.neurcode.com').replace(/\/+$/, '');
+  const publishToken = await browserCliToken(apiUrl, shareOrigin, 'teams');
+  const result = await jsonFetch(`${apiUrl}/api/v1/share/teams`, {
+    method: 'GET',
+    headers: { authorization: `Bearer ${publishToken}` },
+  });
+  return Array.isArray(result?.items) ? result.items : [];
 }
 
 export async function fetchHostedShare(input: {

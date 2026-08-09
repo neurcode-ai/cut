@@ -4,9 +4,9 @@ import { Command } from 'commander';
 import { shareCommand } from './command';
 import { livingShareCommands } from './living-commands';
 
-const engineVersion = '0.6.0';
-const version = process.env.NEURCODE_CUT_ENTRY_VERSION === '0.3.0'
-  ? '0.3.0'
+const engineVersion = '0.7.0';
+const version = process.env.NEURCODE_CUT_ENTRY_VERSION === '0.4.0'
+  ? '0.4.0'
   : engineVersion;
 const program = new Command()
   .name('neurcode-cut')
@@ -23,6 +23,7 @@ if (
   && first !== 'verify'
   && first !== 'refresh'
   && first !== 'comments'
+  && first !== 'teams'
   && first !== '--help'
   && first !== '-h'
   && first !== '--version'

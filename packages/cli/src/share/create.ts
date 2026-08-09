@@ -61,7 +61,16 @@ export interface CreateShareOptions {
     expiryHours: number;
     recipientCount: number;
     reply: boolean;
+    teamSlug?: string;
   };
+}
+
+export function hostedPublishDestination(input: NonNullable<CreateShareOptions['hostedPublish']>): string {
+  return `hosted ${input.visibility} Cut after browser authentication`
+    + (input.teamSlug ? ` · team destination: ${input.teamSlug}` : '')
+    + ` · expires in ${input.expiryHours} hours`
+    + ` · ${input.recipientCount} allowed recipient(s)`
+    + (input.reply ? ' · linked as a hosted reply after parent access is rechecked' : '');
 }
 
 function addBlob(blobs: Map<string, Buffer>, content: Buffer): string {
@@ -283,12 +292,7 @@ export async function createLocalShare(options: CreateShareOptions): Promise<{
         ...(stdoutFormat ? [`${stdoutFormat.toUpperCase()} payload on stdout`] : []),
         ...(copyFormat ? [`${copyFormat.toUpperCase()} payload on the local clipboard`] : []),
         ...(options.hostedPublish
-          ? [
-              `hosted ${options.hostedPublish.visibility} Cut after browser authentication`
-              + ` · expires in ${options.hostedPublish.expiryHours} hours`
-              + ` · ${options.hostedPublish.recipientCount} allowed recipient(s)`
-              + (options.hostedPublish.reply ? ' · linked as a hosted reply after parent access is rechecked' : ''),
-            ]
+          ? [hostedPublishDestination(options.hostedPublish)]
           : []),
       ];
   const cwd = options.cwd ?? process.cwd();

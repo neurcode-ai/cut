@@ -4,7 +4,14 @@
 into one focused Cut for teammates and AI agents.
 
 ```sh
-npx @neurcode-ai/cut@0.3.0
+npx @neurcode-ai/cut@0.4.0
+```
+
+After installing it, the memorable team workflow is:
+
+```sh
+cut teams
+cut src/queue.ts --to backend --yes
 ```
 
 This package is the stable product entry point for the open-source Cut CLI. It

@@ -28,7 +28,7 @@ link when you choose to.
 From any Git repository:
 
 ```sh
-npx @neurcode-ai/cut@0.3.0
+npx @neurcode-ai/cut@0.4.0
 ```
 
 The local Composer asks Git for the changed, staged, and non-ignored untracked
@@ -40,8 +40,8 @@ Publish.
 For a non-interactive local archive:
 
 ```sh
-npx @neurcode-ai/cut@0.3.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
-npx @neurcode-ai/cut@0.3.0 --message "Review this working set" --yes --out working-set.tar.gz
+npx @neurcode-ai/cut@0.4.0 src/auth.ts:20-80 --diff --yes --out review.tar.gz
+npx @neurcode-ai/cut@0.4.0 --message "Review this working set" --yes --out working-set.tar.gz
 ```
 
 ## One canonical Cut, native representations
@@ -72,10 +72,10 @@ Local creation needs no account. Export a deterministic archive, inert HTML,
 Markdown, or agent JSON:
 
 ```sh
-npx @neurcode-ai/cut@0.3.0 src/queue.ts --yes --out queue-review.html
-npx @neurcode-ai/cut@0.3.0 --staged --yes --out staged-review.md
-npx @neurcode-ai/cut@0.3.0 --diff=main..HEAD --yes --out change.json
-npx @neurcode-ai/cut@0.3.0 --run "pnpm test queue" --yes --out evidence.tar.gz
+npx @neurcode-ai/cut@0.4.0 src/queue.ts --yes --out queue-review.html
+npx @neurcode-ai/cut@0.4.0 --staged --yes --out staged-review.md
+npx @neurcode-ai/cut@0.4.0 --diff=main..HEAD --yes --out change.json
+npx @neurcode-ai/cut@0.4.0 --run "pnpm test queue" --yes --out evidence.tar.gz
 ```
 
 Commands are bounded by time and output limits. Sensitive paths are denied by
@@ -85,8 +85,8 @@ Verify exact cited bytes against a selected local repository state, or prepare
 a reviewed immutable successor without publishing:
 
 ```sh
-npx @neurcode-ai/cut@0.3.0 verify review.tar.gz --repo ../project
-npx @neurcode-ai/cut@0.3.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
+npx @neurcode-ai/cut@0.4.0 verify review.tar.gz --repo ../project
+npx @neurcode-ai/cut@0.4.0 refresh review.tar.gz --decision i2=use --output refreshed.tar.gz
 ```
 
 See the [CLI guide](packages/cli/README.md) for deterministic JSON, named
@@ -100,20 +100,36 @@ Neurcode identity and a loopback PKCE flow, so no hosted token is copied into
 the terminal:
 
 ```sh
-npx @neurcode-ai/cut@0.3.0 src/session.ts --publish --visibility unlisted
+npx @neurcode-ai/cut@0.4.0 src/session.ts --publish --visibility unlisted
 ```
 
 The hosted service at [cut.neurcode.com](https://cut.neurcode.com) is
 proprietary and is not implemented in this repository. Its documented client
 contract is available through `@neurcode-ai/share-sdk`.
 
+Cut for Teams Beta uses the same disclosure review and browser authorization.
+List the exact slugs available to your signed-in account, then use `--to`; this
+implies hosted publishing and keeps the Cut inside the team-only shared inbox:
+
+```sh
+npx @neurcode-ai/cut@0.4.0 teams
+npx @neurcode-ai/cut@0.4.0 src/queue.ts --to platform-engineering-a1b2c3 --yes
+```
+
+With the package installed, the same workflow is `cut teams` followed by
+`cut src/queue.ts --to <team-slug> --yes`.
+
+Team membership and the destination slug are revalidated by the server during
+finalization. Public visibility and external recipient flags are rejected for
+team Cuts during Beta.
+
 To publish an independent Cut as a reply to a current hosted Cut, pass its
 canonical ID or URL. Parent access is checked again inside finalization; the
 reply keeps its own visibility, recipients, expiry, provenance, and revision:
 
 ```sh
-npx @neurcode-ai/cut@0.3.0 src/reply.ts --reply-to shr_PARENT_ID --publish
-printf '%s\n' "$CUT_REPLY_URL" | npx @neurcode-ai/cut@0.3.0 src/reply.ts --reply-to - --publish
+npx @neurcode-ai/cut@0.4.0 src/reply.ts --reply-to shr_PARENT_ID --publish
+printf '%s\n' "$CUT_REPLY_URL" | npx @neurcode-ai/cut@0.4.0 src/reply.ts --reply-to - --publish
 ```
 
 Capability-bearing URLs may be retained in shell history when supplied as an
@@ -131,7 +147,7 @@ adjacent canonical representation, or create a short-lived, revision-pinned
 agent link in the hosted library and fetch its scoped format:
 
 ```sh
-npx @neurcode-ai/cut@0.3.0 fetch 'AGENT_LINK' --stdout md
+npx @neurcode-ai/cut@0.4.0 fetch 'AGENT_LINK' --stdout md
 ```
 
 Capability and agent secrets remain in URL fragments at rest and are sent in

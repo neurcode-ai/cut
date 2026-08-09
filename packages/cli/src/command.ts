@@ -7,6 +7,8 @@ import { proposeGitWorkingSet } from './share/working-set';
 import {
   expiryHours,
   fetchHostedShare,
+  hostedTeamSlug,
+  listHostedTeams,
   parseHostedReplyTarget,
   publishHostedShare,
   type HostedReplyTarget,
@@ -36,6 +38,28 @@ async function replyTarget(value: unknown): Promise<HostedReplyTarget | undefine
 
 export function shareCommand(program: Command, toolVersion: string): void {
   program
+    .command('teams')
+    .description('List Cut teams available to your signed-in account')
+    .option('--api-url <url>', 'Override the hosted Cut API URL')
+    .option('--json', 'Write the bounded team list as JSON')
+    .action(async (options) => {
+      const teams = await listHostedTeams({ apiUrl: options.apiUrl });
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify({ items: teams }, null, 2)}\n`);
+        return;
+      }
+      if (teams.length === 0) {
+        process.stdout.write('No Cut teams are available for this account.\n');
+        return;
+      }
+      process.stdout.write('Cut teams\n');
+      for (const team of teams) {
+        process.stdout.write(`  ${team.slug.padEnd(32)} ${team.role.padEnd(6)} ${team.name}\n`);
+      }
+      process.stdout.write('\nPublish with: cut <selection> --to <team-slug> --yes\n');
+    });
+
+  program
     .command('cut [selections...]')
     .alias('share')
     .description('Turn exact source, diffs, and observed command output into a safe local Cut')
@@ -51,6 +75,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
     .option('--expire <duration>', 'Hosted expiry in hours or a bounded duration such as 7d')
     .option('--publish', 'Publish after the local disclosure review')
     .option('--reply-to <cut-url-or-id>', 'Link a hosted publication as a reply; use - to read the target from stdin')
+    .option('--to <team-slug>', 'Publish the reviewed Cut into an active team shared inbox')
     .option('--visibility <mode>', 'Hosted access: unlisted, restricted, or public', 'unlisted')
     .option('--recipient <email>', 'Allow a signed-in email for restricted access', collect, [])
     .option('--api-url <url>', 'Override the hosted Cut API URL')
@@ -69,10 +94,12 @@ export function shareCommand(program: Command, toolVersion: string): void {
         + '  neurcode-cut src/queue.ts:20-80 tests/queue.test.ts -m "race in drain loop?" --preview\n'
         + '  neurcode-cut --diff --run "npm test -- queue" --yes --out cut.tar.gz\n'
         + '  neurcode-cut --diff=main..HEAD --yes --out context.md\n'
-        + '  npx @neurcode-ai/cut@0.3.0                    # local browser Composer\n'
+        + '  npx @neurcode-ai/cut@0.4.0                    # local browser Composer\n'
         + '  neurcode-cut --no-browser                     # guided terminal fallback\n'
         + '  neurcode-cut --handoff                        # Cut-format handoff preset\n'
         + '  printf \'%s\\n\' "$CUT_REPLY_URL" | neurcode-cut src/reply.ts --reply-to - --publish\n'
+        + '  neurcode-cut src/queue.ts --to platform-engineering-a1b2c3 --yes\n'
+        + '  neurcode-cut teams\n'
         + '\nCapability-bearing URLs can be retained in shell history when passed as arguments. Prefer --reply-to - with piped stdin.\n'
         + '\nLocal creation never requires an account. Publish authenticates only after “Review what will be shared.”\n',
     )
@@ -90,6 +117,8 @@ export function shareCommand(program: Command, toolVersion: string): void {
         return;
       }
       const replyTo = await replyTarget(options.replyTo);
+      const teamSlug = options.to === undefined ? '' : hostedTeamSlug(options.to);
+      const hostedPublishRequested = options.publish === true || Boolean(teamSlug);
       const timeout = Number(options.runTimeout);
       if (!Number.isFinite(timeout) || timeout < 0.001 || timeout > 600) {
         throw new Error('--run-timeout must be between 0.001 and 600 seconds.');
@@ -100,6 +129,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
         || Boolean(options.preview)
         || Boolean(options.copy)
         || Boolean(options.stdout)
+        || Boolean(teamSlug)
         || options.dryRun === true;
       const zeroArgumentRequested = (selections?.length ?? 0) === 0
         && options.staged !== true
@@ -113,6 +143,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
         && !options.preview
         && !options.copy
         && !options.stdout
+        && !teamSlug
         && !options.dryRun;
       // --handoff is a Cut-format preset, not a second UI. It opens the visual
       // Composer only when nothing forces headless mode; with --no-browser or any
@@ -202,7 +233,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
             terminalMessage = (await prompt.question('What should the recipient understand or help with? ')).trim();
           }
           if (!terminalMessage) throw new Error('A Cut needs a question or intent.');
-          if (!terminalOut && !terminalPreview && !options.copy && !options.stdout && options.publish !== true) {
+          if (!terminalOut && !terminalPreview && !options.copy && !options.stdout && !hostedPublishRequested) {
             terminalOut = 'neurcode-cut.tar.gz';
             terminalPreview = true;
           }
@@ -211,16 +242,19 @@ export function shareCommand(program: Command, toolVersion: string): void {
         }
       }
 
-      const publishVisibility = options.visibility as 'unlisted' | 'restricted' | 'public';
-      const publishRecipients = (options.recipient ?? []) as string[];
+      const publishVisibility = (teamSlug ? 'restricted' : options.visibility) as 'unlisted' | 'restricted' | 'public';
+      const publishRecipients = (teamSlug ? [] : (options.recipient ?? [])) as string[];
       const publishExpiryHours = expiryHours(options.expire);
-      if (options.expire && options.publish !== true) {
-        throw new Error('--expire applies to hosted publishing and requires --publish.');
+      if (options.expire && !hostedPublishRequested) {
+        throw new Error('--expire applies to hosted publishing and requires --publish or --to.');
       }
-      if (options.publish === true && !['unlisted', 'restricted', 'public'].includes(publishVisibility)) {
+      if (hostedPublishRequested && !['unlisted', 'restricted', 'public'].includes(publishVisibility)) {
         throw new Error('--visibility must be unlisted, restricted, or public.');
       }
-      if (options.publish === true && publishVisibility === 'restricted' && publishRecipients.length === 0) {
+      if (teamSlug && ((options.recipient ?? []).length > 0 || options.visibility === 'public')) {
+        throw new Error('Team Cuts are team-only in Beta; --recipient and --visibility public are not supported with --to.');
+      }
+      if (hostedPublishRequested && !teamSlug && publishVisibility === 'restricted' && publishRecipients.length === 0) {
         throw new Error('--visibility restricted requires at least one --recipient <email>.');
       }
       const result = await createLocalShare({
@@ -244,19 +278,20 @@ export function shareCommand(program: Command, toolVersion: string): void {
         dryRun: options.dryRun === true,
         yes: options.yes === true,
         toolVersion,
-        hostedPublish: options.publish === true
+        hostedPublish: hostedPublishRequested
           ? {
               visibility: publishVisibility,
               expiryHours: publishExpiryHours,
               recipientCount: publishRecipients.length,
               reply: Boolean(replyTo),
+              teamSlug: teamSlug || undefined,
             }
           : undefined,
       });
-      if (replyTo && options.publish !== true) {
+      if (replyTo && !hostedPublishRequested) {
         process.stderr.write('Local artifact created. Reply relationships are hosted metadata and are applied only during hosted publication.\n');
       }
-      if (options.publish === true) {
+      if (hostedPublishRequested) {
         if (!result.bundle) throw new Error('Publishing requires a completed local disclosure review.');
         if (result.bundle.cut.manifest.security.acknowledgedFindings.length > 0) {
           throw new Error(
@@ -270,6 +305,7 @@ export function shareCommand(program: Command, toolVersion: string): void {
           recipients: publishRecipients,
           expiryHours: publishExpiryHours,
           replyTo,
+          teamSlug: teamSlug || undefined,
         });
         process.stdout.write(`Published securely · ${published.url}\n`);
       }
