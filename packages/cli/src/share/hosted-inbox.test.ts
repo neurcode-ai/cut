@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { inboxHuman } from '../living-commands';
-import { normalizeHostedInbox, recordHostedCliProductEvent } from './hosted';
+import { hostedAuthorizationUrl, normalizeHostedInbox, recordHostedCliProductEvent } from './hosted';
 
 function page(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   const cutId = `shr_${'a'.repeat(20)}`;
@@ -28,6 +28,15 @@ function page(overrides: Record<string, unknown> = {}): Record<string, unknown> 
     ...overrides,
   };
 }
+
+test('CLI authorization URLs carry a bounded display purpose beside the anti-CSRF state', () => {
+  for (const purpose of ['publish', 'verify', 'comments', 'receipt', 'teams', 'inbox'] as const) {
+    const url = hostedAuthorizationUrl('https://cut.neurcode.com/authorize-publish?session=session-id', 'state-value', purpose);
+    assert.equal(url.searchParams.get('session'), 'session-id');
+    assert.equal(url.searchParams.get('state'), 'state-value');
+    assert.equal(url.searchParams.get('purpose'), purpose);
+  }
+});
 
 test('Cut Inbox normalizes only its documented, source-free schema', () => {
   const normalized = normalizeHostedInbox(page());

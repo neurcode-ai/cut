@@ -17,7 +17,7 @@ import { createLocalShare } from './create';
 import { composerHtml } from './composer-ui';
 import { readComposerFile, readComposerRepository } from './composer-data';
 import { proposeGitWorkingSet } from './working-set';
-import type { HostedReplyTarget } from './hosted';
+import { hostedAuthorizationUrl, type HostedReplyTarget } from './hosted';
 import {
   loadComposerDraft,
   newComposerDraft,
@@ -557,11 +557,12 @@ export async function launchShareComposer(options: ShareComposerOptions): Promis
           if (!init.ok) throw new HttpError('Secure browser publishing authentication is unavailable.', 502);
           const payload = await init.json() as { sessionId: string; authorizationUrl?: string };
           pendingAuth = { sessionId: payload.sessionId, verifier, state };
-          const authorizationUrl = new URL(
+          const authorizationUrl = hostedAuthorizationUrl(
             payload.authorizationUrl
               || `${shareOrigin}/login?publish_session=${encodeURIComponent(payload.sessionId)}`,
+            state,
+            'publish',
           );
-          authorizationUrl.searchParams.set('state', state);
           json(response, 200, { authorizationUrl: authorizationUrl.toString() });
           return;
         }

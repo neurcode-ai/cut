@@ -255,7 +255,7 @@ test('cut try rejects drift and repository checkout filters without changing fil
   writeFileSync(join(drift.repo, 'src', 'app.ts'), 'export const answer = 99;\n');
   assert.throws(
     () => createCutTry({ bundle: drift.reply, metadata: drift.metadata, repoPath: drift.repo }),
-    /preimage/,
+    /Local code changed since this Cut[\s\S]*preimage/,
   );
   assert.equal(listCutTries().length, 0);
 

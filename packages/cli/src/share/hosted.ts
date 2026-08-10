@@ -22,6 +22,20 @@ export type HostedCliProductEvent =
   | 'try_started' | 'try_succeeded' | 'try_rejected_by_reason_class'
   | 'apply_started' | 'apply_confirmed' | 'apply_rejected_by_reason_class';
 
+export type HostedAuthorizationPurpose =
+  | 'publish' | 'verify' | 'comments' | 'receipt' | 'teams' | 'inbox';
+
+export function hostedAuthorizationUrl(
+  source: string,
+  state: string,
+  purpose: HostedAuthorizationPurpose,
+): URL {
+  const authorization = new URL(source);
+  authorization.searchParams.set('state', state);
+  authorization.searchParams.set('purpose', purpose);
+  return authorization;
+}
+
 /** Strict source-free CLI telemetry: callers cannot attach content or identifiers. */
 export async function recordHostedCliProductEvent(input: {
   eventType: HostedCliProductEvent;
@@ -163,7 +177,7 @@ async function boundedResponseBytes(response: Response, limit: number): Promise<
 export async function browserCliToken(
   apiUrl: string,
   shareOrigin: string,
-  purpose: 'publish' | 'verify' | 'comments' | 'receipt' | 'teams' | 'inbox' = 'publish',
+  purpose: HostedAuthorizationPurpose = 'publish',
 ): Promise<string> {
   const state = randomBytes(32).toString('base64url');
   const verifier = randomBytes(48).toString('base64url');
@@ -220,11 +234,12 @@ export async function browserCliToken(
       purpose,
     }),
   });
-  const authorization = new URL(
+  const authorization = hostedAuthorizationUrl(
     initialized.authorizationUrl
       || `${shareOrigin}/authorize-publish?session=${encodeURIComponent(initialized.sessionId)}`,
+    state,
+    purpose,
   );
-  authorization.searchParams.set('state', state);
   process.stdout.write(`Sign in to authorize Cut ${purpose}:\n${authorization.toString()}\n`);
   try {
     const open = (await import('open')).default;

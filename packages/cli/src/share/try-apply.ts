@@ -201,10 +201,10 @@ function prepareChanges(root: string, metadata: ApplyableReplyMetadata): Prepare
   const repository = discoverShareRepository(root, { requireBoundedStatus: true });
   if (repository.root !== realpathSync(root)) throw new Error('Repository root must be selected explicitly.');
   if (repository.origin !== metadata.repository.remote) {
-    throw new Error('Applyable reply repository identity does not match this repository.');
+    throw new Error('Repository does not match this Cut.');
   }
   if (repository.head !== metadata.repository.baseRevision) {
-    throw new Error('Applyable reply base revision does not match the checked-out repository HEAD.');
+    throw new Error('Base revision is unavailable in the selected checkout.');
   }
 
   return metadata.edits.map((edit): PreparedChange => {
@@ -217,7 +217,9 @@ function prepareChanges(root: string, metadata: ApplyableReplyMetadata): Prepare
     const text = decodeText(originalFile, edit.path);
     let result: string;
     if (edit.kind === 'file') {
-      if (text !== edit.original.text) throw new Error(`${edit.path}: exact full-file preimage does not match.`);
+      if (text !== edit.original.text) {
+        throw new Error(`Local code changed since this Cut. ${edit.path}: exact full-file preimage does not match.`);
+      }
       result = edit.replacement.text;
     } else {
       const chunks = lineChunks(text);
@@ -225,9 +227,11 @@ function prepareChanges(root: string, metadata: ApplyableReplyMetadata): Prepare
       const before = chunks.slice(0, edit.range.start - 1).join('');
       const selected = chunks.slice(edit.range.start - 1, edit.range.end).join('');
       const after = chunks.slice(edit.range.end).join('');
-      if (selected !== edit.original.text) throw new Error(`${edit.path}: exact range preimage does not match.`);
+      if (selected !== edit.original.text) {
+        throw new Error(`Local code changed since this Cut. ${edit.path}: exact range preimage does not match.`);
+      }
       if (!before.endsWith(edit.context.before) || !after.startsWith(edit.context.after)) {
-        throw new Error(`${edit.path}: bounded parent context no longer matches.`);
+        throw new Error(`Local code changed since this Cut. ${edit.path}: bounded parent context no longer matches.`);
       }
       result = `${before}${edit.replacement.text}${after}`;
     }
