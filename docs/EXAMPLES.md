@@ -80,3 +80,24 @@ unchanged. `apply` revalidates the exact parent, repository, base, paths,
 preimages, ranges, and result digests before showing the complete diff and
 requesting the reply digest. It creates recovery material before any target
 write and never runs captured commands, hooks, tests, commits, or pushes.
+
+## Team inbox exchange
+
+**Use case:** Give a small owner/member team one stable destination for a
+focused code question and its returned code answer.
+
+This workflow requires authorized team state, so it is documented as a
+reproducible walkthrough rather than a public fixture that would weaken the
+team boundary:
+
+```bash
+npx @neurcode-ai/cut@0.5.0 teams
+npx @neurcode-ai/cut@0.5.0 src/queue.ts --to backend-a1b2c3 --yes
+npx @neurcode-ai/cut@0.5.0 inbox --team backend-a1b2c3 --status waiting
+```
+
+An active member opens the team Cut and replies with a Cut containing their
+proposed implementation. The root state becomes Answered automatically. The
+status is derived from an active reply or non-author comment and is never
+assigned manually. See the hosted [Teams page](https://cut.neurcode.com/teams)
+for roles, invitation, removal, and Beta limits.

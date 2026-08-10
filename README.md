@@ -12,10 +12,12 @@
 
 Select the exact code once. One canonical
 Cut becomes a readable review for a teammate or bounded Markdown, JSON, or
-archive context for an AI agent.
+archive context for an AI agent. A recipient can reply with another Cut, and
+an eligible code reply can be tried in isolation before it is applied.
 
 [Create in the browser](https://cut.neurcode.com/new) ·
-[Open a real example](https://cut.neurcode.com/examples/code-review) ·
+[Explore examples](https://cut.neurcode.com/examples) ·
+[Learn about Teams](https://cut.neurcode.com/teams) ·
 [Read the privacy boundary](docs/PRIVACY.md)
 
 Cut by Neurcode is the open format, CLI, SDK, and viewer for creating a bounded,
@@ -114,6 +116,9 @@ material before writing. See [Cut Try and Apply](docs/CUT_TRY.md) and the
 Use `cut inbox` for a bounded source-free Waiting/Answered view of authorized
 personal and team conversations. Its stable JSON contract and pagination are
 documented in [Cut Inbox](docs/CUT_INBOX.md).
+
+For the full send, reply, try, and apply sequence, plus solo, teammate, AI, and
+team jobs, see [Cut workflows](docs/WORKFLOWS.md).
 
 ## Hosted publishing
 
